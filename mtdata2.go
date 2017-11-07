@@ -20,7 +20,7 @@ const (
 	magnetic       xdi = 0xC000
 	velocityXYZ    xdi = 0xd012
 	statusWord     xdi = 0xe020
-	acceleration	xdi		= 0x4000
+	acceleration   xdi = 0x4000
 )
 
 /*
@@ -51,7 +51,6 @@ type XDIAccelerationXYZ struct {
 	AccX, AccY, AccZ float64
 }
 
-
 type XDIMagneticXYZ struct {
 	MagX, MagY, MagZ float64
 }
@@ -67,9 +66,9 @@ func (mag XDIMagneticXYZ) Heading() (heading float64) {
 	heading = math.Atan2(mag.MagY, mag.MagX)
 	if mag.MagX < 0 {
 		heading = 180 - heading
-	} else if mag.MagX > 0 && mag.MagY <0 {
+	} else if mag.MagX > 0 && mag.MagY < 0 {
 		heading = -heading
-	} else if mag.MagX >0 && mag.MagY > 0 {
+	} else if mag.MagX > 0 && mag.MagY > 0 {
 		heading = 360 - heading
 	} else if mag.MagX == 0 && mag.MagY < 0 {
 		heading = 90
@@ -91,13 +90,13 @@ func (fp xsens1632) ToFloat() float64 {
 }
 
 type XsensData struct {
-	PacketCounter               uint16
+	PacketCounter              uint16
 	SampleTimeFine, StatusWord uint32
 	Altitude                   float64
 	Quat                       XDIQuaternion
 	Vel                        XDIVelocityXYZ
 	Latlng                     XDILatLon
-	Acc XDIAccelerationXYZ
+	Acc                        XDIAccelerationXYZ
 	Mag                        XDIMagneticXYZ
 }
 
@@ -136,7 +135,7 @@ func mtData2Decode(data []byte) (currentStatus XsensData, err error) {
 		//	dataID, dataLEN, packetdata)
 
 		packetBuf := bytes.NewReader(packetdata)
-		group := dataID&0xFF00
+		group := dataID & 0xFF00
 		switch group {
 		case packetCounter:
 			var packetCounter uint16
@@ -236,7 +235,7 @@ func mtData2Decode(data []byte) (currentStatus XsensData, err error) {
 				currentStatus.Acc = XDIAccelerationXYZ{accX.ToFloat(), accY.ToFloat(), accZ.ToFloat()}
 				break
 			case 0x40: // Free Acceleration
-			break
+				break
 			default:
 				break
 			}

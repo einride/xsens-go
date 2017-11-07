@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"encoding/binary"
 	"github.com/stretchr/testify/assert"
+	"log"
 	"math"
 	"testing"
-	"log"
 )
 
 func Test1632(t *testing.T) {
