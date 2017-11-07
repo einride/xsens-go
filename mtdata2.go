@@ -17,12 +17,13 @@ const (
 	quaternion     XDI = 0x2010
 	ellipsoid      XDI = 0x5022
 	latLon         XDI = 0x5042
-	Magnetic       XDI = 0xC000
+	magnetic       XDI = 0xC000
 	velocityXYZ    XDI = 0xd012
 	statusWord     XDI = 0xe020
 )
 
 /*
+should be integrated eventually
 ErrorCodes = {
 		0x03: "Invalid period",
 		0x04: "Invalid message",
@@ -181,7 +182,7 @@ func MTData2Decode(data []byte) (currentStatus XsensData, err error) {
 			}
 			currentStatus.StatusWord = statusWord
 			break
-		case Magnetic:
+		case magnetic:
 			var magx, magy, magz xsens1632
 			err = binary.Read(packetBuf, binary.BigEndian, &magx)
 			if err != nil {

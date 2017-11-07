@@ -11,9 +11,13 @@ func main() {
 	err := xsens.Open()
 	if nil != err {
 		fmt.Printf("Could not open XSens device: %s\n", err)
-	} else {
-		defer xsens.Close()
+		return
 	}
+	defer xsens.Close()
+
+	xsens.Run(func(data xsens.XsensData, err error) {
+		fmt.Printf("got some data %v, %v", data, err)
+	})
 
 	c := make(chan struct{})
 	<-c
