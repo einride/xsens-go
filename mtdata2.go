@@ -9,17 +9,18 @@ import (
 	"math"
 )
 
-type XDI uint16
+type xdi uint16
 
 const (
-	packetCounter  XDI = 0x1020
-	sampleTimeFine XDI = 0x1060
-	quaternion     XDI = 0x2010
-	ellipsoid      XDI = 0x5022
-	latLon         XDI = 0x5042
-	magnetic       XDI = 0xC000
-	velocityXYZ    XDI = 0xd012
-	statusWord     XDI = 0xe020
+	packetCounter  xdi = 0x1020
+	sampleTimeFine xdi = 0x1060
+	quaternion     xdi = 0x2010
+	ellipsoid      xdi = 0x5022
+	latLon         xdi = 0x5042
+	magnetic       xdi = 0xC000
+	velocityXYZ    xdi = 0xd012
+	statusWord     xdi = 0xe020
+	acceleration	xdi		= 0x4000
 )
 
 /*
@@ -46,8 +47,36 @@ type XDIVelocityXYZ struct {
 	VelX, VelY, VelZ float64
 }
 
+type XDIAccelerationXYZ struct {
+	AccX, AccY, AccZ float64
+}
+
+
 type XDIMagneticXYZ struct {
 	MagX, MagY, MagZ float64
+}
+
+/*
+heading=arctan(Yh/Xh);
+if    (Xh<0)         {heading=180-heading;}
+elseif(Xh>0  && Yh<0){heading=-heading;}
+elseif(Xh>0  && Yh>0){heading=360-heading}
+elseif(Xh==0 && Yh<0){heading=90}
+elseif(Xh==0 && Yh>0){heading=270}*/
+func (mag XDIMagneticXYZ) Heading() (heading float64) {
+	heading = math.Atan2(mag.MagY, mag.MagX)
+	if mag.MagX < 0 {
+		heading = 180 - heading
+	} else if mag.MagX > 0 && mag.MagY <0 {
+		heading = -heading
+	} else if mag.MagX >0 && mag.MagY > 0 {
+		heading = 360 - heading
+	} else if mag.MagX == 0 && mag.MagY < 0 {
+		heading = 90
+	} else if mag.MagX == 0 && mag.MagY > 0 {
+		heading = 270
+	}
+	return
 }
 
 type xsens1632 struct {
@@ -62,22 +91,23 @@ func (fp xsens1632) ToFloat() float64 {
 }
 
 type XsensData struct {
-	PacketCouter               uint16
+	PacketCounter               uint16
 	SampleTimeFine, StatusWord uint32
 	Altitude                   float64
 	Quat                       XDIQuaternion
 	Vel                        XDIVelocityXYZ
 	Latlng                     XDILatLon
+	Acc XDIAccelerationXYZ
 	Mag                        XDIMagneticXYZ
 }
 
 // MTData2Decode decode any number of packages from the given slice
-func MTData2Decode(data []byte) (currentStatus XsensData, err error) {
+func mtData2Decode(data []byte) (currentStatus XsensData, err error) {
 	//var packetnum int
 	buf := bytes.NewReader(data)
 
 	for {
-		var dataID XDI
+		var dataID xdi
 		var dataLEN byte
 		err = binary.Read(buf, binary.BigEndian, &dataID)
 		if nil != err {
@@ -106,8 +136,8 @@ func MTData2Decode(data []byte) (currentStatus XsensData, err error) {
 		//	dataID, dataLEN, packetdata)
 
 		packetBuf := bytes.NewReader(packetdata)
-
-		switch dataID {
+		group := dataID&0xFF00
+		switch group {
 		case packetCounter:
 			var packetCounter uint16
 			err = binary.Read(packetBuf, binary.BigEndian, &packetCounter)
@@ -115,7 +145,7 @@ func MTData2Decode(data []byte) (currentStatus XsensData, err error) {
 				log.Printf("could not read packetcounter %+v", err)
 				return
 			}
-			currentStatus.PacketCouter = packetCounter
+			currentStatus.PacketCounter = packetCounter
 			break
 		case sampleTimeFine:
 			var sampleTimeFine uint32
@@ -171,7 +201,7 @@ func MTData2Decode(data []byte) (currentStatus XsensData, err error) {
 				log.Printf("could not read velz %+v", err)
 				return
 			}
-			currentStatus.Vel = XDIVelocityXYZ{velx.ToFloat(), vely.ToFloat(), velx.ToFloat()}
+			currentStatus.Vel = XDIVelocityXYZ{velx.ToFloat(), vely.ToFloat(), velz.ToFloat()}
 			break
 		case statusWord:
 			var statusWord uint32
@@ -182,6 +212,34 @@ func MTData2Decode(data []byte) (currentStatus XsensData, err error) {
 			}
 			currentStatus.StatusWord = statusWord
 			break
+		case acceleration:
+			var accX, accY, accZ xsens1632
+			err = binary.Read(packetBuf, binary.BigEndian, &accX)
+			if err != nil {
+				log.Printf("could not read accX %+v", err)
+				return
+			}
+			err = binary.Read(packetBuf, binary.BigEndian, &accY)
+			if err != nil {
+				log.Printf("could not read accY %+v", err)
+				return
+			}
+			err = binary.Read(packetBuf, binary.BigEndian, &accZ)
+			if err != nil {
+				log.Printf("could not read accZ %+v", err)
+				return
+			}
+			switch dataID & 0x00F0 {
+			case 0x10: // DeltaV
+				break
+			case 0x20: // Acceleration
+				currentStatus.Acc = XDIAccelerationXYZ{accX.ToFloat(), accY.ToFloat(), accZ.ToFloat()}
+				break
+			case 0x40: // Free Acceleration
+			break
+			default:
+				break
+			}
 		case magnetic:
 			var magx, magy, magz xsens1632
 			err = binary.Read(packetBuf, binary.BigEndian, &magx)

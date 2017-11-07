@@ -18,7 +18,7 @@ type header struct {
 }
 
 // All MIDs
-const MTData2 = 54
+const mtData2 = 54
 
 var prt io.ReadWriteCloser
 
@@ -82,14 +82,14 @@ func readmsgs(callback func(data XsensData, err error)) (err error) {
 		}
 		// TODO: Validate chacksum
 
-		if h.MID != MTData2 {
+		if h.MID != mtData2 {
 			err = fmt.Errorf("Unhandled MID %v\n", h.MID)
 			log.Printf("%v", err)
 			callback(data, err)
 			return
 		}
 
-		data, err = MTData2Decode(buf)
+		data, err = mtData2Decode(buf)
 		if err != nil {
 			log.Printf("could not decode data %+v", err)
 			callback(data, err)
