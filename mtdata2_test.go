@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"math"
 	"testing"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test1632(t *testing.T) {
@@ -26,4 +27,14 @@ func Test1632(t *testing.T) {
 	if 0.00001 < diff {
 		t.Error("Error when converting to float64, expected 3.1415 was ", f)
 	}
+}
+
+func TestRun(t *testing.T) {
+	test := assert.New(t)
+	err := Open()
+	test.Nil(err)
+	defer Close()
+
+	err = readmsgs()
+	test.Nil(err)
 }

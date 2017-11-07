@@ -14,6 +14,15 @@ const XDI_AltitudeEllipsoid = 0x5022
 const XDI_LatLon = 0x5042
 const XDI_VelocityXYZ = 0xd012
 const XDI_StatusWord = 0xe020
+/*
+ErrorCodes = {
+		0x03: "Invalid period",
+		0x04: "Invalid message",
+		0x1E: "Timer overflow",
+		0x20: "Invalid baudrate",
+		0x21: "Invalid parameter"
+	}
+ */
 
 // XDIQuaternion contains orientation output expressed as a quaternion
 type XDIQuaternion struct {
