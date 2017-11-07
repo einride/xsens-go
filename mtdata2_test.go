@@ -3,9 +3,10 @@ package xsens
 import (
 	"bytes"
 	"encoding/binary"
+	"github.com/stretchr/testify/assert"
 	"math"
 	"testing"
-	"github.com/stretchr/testify/assert"
+	"log"
 )
 
 func Test1632(t *testing.T) {
@@ -35,6 +36,8 @@ func TestRun(t *testing.T) {
 	test.Nil(err)
 	defer Close()
 
-	err = readmsgs()
+	err = readmsgs(func(data XsensData, err error) {
+		log.Printf("got this %v, %v", data, err)
+	})
 	test.Nil(err)
 }
