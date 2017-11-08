@@ -132,6 +132,6 @@ func Run(callback func(data XsensData, err error)) (err error) {
 		return
 	}
 	defer Close()
-	go readmsgs(callback)
+	readmsgs(callback)
 	return
 }
