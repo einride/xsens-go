@@ -34,7 +34,7 @@ func readmsgs(callback func(data XsensData, err error)) (err error) {
 		}
 
 		if 0xfa != h.Preamble || 0xff != h.BID {
-			err = fmt.Errorf("bad preamble and BID")
+			err = fmt.Errorf("bad preamble: %v and BID: %v", h.Preamble, h.BID)
 			callback(data, err)
 			return
 		}
