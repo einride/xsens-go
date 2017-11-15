@@ -1,0 +1,9 @@
+# code does not work in mac so nanobox is needed
+run.config:
+  engine: golang
+  engine.config:
+    # Go Settings
+    runtime: go-1.9
+    package: 'github.com/einride/xsens-go'
+    fetch: 'go get'
+    build: 'go build'
