@@ -1,4 +1,4 @@
-package xsensgo
+package xsens
 
 import (
 	"bytes"
@@ -38,89 +38,89 @@ func TestHeading(t *testing.T) {
 	// Heading returns a value which has the magnetic north as reference, as this is not the same as geographical north,
 	// the magnetic declination should be compensated for to get correctness in a geographical sense.
 	//East
-	dataEast := XsensData{
+	dataEast := Data{
 		Latlng: XDILatLng{Lat: 0, Lng: 0},
 		Euler:  XDIEulerAngles{Roll: 0, Pitch: 0, Yaw: 0},
 		Mag:    XDIMagneticXYZ{0, 1, 0}, // East --> Heading == 0
 	}
-	heading := XsensData.Heading(dataEast)
+	heading := Data.Heading(dataEast)
 	log.Printf("Heading is: %v", heading-magneticDeclination)
 	assert.Equal(t, east+magneticDeclination, heading)
 
 	// North
-	dataNorth := XsensData{
+	dataNorth := Data{
 		Latlng: XDILatLng{Lat: 0, Lng: 0},
 		Euler:  XDIEulerAngles{Roll: 0, Pitch: 0, Yaw: 0},
 		Mag:    XDIMagneticXYZ{1, 0, 0}, // North --> Heading == 90
 	}
 
-	heading = XsensData.Heading(dataNorth)
+	heading = Data.Heading(dataNorth)
 	log.Printf("Heading is: %v", heading-magneticDeclination)
 	assert.Equal(t, north+magneticDeclination, heading)
 
 	// West
-	dataWest := XsensData{
+	dataWest := Data{
 		Latlng: XDILatLng{Lat: 0, Lng: 0},
 		Euler:  XDIEulerAngles{Roll: 0, Pitch: 0, Yaw: 0},
 		Mag:    XDIMagneticXYZ{0, -1, 0}, // West --> Heading == -180||180
 	}
 
-	heading = XsensData.Heading(dataWest)
+	heading = Data.Heading(dataWest)
 	log.Printf("Heading is: %v", heading-magneticDeclination)
 	assert.Equal(t, westNeg+magneticDeclination, heading)
 
 	// South
-	dataSouth := XsensData{
+	dataSouth := Data{
 		Latlng: XDILatLng{Lat: 0, Lng: 0},
 		Euler:  XDIEulerAngles{Roll: 0, Pitch: 0, Yaw: 0},
 		Mag:    XDIMagneticXYZ{-1, 0, 0}, // South --> Heading == -90
 	}
 
-	heading = XsensData.Heading(dataSouth)
+	heading = Data.Heading(dataSouth)
 	log.Printf("Heading is: %v", heading-magneticDeclination)
 	assert.Equal(t, south+magneticDeclination, heading)
 
 	// NorthEast
-	dataNorthEast := XsensData{
+	dataNorthEast := Data{
 		Latlng: XDILatLng{Lat: 0, Lng: 0},
 		Euler:  XDIEulerAngles{Roll: 0, Pitch: 0, Yaw: 0},
 		Mag:    XDIMagneticXYZ{1, 1, 0}, // NorthEast --> Heading == 45
 	}
 
-	heading = XsensData.Heading(dataNorthEast)
+	heading = Data.Heading(dataNorthEast)
 	log.Printf("Heading is: %v", heading-magneticDeclination)
 	assert.Equal(t, northEast+magneticDeclination, heading)
 
 	// NorthWest
-	dataNorthWest := XsensData{
+	dataNorthWest := Data{
 		Latlng: XDILatLng{Lat: 0, Lng: 0},
 		Euler:  XDIEulerAngles{Roll: 0, Pitch: 0, Yaw: 0},
 		Mag:    XDIMagneticXYZ{1, -1, 0}, // NorthWest --> Heading == 135
 	}
 
-	heading = XsensData.Heading(dataNorthWest)
+	heading = Data.Heading(dataNorthWest)
 	log.Printf("Heading is: %v", heading-magneticDeclination)
 	assert.Equal(t, northWest+magneticDeclination, heading)
 
 	// SouthEast
-	dataSouthEast := XsensData{
+	dataSouthEast := Data{
 		Latlng: XDILatLng{Lat: 0, Lng: 0},
 		Euler:  XDIEulerAngles{Roll: 0, Pitch: 0, Yaw: 0},
 		Mag:    XDIMagneticXYZ{-1, 1, 0}, // SouthEast --> Heading == -45
 	}
 
-	heading = XsensData.Heading(dataSouthEast)
+	heading = Data.Heading(dataSouthEast)
 	log.Printf("Heading is: %v", heading-magneticDeclination)
 	assert.Equal(t, southEast+magneticDeclination, heading)
 
 	// SouthWest
-	dataSouthWest := XsensData{
+	dataSouthWest := Data{
 		Latlng: XDILatLng{Lat: 0, Lng: 0},
 		Euler:  XDIEulerAngles{Roll: 0, Pitch: 0, Yaw: 0},
 		Mag:    XDIMagneticXYZ{-1, -1, 0}, // SouthWest --> Heading == -135
 	}
 
-	heading = XsensData.Heading(dataSouthWest)
+	heading = Data.Heading(dataSouthWest)
 	log.Printf("Heading is: %v", heading-magneticDeclination)
 	assert.Equal(t, southWest+magneticDeclination, heading)
 

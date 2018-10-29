@@ -1,4 +1,4 @@
-package xsensgo
+package xsens
 
 import (
 	"bytes"
@@ -16,12 +16,12 @@ type packet struct {
 }
 
 // MTData2Decode decode any number of packages from the given slice.
-func mtData2Decode(data []byte) (XsensData, error) {
+func Decode(data []byte) (*Data, error) {
 	// Split data into list of packets to be decoded
 	packets, err := parsePackets(bytes.NewReader(data))
 
 	if err != nil {
-		return XsensData{}, err
+		return nil, err
 	}
 	// Decode content of packets
 	return decodePackets(packets)
@@ -71,8 +71,8 @@ func isAnyKindOfEOF(e error) bool {
 	return strings.Contains(e.Error(), io.EOF.Error())
 }
 
-func decodePackets(packets []packet) (XsensData, error) {
-	var currentStatus XsensData
+func decodePackets(packets []packet) (*Data, error) {
+	var currentStatus Data
 
 	// Decode all packets separately
 	for _, packet := range packets {
@@ -108,18 +108,18 @@ func decodePackets(packets []packet) (XsensData, error) {
 		case angularVelocity:
 			err = decodeAngularVelocity(groupTypeName, packet, &currentStatus)
 		default:
-			err = fmt.Errorf("\tUnknown packet ID %v, %v", group, groupTypeName)
+			err = errors.Errorf("\tUnknown packet ID %v, %v", group, groupTypeName)
 		}
 
 		if err != nil {
-			return currentStatus, err
+			return nil, err
 		}
 	}
 
-	return currentStatus, nil
+	return &currentStatus, nil
 }
 
-func decodeTimestamp(groupTypeName xdi, packet packet, currentStatus *XsensData) error {
+func decodeTimestamp(groupTypeName xdi, packet packet, currentStatus *Data) error {
 	switch groupTypeName {
 	case 0x10: // Utc time
 		err := binary.Read(bytes.NewReader(packet.data), binary.BigEndian, &currentStatus.UTCTimestamp)
@@ -128,10 +128,10 @@ func decodeTimestamp(groupTypeName xdi, packet packet, currentStatus *XsensData)
 		err := binary.Read(bytes.NewReader(packet.data), binary.BigEndian, &currentStatus.PacketCounter)
 		return errors.Wrap(err, "could not read Packet counter")
 	}
-	return errors.New(fmt.Sprintf("Unhandled group type name='%v'", groupTypeName))
+	return errors.Errorf("Unhandled group type name='%v'", groupTypeName)
 }
 
-func decodePosition(groupTypeName xdi, packet packet, currentStatus *XsensData) error {
+func decodePosition(groupTypeName xdi, packet packet, currentStatus *Data) error {
 	switch groupTypeName {
 	case 0x20: // Altitude Ellipsoid
 		err := binary.Read(bytes.NewReader(packet.data), binary.BigEndian, &currentStatus.AltitudeMEllips)
@@ -140,37 +140,37 @@ func decodePosition(groupTypeName xdi, packet packet, currentStatus *XsensData) 
 		err := binary.Read(bytes.NewReader(packet.data), binary.BigEndian, &currentStatus.Latlng)
 		return errors.Wrap(err, "could not read (lat,lon)")
 	}
-	return errors.New(fmt.Sprintf("Unhandled group type name='%v'", groupTypeName))
+	return errors.Errorf("Unhandled group type name='%v'", groupTypeName)
 }
 
-func decodeOrientation(groupTypeName xdi, packet packet, currentStatus *XsensData) error {
+func decodeOrientation(groupTypeName xdi, packet packet, currentStatus *Data) error {
 	switch groupTypeName {
 	case 0x30: // Euler Angles
 		err := binary.Read(bytes.NewReader(packet.data), binary.BigEndian, &currentStatus.Euler)
 		return errors.Wrap(err, "could not read Euler angles")
 	}
-	return errors.New(fmt.Sprintf("Unhandled group type name='%v'", groupTypeName))
+	return errors.Errorf("Unhandled group type name='%v'", groupTypeName)
 }
 
-func decodeVelocity(groupTypeName xdi, packet packet, currentStatus *XsensData) error {
+func decodeVelocity(groupTypeName xdi, packet packet, currentStatus *Data) error {
 	switch groupTypeName {
 	case 0x10: // Velocity XYZ
 		err := binary.Read(bytes.NewReader(packet.data), binary.BigEndian, &currentStatus.Vel)
 		return errors.Wrap(err, "could not read velocity")
 	}
-	return errors.New(fmt.Sprintf("Unhandled group type name='%v'", groupTypeName))
+	return errors.Errorf("Unhandled group type name='%v'", groupTypeName)
 }
 
-func decodeStatusWord(groupTypeName xdi, packet packet, currentStatus *XsensData) error {
+func decodeStatusWord(groupTypeName xdi, packet packet, currentStatus *Data) error {
 	switch groupTypeName {
 	case 0x20: // Status Word
 		err := binary.Read(bytes.NewReader(packet.data), binary.BigEndian, &currentStatus.StatusWord)
 		return errors.Wrap(err, "could not read status word")
 	}
-	return errors.New(fmt.Sprintf("Unhandled group type name='%v'", groupTypeName))
+	return errors.Errorf("Unhandled group type name='%v'", groupTypeName)
 }
 
-func decodeAcceleration(groupTypeName xdi, packet packet, currentStatus *XsensData) error {
+func decodeAcceleration(groupTypeName xdi, packet packet, currentStatus *Data) error {
 	switch groupTypeName {
 	case 0x10: // DeltaV
 		err := binary.Read(bytes.NewReader(packet.data), binary.BigEndian, &currentStatus.DeltaV)
@@ -182,19 +182,19 @@ func decodeAcceleration(groupTypeName xdi, packet packet, currentStatus *XsensDa
 		err := binary.Read(bytes.NewReader(packet.data), binary.BigEndian, &currentStatus.FreeAcc)
 		return errors.Wrap(err, "could not read free acceleration")
 	}
-	return errors.New(fmt.Sprintf("Unhandled group type name='%v'", groupTypeName))
+	return errors.Errorf("Unhandled group type name='%v'", groupTypeName)
 }
 
-func decodeMagnetic(groupTypeName xdi, packet packet, currentStatus *XsensData) error {
+func decodeMagnetic(groupTypeName xdi, packet packet, currentStatus *Data) error {
 	switch groupTypeName {
 	case 0x20: // MagneticField
 		err := binary.Read(bytes.NewReader(packet.data), binary.BigEndian, &currentStatus.Mag)
 		return errors.Wrap(err, "could not read magnetic field")
 	}
-	return errors.New(fmt.Sprintf("Unhandled group type name='%v'", groupTypeName))
+	return errors.Errorf("Unhandled group type name='%v'", groupTypeName)
 }
 
-func decodeAngularVelocity(groupTypeName xdi, packet packet, currentStatus *XsensData) error {
+func decodeAngularVelocity(groupTypeName xdi, packet packet, currentStatus *Data) error {
 	switch groupTypeName {
 	case 0x20: // Rate of turn
 		err := binary.Read(bytes.NewReader(packet.data), binary.BigEndian, &currentStatus.AngularVel)
@@ -203,5 +203,5 @@ func decodeAngularVelocity(groupTypeName xdi, packet packet, currentStatus *Xsen
 		err := binary.Read(bytes.NewReader(packet.data), binary.BigEndian, &currentStatus.DeltaQ)
 		return errors.Wrap(err, "could not read DeltaQ")
 	}
-	return errors.New(fmt.Sprintf("Unhandled group type name='%v'", groupTypeName))
+	return errors.Errorf("Unhandled group type name='%v'", groupTypeName)
 }

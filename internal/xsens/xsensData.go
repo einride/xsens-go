@@ -1,6 +1,8 @@
-package xsensgo
+package xsens
 
 import (
+	"bytes"
+	"log"
 	"math"
 )
 
@@ -17,6 +19,8 @@ const (
 	magnetic        xdi = 0xC000
 	velocity        xdi = 0xD000
 	statusWord      xdi = 0xE000
+	gnssID          xdi = 0x7000
+	group           xdi = 0xFF00
 )
 
 /*
@@ -30,7 +34,7 @@ ErrorCodes = {
 	}
 */
 
-type XsensData struct {
+type Data struct {
 	PacketCounter   uint16
 	StatusWord      uint32
 	UTCTimestamp    XDIUTCTime
@@ -101,7 +105,7 @@ elseif(Xh>0  && Yh>0){heading=360-heading}
 elseif(Xh==0 && Yh<0){heading=90}
 elseif(Xh==0 && Yh>0){heading=270}*/
 
-func (data XsensData) Heading() (heading float64) {
+func (data Data) Heading() (heading float64) {
 	cRoll := math.Cos(data.Euler.Roll * math.Pi / 180)
 	sRoll := math.Sin(data.Euler.Roll * math.Pi / 180)
 	cPitch := math.Cos(data.Euler.Pitch * math.Pi / 180)
@@ -132,9 +136,8 @@ velocity = (VelY-VelX)x(VelZ-VelX) = - VelX - VelY + VelZ
 velocity output from mt in m/s, Velocity() output in km/h
 */
 // Absolute velocity
-func (vel XDIVelocityXYZ) Velocity() (velocity float64) {
-	velocity = math.Abs(vel.VelX + vel.VelY + vel.VelZ)
-	return
+func (vel XDIVelocityXYZ) Velocity() float64 {
+	return math.Abs(vel.VelX + vel.VelY + vel.VelZ)
 }
 
 /*
@@ -143,15 +146,13 @@ Acceleration output from mt in m/s2, Acceleration() output in km/h2
 */
 
 // Calculating absolute acceleration, with gravity bias
-func (acc XDIAccelerationXYZ) Acceleration() (acceleration float64) {
-	acceleration = math.Abs(acc.AccX + acc.AccY + acc.AccZ)
-	return
+func (acc XDIAccelerationXYZ) Acceleration() float64 {
+	return math.Abs(acc.AccX + acc.AccY + acc.AccZ)
 }
 
 // Calculating absolute acceleration, without gravity bias
-func (freeAcc XDIFreeAccelerationXYZ) Acceleration() (acceleration float64) {
-	acceleration = math.Abs(freeAcc.FreeAccX + freeAcc.FreeAccY + freeAcc.FreeAccZ)
-	return
+func (freeAcc XDIFreeAccelerationXYZ) Acceleration() float64 {
+	return math.Abs(freeAcc.FreeAccX + freeAcc.FreeAccY + freeAcc.FreeAccZ)
 }
 
 // Make Euler to Quaternion conversion according to JPL convention
@@ -178,4 +179,20 @@ func (fp xsens1632) ToFloat() float64 {
 	i := int64(fp.Integer) << 32
 	i = i + int64(fp.Fraction)
 	return float64(i) / math.Pow(2, 32)
+}
+
+func CheckIfGNSS(data []byte) bool {
+	packets, err := parsePackets(bytes.NewReader(data))
+	if err != nil {
+		log.Printf("Error parsing packets: %v", err)
+		// TODO: Handle this error?
+	}
+
+	for i := 0; i < len(packets); i++ {
+		// Check if group ID is of type GNSS in any of packets
+		if packets[i].id&group == gnssID {
+			return true
+		}
+	}
+	return false
 }
