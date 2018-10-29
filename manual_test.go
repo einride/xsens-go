@@ -19,7 +19,7 @@ func TestReadmsgs(t *testing.T) {
 	test.Nil(err)
 	defer prt.Close()
 
-	err = prt.readmsgs(func(data XsensData, err error) {
+	err = prt.readMessages(func(data XsensData, err error) {
 		log.Printf("got this %v, %v", data, err)
 	})
 	test.Nil(err)

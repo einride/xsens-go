@@ -5,8 +5,10 @@ import (
 	"net"
 	"testing"
 
+	"github.com/einride/xsens-go/internal/xsens"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
 )
 
 var inputDataWithHeader = []byte{
@@ -74,7 +76,9 @@ var gnssDataWithHeader = []byte{
 
 func TestReadGNSS(t *testing.T) {
 	reader, writer := net.Pipe()
-	x := Client{prt: reader}
+
+	logger := zap.NewExample()
+	x := NewClient(reader, logger)
 
 	go func() {
 		// GNSS message, should notset  data and willget EOF error
@@ -85,7 +89,7 @@ func TestReadGNSS(t *testing.T) {
 	}()
 
 	var dataIsSet bool
-	err := x.readmsgs(func(data XsensData, err error) {
+	err := x.readMessages(func(data *xsens.Data, err error) {
 		dataIsSet = true
 	})
 
@@ -99,7 +103,8 @@ func TestReadGNSS(t *testing.T) {
 func TestSkipGNSS(t *testing.T) {
 	// Data should only be set from non-GNSS message
 	reader, writer := net.Pipe()
-	x := Client{prt: reader}
+	logger := zap.NewExample()
+	x := NewClient(reader, logger)
 
 	go func() {
 		// GNSS message, should not set data and will get EOF error
@@ -114,7 +119,7 @@ func TestSkipGNSS(t *testing.T) {
 		err = writer.Close()
 		assert.Nil(t, err)
 	}()
-	err := x.readmsgs(func(data XsensData, err error) {
+	err := x.readMessages(func(data *xsens.Data, err error) {
 		assert.Equal(t, 13.37, data.Latlng.Lng)
 		assert.Equal(t, 42.0, data.Latlng.Lat)
 	})
@@ -124,7 +129,8 @@ func TestSkipGNSS(t *testing.T) {
 
 func TestReadMsgs(t *testing.T) {
 	reader, writer := net.Pipe()
-	x := Client{prt: reader}
+	logger := zap.NewExample()
+	x := NewClient(reader, logger)
 
 	go func() {
 		_, err := writer.Write(inputDataWithHeader)
@@ -133,7 +139,7 @@ func TestReadMsgs(t *testing.T) {
 		assert.Nil(t, err)
 	}()
 
-	err := x.readmsgs(func(data XsensData, err error) {
+	err := x.readMessages(func(data *xsens.Data, err error) {
 		assert.Equal(t, 42.0, data.Latlng.Lat)
 		assert.Equal(t, 13.37, data.Latlng.Lng)
 		assert.Nil(t, err)
@@ -143,7 +149,8 @@ func TestReadMsgs(t *testing.T) {
 
 func TestReadTwoMsgs(t *testing.T) {
 	reader, writer := net.Pipe()
-	x := Client{prt: reader}
+	logger := zap.NewExample()
+	x := NewClient(reader, logger)
 
 	go func() {
 		_, err := writer.Write(inputDataWithHeader)
@@ -154,7 +161,7 @@ func TestReadTwoMsgs(t *testing.T) {
 		assert.Nil(t, err)
 	}()
 
-	err := x.readmsgs(func(data XsensData, err error) {
+	err := x.readMessages(func(data *xsens.Data, err error) {
 		assert.Equal(t, 42.0, data.Latlng.Lat)
 		assert.Equal(t, 13.37, data.Latlng.Lng)
 		assert.Nil(t, err)

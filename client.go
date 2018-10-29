@@ -4,12 +4,7 @@ import (
 	"encoding/binary"
 	"io"
 
-	"os"
-
-	"bytes"
-
-	"log"
-
+	"github.com/einride/xsens-go/internal/xsens"
 	"github.com/jacobsa/go-serial/serial"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -30,21 +25,31 @@ const (
 	busIdentifier         = 0xFF
 )
 
-var xsensUSBHandle = func() string {
-	handle := os.Getenv("XSENS_USB_HANDLE")
-	if handle == "" {
-		handle = "/dev/ttyUSB0"
-	}
-	return handle
-}()
-
 type Client struct {
 	prt    io.ReadWriteCloser
 	logger *zap.Logger
 }
 
-// Check "Client config" on drive for deepmap's config and more.
-func (x *Client) readmsgs(callback func(data XsensData, err error)) error {
+type ReceiverFunc func(data *xsens.Data, err error)
+
+// create a new client, handle is usually /dev/ttyUSB0 on linux systems
+func NewClient(prt io.ReadWriteCloser, logger *zap.Logger) (x *Client) {
+	// Configure and open the serial port to the Client
+	return &Client{prt: prt, logger: logger}
+}
+
+func DefaultSerialPort() (io.ReadWriteCloser, error) {
+	return serial.Open(serial.OpenOptions{
+		PortName:        "/dev/ttyUSB0",
+		BaudRate:        115200,
+		DataBits:        8,
+		StopBits:        1,
+		MinimumReadSize: 4,
+	})
+}
+
+// Check "Client config" on drive for xsens's config and more.
+func (x *Client) readMessages(callback ReceiverFunc) error {
 	for {
 		// Read the header of the message
 		h, err := readNextHeader(x.prt)
@@ -52,37 +57,38 @@ func (x *Client) readmsgs(callback func(data XsensData, err error)) error {
 			return errors.Wrap(err, "could not read header")
 		}
 
-		var datalen uint16
+		var dataLength uint16
 		if h.LEN < 0xFF {
-			datalen = uint16(h.LEN)
+			dataLength = uint16(h.LEN)
 		} else {
 			// If data package is of extended size. Will be this when following deepmap's setup + freeacc + mag.
-			err = binary.Read(x.prt, binary.BigEndian, &datalen)
+			err = binary.Read(x.prt, binary.BigEndian, &dataLength)
 			if err != nil {
 				err = errors.Wrap(err, "error reading datalength from MTMessage")
-				callback(XsensData{}, err)
+				callback(nil, err)
 				return err
 			}
 		}
 
 		// Create a buffer and read the whole data part into this buffer
-		buf := make([]byte, datalen)
+		buf := make([]byte, dataLength)
 		var n int
-		for n < int(datalen) && err == nil {
+		for n < int(dataLength) && err == nil {
 			var nn int
 			nn, err = x.prt.Read(buf[n:])
 			n += nn
 		}
 
-		if n >= int(datalen) {
+		if n >= int(dataLength) {
 			err = nil
 			// no more data, continue anyway
 			//log.Printf("no more data continue")
+			x.logger.Warn("no more data continue anyway")
 		}
 
 		if err != nil {
 			err = errors.Wrap(err, "error reading data from XSens")
-			callback(XsensData{}, err)
+			callback(nil, err)
 			return err
 		}
 
@@ -97,18 +103,18 @@ func (x *Client) readmsgs(callback func(data XsensData, err error)) error {
 		// Check if Message ID is of type mtData2
 		if h.MID != mtData2 {
 			err = errors.Errorf("Unhandled MID %v\n", h.MID)
-			callback(XsensData{}, err)
+			callback(nil, err)
 			return err
 		}
 
 		// Check if message is GNSS
-		if checkIfGNSS(buf) {
+		if xsens.CheckIfGNSS(buf) {
 			// GNSS message, skip it
 			continue
 		}
 
 		// Decode data in message
-		data, err := mtData2Decode(buf)
+		data, err := xsens.Decode(buf)
 		if err != nil {
 			err = errors.Wrap(err, "could not decode data")
 			callback(data, err)
@@ -117,32 +123,10 @@ func (x *Client) readmsgs(callback func(data XsensData, err error)) error {
 
 		// Set status from parsed data
 		callback(data, nil)
-
 	}
 }
 
-const (
-	gnssID xdi = 0x7000
-	group  xdi = 0xFF00
-)
-
-func checkIfGNSS(data []byte) bool {
-	packets, err := parsePackets(bytes.NewReader(data))
-	for i := 0; i < len(packets); i++ {
-		if err != nil {
-			log.Printf("Error parsing packets: %v", err)
-			// TODO: Handle this error?
-		}
-		// Check if group ID is of type GNSS in any of packets
-		if packets[i].id&group == gnssID {
-			return true
-		}
-	}
-	return false
-}
-
-func readNextHeader(prt io.Reader) (header, error) {
-	h := header{}
+func readNextHeader(prt io.Reader) (*header, error) {
 	var data [3]byte
 
 	// Wait for correct type of package
@@ -153,16 +137,17 @@ func readNextHeader(prt io.Reader) (header, error) {
 		for sentry[0] != packageStartIndicator {
 			err := binary.Read(prt, binary.BigEndian, &sentry)
 			if err != nil {
-				return h, errors.Wrap(err, "could not read")
+				return nil, errors.Wrap(err, "could not read")
 			}
 		}
 
 		err := binary.Read(prt, binary.BigEndian, &data)
 		if err != nil {
-			return h, errors.Wrap(err, "could not read")
+			return nil, errors.Wrap(err, "could not read")
 		}
 	}
 
+	h := &header{}
 	h.Preamble = packageStartIndicator
 	h.BID = data[0]
 	h.MID = data[1]
@@ -171,45 +156,28 @@ func readNextHeader(prt io.Reader) (header, error) {
 	return h, nil
 }
 
-func NewClient() (x *Client, err error) {
-	// Configure and open the serial port to the Client
-	options := serial.OpenOptions{
-		PortName:        xsensUSBHandle,
-		BaudRate:        115200,
-		DataBits:        8,
-		StopBits:        1,
-		MinimumReadSize: 4,
-	}
-	prt, err := serial.Open(options)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not open ports")
-	}
-	return &Client{prt: prt}, nil
-}
-
 func (x *Client) Close() (err error) {
 	if x.prt == nil {
-		err = errors.Errorf("could not close, no prt")
-		return
+		return errors.Errorf("could not close, no prt")
 	}
 	return x.prt.Close()
 }
 
-func (x *Client) Run(callback func(data XsensData, err error)) (err error) {
+func (x *Client) Run(callback ReceiverFunc) (err error) {
 	defer func() {
 		err = x.Close()
 		if err != nil {
 			x.logger.Error("could not close")
 		}
 	}()
-	return x.readmsgs(callback)
+	return x.readMessages(callback)
 }
 
 // Low-level message sending function.
 func (x *Client) writeMsg(mid byte, data []byte) error {
 	length := byte(len(data))
 	var lendat []byte
-	if length > 254 {
+	if length > 0xFE {
 		//lendat = []byte{
 		//	0xFF,
 		//	0xFF & length,
@@ -228,29 +196,17 @@ func (x *Client) writeMsg(mid byte, data []byte) error {
 	return err
 }
 
-/*
-## Send a message and read confirmation
-	def write_ack(self, mid, data=[]):
-		"""Send a message a read confirmation."""
-		self.write_msg(mid, data)
-		for tries in range(100):
-			mid_ack, dataAck = self.read_msg()
-			if MidAck==(mid+1):
-				break
-		else:
-			raise MTException("Ack (0x%X) expected, MID 0x%X received instead"\
-					" (after 100 tries)."%(mid+1, mid_ack))
-		return dataAck
-*/
 type ack struct {
 	MidAck, DataAck byte
 }
 
+// Send a message and read confirmation
 func (x *Client) writeAck(mid byte, data []byte) error {
 	err := x.writeMsg(mid, data)
 	if err != nil {
 		return err
 	}
+
 	for i := 1; i <= 100; i++ {
 		a := ack{}
 		err = binary.Read(x.prt, binary.BigEndian, &a)

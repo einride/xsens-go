@@ -1,4 +1,4 @@
-package xsensgo
+package xsens
 
 import (
 	"log"
@@ -24,7 +24,7 @@ var inputData = []byte{0x10, 0x10, 0x0C, 0x29, 0xFA, 0xC3, 0xE0, 0x07, 0xE2, 0x0
 	0x00, 0x00, 0x00, 0xD0, 0x13, 0x18, 0x3F, 0xB2, 0x99, 0x03, 0xC0, 0x00, 0x00, 0x00, 0x3F, 0x87, 0x31, 0xDC, 0x40,
 	0x00, 0x00, 0x00, 0x3F, 0x92, 0x86, 0x15, 0x80, 0x00, 0x00, 0x00, 0xE0, 0x20, 0x04, 0x01, 0x80, 0x00, 0x47}
 
-var expectedData = XsensData{
+var expectedData = Data{
 	UTCTimestamp:    XDIUTCTime{NS: 704300000, Year: 2018, Month: 8, Day: 9, Hour: 13, Minute: 59, Second: 4, Conf: 247},
 	PacketCounter:   17280,
 	Euler:           XDIEulerAngles{Roll: 0.08790865, Pitch: 5.30700874, Yaw: -2.78199315},
@@ -43,7 +43,7 @@ var expectedData = XsensData{
 func TestMTData2Decode(t *testing.T) {
 	test := assert.New(t)
 
-	currentStatus, err := mtData2Decode(inputData)
+	currentStatus, err := Decode(inputData)
 	test.Nil(err)
 
 	log.Printf("currentstatus is %v, err is: %v", currentStatus, err)
