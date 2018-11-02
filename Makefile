@@ -14,5 +14,9 @@ test-go: vendor
 .PHONY: doc
 doc:
 	godoc -http=:6060 &
+ifeq ($(Uname),Linux)
 	xdg-open http://localhost:6060/pkg/github.com/einride/xsens-go
+else ifeq ($(Uname),Darwin)
+	open http://localhost:6060/pkg/github.com/einride/xsens-go
+endif
 
