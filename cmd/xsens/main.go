@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"github.com/einride/xsens-go"
-	"github.com/einride/xsens-go/internal/xsens"
 	"go.uber.org/zap"
 )
 
@@ -22,7 +21,7 @@ func main() {
 	}
 
 	defer client.Close()
-	err = client.Run(func(data *xsens.Data, err error) {
+	err = client.Run(func(data *xsensgo.Data, err error) {
 		if err != nil {
 			logger.Warn("Got error from xsens data %v", zap.Error(err))
 			return

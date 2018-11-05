@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"io"
 
-	"github.com/einride/xsens-go/internal/xsens"
 	"github.com/jacobsa/go-serial/serial"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -30,7 +29,7 @@ type Client struct {
 	logger *zap.Logger
 }
 
-type ReceiverFunc func(data *xsens.Data, err error)
+type ReceiverFunc func(data *Data, err error)
 
 // create a new client, handle is usually /dev/ttyUSB0 on linux systems
 func NewClient(prt io.ReadWriteCloser, logger *zap.Logger) (x *Client) {
@@ -108,13 +107,13 @@ func (x *Client) readMessages(callback ReceiverFunc) error {
 		}
 
 		// Check if message is GNSS
-		if xsens.CheckIfGNSS(buf) {
+		if checkIfGNSS(buf) {
 			// GNSS message, skip it
 			continue
 		}
 
 		// Decode data in message
-		data, err := xsens.Decode(buf)
+		data, err := Decode(buf)
 		if err != nil {
 			err = errors.Wrap(err, "could not decode data")
 			callback(data, err)
@@ -156,6 +155,7 @@ func readNextHeader(prt io.Reader) (*header, error) {
 	return h, nil
 }
 
+// Close the serial port connection
 func (x *Client) Close() (err error) {
 	if x.prt == nil {
 		return errors.Errorf("could not close, no prt")
@@ -220,6 +220,7 @@ func (x *Client) writeAck(mid byte, data []byte) error {
 	return errors.Errorf("no ack got")
 }
 
+// Write a rest to the xsens
 func (x *Client) Reset() error {
 	return x.writeAck(reset, []byte{})
 }

@@ -1,4 +1,4 @@
-package xsens
+package xsensgo
 
 import (
 	"bytes"
