@@ -3,7 +3,7 @@
 package xsensgo
 
 import (
-	"log"
+	"go.uber.org/zap"
 	"math"
 	"testing"
 
@@ -15,36 +15,54 @@ import (
 
 func TestReadmsgs(t *testing.T) {
 	test := assert.New(t)
-	prt, err := NewClient()
-	test.Nil(err)
-	defer prt.Close()
 
-	err = prt.readMessages(func(data XsensData, err error) {
-		log.Printf("got this %v, %v", data, err)
+	logger := zap.NewExample()
+	prt, err := DefaultSerialPort()
+	test.Nil(err)
+	client := NewClient(prt, logger)
+	test.Nil(err)
+	defer client.Close()
+
+	err = client.readMessages(func(data *Data, err error) {
+		logger.Info("got this", zap.Any("data", data), zap.Error(err))
 	})
 	test.Nil(err)
 }
 
 func TestRun(t *testing.T) {
 	test := assert.New(t)
-	x, err := NewClient()
+
+	logger := zap.NewExample()
+	prt, err := DefaultSerialPort()
 	test.Nil(err)
-	err = x.Run(func(data XsensData, err error) {
-		log.Printf("Got this %v, %v", data, err)
+
+	client := NewClient(prt, logger)
+	test.Nil(err)
+	defer client.Close()
+
+	err = client.Run(func(data *Data, err error) {
+		logger.Info("Got this", zap.Any("data", data), zap.Error(err))
 	})
 	test.Nil(err)
 }
 
 func TestHeadingCalc(t *testing.T) {
 	test := assert.New(t)
-	x, err := NewClient()
+
+	logger := zap.NewExample()
+	prt, err := DefaultSerialPort()
 	test.Nil(err)
-	err = x.Run(func(data XsensData, err error) {
+
+	client := NewClient(prt, logger)
+	test.Nil(err)
+	defer client.Close()
+
+	err = client.Run(func(data *Data, err error) {
 		heading := data.Heading()
-		log.Printf("Heading is %v", heading)
+		logger.Info("Heading is", zap.Float64("heading", heading))
 		// Set north as reference
 		wanted := math.Atan2(1, 0) * 180 / math.Pi
-		log.Printf("wanted: %v", wanted)
+		logger.Info("wanted:", zap.Float64("wanted",wanted))
 		// Check angle error (reference - actual)
 		headingError := wanted - heading
 		switch {
@@ -54,6 +72,6 @@ func TestHeadingCalc(t *testing.T) {
 			headingError += 360
 		}
 		// When Client is facing north, headingError should be 0
-		log.Printf("Heading error is %v", headingError)
+		logger.Info("Heading error is", zap.Float64("headingError",headingError))
 	})
 }

@@ -5,7 +5,6 @@ import (
 	"net"
 	"testing"
 
-	"github.com/einride/xsens-go/internal/xsens"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
@@ -89,7 +88,7 @@ func TestReadGNSS(t *testing.T) {
 	}()
 
 	var dataIsSet bool
-	err := x.readMessages(func(data *xsens.Data, err error) {
+	err := x.readMessages(func(data *Data, err error) {
 		dataIsSet = true
 	})
 
@@ -119,7 +118,7 @@ func TestSkipGNSS(t *testing.T) {
 		err = writer.Close()
 		assert.Nil(t, err)
 	}()
-	err := x.readMessages(func(data *xsens.Data, err error) {
+	err := x.readMessages(func(data *Data, err error) {
 		assert.Equal(t, 13.37, data.Latlng.Lng)
 		assert.Equal(t, 42.0, data.Latlng.Lat)
 	})
@@ -139,7 +138,7 @@ func TestReadMsgs(t *testing.T) {
 		assert.Nil(t, err)
 	}()
 
-	err := x.readMessages(func(data *xsens.Data, err error) {
+	err := x.readMessages(func(data *Data, err error) {
 		assert.Equal(t, 42.0, data.Latlng.Lat)
 		assert.Equal(t, 13.37, data.Latlng.Lng)
 		assert.Nil(t, err)
@@ -161,7 +160,7 @@ func TestReadTwoMsgs(t *testing.T) {
 		assert.Nil(t, err)
 	}()
 
-	err := x.readMessages(func(data *xsens.Data, err error) {
+	err := x.readMessages(func(data *Data, err error) {
 		assert.Equal(t, 42.0, data.Latlng.Lat)
 		assert.Equal(t, 13.37, data.Latlng.Lng)
 		assert.Nil(t, err)

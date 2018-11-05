@@ -1,4 +1,4 @@
-package xsens
+package xsensgo
 
 import (
 	"bytes"
@@ -181,7 +181,7 @@ func (fp xsens1632) ToFloat() float64 {
 	return float64(i) / math.Pow(2, 32)
 }
 
-func CheckIfGNSS(data []byte) bool {
+func checkIfGNSS(data []byte) bool {
 	packets, err := parsePackets(bytes.NewReader(data))
 	if err != nil {
 		log.Printf("Error parsing packets: %v", err)
