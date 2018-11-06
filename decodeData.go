@@ -127,6 +127,8 @@ func decodeTimestamp(groupTypeName xdi, packet packet, currentStatus *Data) erro
 	case 0x20: // packet counter
 		err := binary.Read(bytes.NewReader(packet.data), binary.BigEndian, &currentStatus.PacketCounter)
 		return errors.Wrap(err, "could not read Packet counter")
+	case 0x60: // UTC time request info
+		return nil
 	}
 	return errors.Errorf("Unhandled group type name='%v'", groupTypeName)
 }

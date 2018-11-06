@@ -81,8 +81,6 @@ func (x *Client) readMessages(callback ReceiverFunc) error {
 		if n >= int(dataLength) {
 			err = nil
 			// no more data, continue anyway
-			//log.Printf("no more data continue")
-			x.logger.Warn("no more data continue anyway")
 		}
 
 		if err != nil {
