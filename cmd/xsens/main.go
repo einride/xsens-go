@@ -1,37 +1,22 @@
 package main
 
 import (
-	"os"
+	"go.uber.org/zap"
 
 	"github.com/einride/xsens-go"
-	"go.uber.org/zap"
 )
 
 func main() {
 	logger := zap.NewExample()
-	prt, err := xsensgo.DefaultSerialPort()
+	serialPort, err := xsensgo.DefaultSerialPort()
 	if err != nil {
-		logger.Fatal("could not open port", zap.Error(err))
+		logger.Panic("Failed to open default Xsens serial port", zap.Error(err))
 	}
-
-	client := xsensgo.NewClient(prt, logger)
-	if err != nil {
-		logger.Fatal("Got error opening new xsens %v", zap.Error(err))
-		return
-	}
-
-	defer client.Close()
-	err = client.Run(func(data *xsensgo.Data, err error) {
-		if err != nil {
-			logger.Warn("Got error from xsens data %v", zap.Error(err))
-			return
+	var data xsensgo.Data
+	for {
+		if err := data.Read(serialPort); err != nil {
+			logger.Panic("Failed to read from Xsens serial port", zap.Error(err))
 		}
-
-		if os.Getenv("RECIEVE_STATE_LOG_FROM_IMU") != "" {
-			logger.Info("Received ", zap.Any("xsens data", data))
-		}
-	})
-	if err != nil {
-		logger.Error("Error in xsens Run %v", zap.Error(err))
+		logger.Info("Data", zap.Any("data", data))
 	}
 }

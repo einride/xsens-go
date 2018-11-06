@@ -2,6 +2,9 @@ package xsensgo
 
 import (
 	"bytes"
+	"encoding/binary"
+	"github.com/pkg/errors"
+	"io"
 	"log"
 	"math"
 )
@@ -49,6 +52,73 @@ type Data struct {
 	DeltaQ          XDIDeltaQ
 	DeltaV          XDIDeltaV
 	Quat            XDIQuaternion
+}
+
+func (d *Data) Read(r io.Reader) error {
+	var h header
+	for {
+		if err := h.Read(r); err != nil {
+			return errors.Wrap(err, "could not read header")
+		}
+
+		var dataLength uint16
+		if h.LEN < 0xFF {
+			dataLength = uint16(h.LEN)
+		} else {
+			// If data package is of extended size. Will be this when following deepmap's setup + freeacc + mag.
+			err := binary.Read(r, binary.BigEndian, &dataLength)
+			if err != nil {
+				return errors.Wrap(err, "error reading datalength from MTMessage")
+			}
+		}
+
+		// Create a buffer and read the whole data part into this buffer
+		buf := make([]byte, dataLength)
+		var n int
+		var err error
+		for n < int(dataLength) && err == nil {
+			var nn int
+			nn, err = r.Read(buf[n:])
+			n += nn
+		}
+
+		if n >= int(dataLength) {
+			// no more data, continue anyway
+			err = nil
+		}
+
+		if err != nil {
+			return errors.Wrap(err, "error reading data from XSens")
+		}
+
+		// Read the checksum
+		var checksum byte
+		err = binary.Read(r, binary.BigEndian, &checksum)
+		if err != nil {
+			return errors.Wrap(err, "could not read checksum")
+		}
+		// TODO: Validate chacksum
+
+		// Check if Message ID is of type mtData2
+		if h.MID != mtData2 {
+			return errors.Errorf("Unhandled MID %v\n", h.MID)
+		}
+
+		// Check if message is GNSS
+		if checkIfGNSS(buf) {
+			// GNSS message, skip it
+			continue
+		}
+
+		// Decode data in message
+		data, err := Decode(buf)
+		if err != nil {
+			return errors.Wrap(err, "could not decode data")
+		}
+
+		*d = *data
+		return nil
+	}
 }
 
 type XDIDeltaV struct {
@@ -105,15 +175,15 @@ elseif(Xh>0  && Yh>0){heading=360-heading}
 elseif(Xh==0 && Yh<0){heading=90}
 elseif(Xh==0 && Yh>0){heading=270}*/
 
-func (data Data) Heading() (heading float64) {
-	cRoll := math.Cos(data.Euler.Roll * math.Pi / 180)
-	sRoll := math.Sin(data.Euler.Roll * math.Pi / 180)
-	cPitch := math.Cos(data.Euler.Pitch * math.Pi / 180)
-	sPitch := math.Sin(data.Euler.Pitch * math.Pi / 180)
+func (d Data) Heading() (heading float64) {
+	cRoll := math.Cos(d.Euler.Roll * math.Pi / 180)
+	sRoll := math.Sin(d.Euler.Roll * math.Pi / 180)
+	cPitch := math.Cos(d.Euler.Pitch * math.Pi / 180)
+	sPitch := math.Sin(d.Euler.Pitch * math.Pi / 180)
 
-	mX := data.Mag.MagX
-	mY := data.Mag.MagY
-	mZ := data.Mag.MagZ
+	mX := d.Mag.MagX
+	mY := d.Mag.MagY
+	mZ := d.Mag.MagZ
 
 	// Tilt compensated magnetometer values
 	magX := mX*cPitch + mZ*sPitch
