@@ -10,7 +10,6 @@ import (
 )
 
 type header struct {
-	Preamble byte
 	BID      byte
 	MID      byte
 	LEN      byte
@@ -33,7 +32,6 @@ func (h *header) Read(r io.Reader) error {
 			return errors.Wrap(err, "could not read")
 		}
 	}
-	h.Preamble = packageStartIndicator
 	h.BID = data[0]
 	h.MID = data[1]
 	h.LEN = data[2]
