@@ -1,4 +1,4 @@
-package xsensgo
+package xsens
 
 import (
 	"encoding/binary"
@@ -10,9 +10,9 @@ import (
 )
 
 type header struct {
-	BID      byte
-	MID      byte
-	LEN      byte
+	BID byte
+	MID byte
+	LEN byte
 }
 
 func (h *header) Read(r io.Reader) error {
@@ -51,8 +51,6 @@ type Client struct {
 	logger *zap.Logger
 }
 
-type ReceiverFunc func(data *Data, err error)
-
 // create a new client, handle is usually /dev/ttyUSB0 on linux systems
 func NewClient(prt io.ReadWriteCloser, logger *zap.Logger) (x *Client) {
 	// Configure and open the serial port to the Client
@@ -69,98 +67,12 @@ func DefaultSerialPort() (io.ReadWriteCloser, error) {
 	})
 }
 
-// Check "Client config" on drive for xsens's config and more.
-func (x *Client) readMessages(callback ReceiverFunc) error {
-	var h header
-	for {
-		if err := h.Read(x.prt); err != nil {
-			return errors.Wrap(err, "could not read header")
-		}
-
-		var dataLength uint16
-		if h.LEN < 0xFF {
-			dataLength = uint16(h.LEN)
-		} else {
-			// If data package is of extended size. Will be this when following deepmap's setup + freeacc + mag.
-			err := binary.Read(x.prt, binary.BigEndian, &dataLength)
-			if err != nil {
-				err = errors.Wrap(err, "error reading datalength from MTMessage")
-				callback(nil, err)
-				return err
-			}
-		}
-
-		// Create a buffer and read the whole data part into this buffer
-		buf := make([]byte, dataLength)
-		var n int
-		var err error
-		for n < int(dataLength) && err == nil {
-			var nn int
-			nn, err = x.prt.Read(buf[n:])
-			n += nn
-		}
-
-		if n >= int(dataLength) {
-			err = nil
-			// no more data, continue anyway
-		}
-
-		if err != nil {
-			err = errors.Wrap(err, "error reading data from XSens")
-			callback(nil, err)
-			return err
-		}
-
-		// Read the checksum
-		var checksum byte
-		err = binary.Read(x.prt, binary.BigEndian, &checksum)
-		if err != nil {
-			return errors.Wrap(err, "could not read checksum")
-		}
-		// TODO: Validate chacksum
-
-		// Check if Message ID is of type mtData2
-		if h.MID != mtData2 {
-			err = errors.Errorf("Unhandled MID %v\n", h.MID)
-			callback(nil, err)
-			return err
-		}
-
-		// Check if message is GNSS
-		if checkIfGNSS(buf) {
-			// GNSS message, skip it
-			continue
-		}
-
-		// Decode data in message
-		data, err := Decode(buf)
-		if err != nil {
-			err = errors.Wrap(err, "could not decode data")
-			callback(data, err)
-			return err
-		}
-
-		// Set status from parsed data
-		callback(data, nil)
-	}
-}
-
 // Close the serial port connection
 func (x *Client) Close() (err error) {
 	if x.prt == nil {
 		return errors.Errorf("could not close, no prt")
 	}
 	return x.prt.Close()
-}
-
-func (x *Client) Run(callback ReceiverFunc) (err error) {
-	defer func() {
-		err = x.Close()
-		if err != nil {
-			x.logger.Error("could not close")
-		}
-	}()
-	return x.readMessages(callback)
 }
 
 // Low-level message sending function.

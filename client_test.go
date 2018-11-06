@@ -1,14 +1,13 @@
 package xsensgo
 
 import (
-	"github.com/stretchr/testify/require"
+	"bytes"
 	"io"
 	"net"
 	"testing"
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
-	"go.uber.org/zap"
 )
 
 var inputDataWithHeader = []byte{
@@ -75,37 +74,13 @@ var gnssDataWithHeader = []byte{
 	0x1E, 0x06, 0x16, 0x1C, 0x17, 0x06, 0xFF, 0x2E, 0x07}
 
 func TestReadGNSS(t *testing.T) {
-	reader, writer := net.Pipe()
-
-	logger := zap.NewExample()
-	x := NewClient(reader, logger)
-
-	go func() {
-		// GNSS message, should notset  data and willget EOF error
-		_, err := writer.Write(gnssDataWithHeader)
-		assert.Nil(t, err)
-		err = writer.Close()
-		assert.Nil(t, err)
-	}()
-
-	var dataIsSet bool
-	err := x.readMessages(func(data *Data, err error) {
-		dataIsSet = true
-	})
-
-	// Check if any data is set
-	assert.False(t, dataIsSet)
-
-	assert.Equal(t, errors.Cause(err), io.EOF)
-
+	var data Data
+	assert.Equal(t, io.EOF, errors.Cause(data.Read(bytes.NewReader(gnssDataWithHeader))))
 }
 
 func TestSkipGNSS(t *testing.T) {
 	// Data should only be set from non-GNSS message
 	reader, writer := net.Pipe()
-	logger := zap.NewExample()
-	x := NewClient(reader, logger)
-
 	go func() {
 		// GNSS message, should not set data and will get EOF error
 		_, err := writer.Write(gnssDataWithHeader)
@@ -119,39 +94,30 @@ func TestSkipGNSS(t *testing.T) {
 		err = writer.Close()
 		assert.Nil(t, err)
 	}()
-	err := x.readMessages(func(data *Data, err error) {
-		assert.Equal(t, 13.37, data.Latlng.Lng)
-		assert.Equal(t, 42.0, data.Latlng.Lat)
-	})
-	// Expecting EOF and nothing else
-	assert.Equal(t, errors.Cause(err), io.EOF)
+	var data Data
+	assert.NoError(t, data.Read(reader))
+	assert.Equal(t, 13.37, data.Latlng.Lng)
+	assert.Equal(t, 42.0, data.Latlng.Lat)
+	assert.Equal(t, io.EOF, errors.Cause(data.Read(reader)))
 }
 
 func TestReadMsgs(t *testing.T) {
 	reader, writer := net.Pipe()
-	logger := zap.NewExample()
-	x := NewClient(reader, logger)
-
 	go func() {
 		_, err := writer.Write(inputDataWithHeader)
 		assert.Nil(t, err)
 		err = writer.Close()
 		assert.Nil(t, err)
 	}()
-
-	err := x.readMessages(func(data *Data, err error) {
-		assert.Equal(t, 42.0, data.Latlng.Lat)
-		assert.Equal(t, 13.37, data.Latlng.Lng)
-		assert.Nil(t, err)
-	})
-	assert.Equal(t, io.EOF, errors.Cause(err))
+	var data Data
+	assert.NoError(t, data.Read(reader))
+	assert.Equal(t, 42.0, data.Latlng.Lat)
+	assert.Equal(t, 13.37, data.Latlng.Lng)
+	assert.Equal(t, io.EOF, errors.Cause(data.Read(reader)))
 }
 
 func TestReadTwoMsgs(t *testing.T) {
 	reader, writer := net.Pipe()
-	logger := zap.NewExample()
-	x := NewClient(reader, logger)
-
 	go func() {
 		_, err := writer.Write(inputDataWithHeader)
 		assert.Nil(t, err)
@@ -160,14 +126,14 @@ func TestReadTwoMsgs(t *testing.T) {
 		err = writer.Close()
 		assert.Nil(t, err)
 	}()
-
-	err := x.readMessages(func(data *Data, err error) {
-		assert.Equal(t, 42.0, data.Latlng.Lat)
-		assert.Equal(t, 13.37, data.Latlng.Lng)
-		assert.Nil(t, err)
-	})
-
-	assert.Equal(t, io.EOF, errors.Cause(err))
+	var data Data
+	assert.NoError(t, data.Read(reader))
+	assert.Equal(t, 42.0, data.Latlng.Lat)
+	assert.Equal(t, 13.37, data.Latlng.Lng)
+	assert.NoError(t, data.Read(reader))
+	assert.Equal(t, 42.0, data.Latlng.Lat)
+	assert.Equal(t, 13.37, data.Latlng.Lng)
+	assert.Equal(t, io.EOF, errors.Cause(data.Read(reader)))
 }
 
 func TestReadNextHeader(t *testing.T) {
@@ -191,7 +157,6 @@ func TestReadNextHeader(t *testing.T) {
 				0x00,
 				0x01,
 				0x02,
-
 				// Header start here
 				0xFA,
 				0xFF,
@@ -211,7 +176,6 @@ func TestReadNextHeader(t *testing.T) {
 				0x03,
 				0x02,
 				0x01,
-
 				// Header start here
 				0xFA,
 				0xFF,
@@ -220,20 +184,17 @@ func TestReadNextHeader(t *testing.T) {
 			},
 		},
 	}
-
 	for _, tc := range foundHeaders {
 		t.Run(tc.name, func(t *testing.T) {
 			reader, writer := net.Pipe()
-
 			go func() {
 				_, err := writer.Write(tc.bytes)
 				assert.Nil(t, err)
 				err = writer.Close()
 				assert.Nil(t, err)
 			}()
-
 			var h header
-			require.NoError(t, h.Read(reader))
+			assert.NoError(t, h.Read(reader))
 			assert.Equal(t, uint8(42), h.LEN)
 		})
 	}
@@ -251,21 +212,17 @@ func TestReadNextHeader_Error_EOF(t *testing.T) {
 		{bytes: []byte{0xFA, 0xFF}, expected: io.ErrUnexpectedEOF},
 		{bytes: []byte{0xFA, 0xFF, 54}, expected: io.ErrUnexpectedEOF},
 	}
-
 	for _, tc := range foundHeaders {
 		t.Run("", func(t *testing.T) {
 			reader, writer := net.Pipe()
-
 			go func() {
 				_, err := writer.Write(tc.bytes)
 				assert.Nil(t, err)
 				err = writer.Close()
 				assert.Nil(t, err)
 			}()
-
 			var h header
 			assert.Equal(t, tc.expected, errors.Cause(h.Read(reader)))
 		})
 	}
 }
-
