@@ -1,18 +1,17 @@
 package main
 
 import (
-	"go.uber.org/zap"
-
 	"github.com/einride/xsens-go"
+	"go.uber.org/zap"
 )
 
 func main() {
 	logger := zap.NewExample()
-	serialPort, err := xsensgo.DefaultSerialPort()
+	serialPort, err := xsens.DefaultSerialPort()
 	if err != nil {
 		logger.Panic("Failed to open default Xsens serial port", zap.Error(err))
 	}
-	var data xsensgo.Data
+	var data xsens.Data
 	for {
 		if err := data.Read(serialPort); err != nil {
 			logger.Panic("Failed to read from Xsens serial port", zap.Error(err))

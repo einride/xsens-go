@@ -1,12 +1,13 @@
-package xsensgo
+package xsens
 
 import (
 	"bytes"
 	"encoding/binary"
-	"github.com/pkg/errors"
 	"io"
 	"log"
 	"math"
+
+	"github.com/pkg/errors"
 )
 
 // group

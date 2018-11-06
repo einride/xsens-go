@@ -1,4 +1,4 @@
-package xsensgo
+package xsens
 
 import (
 	"log"

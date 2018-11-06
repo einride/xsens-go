@@ -1,6 +1,6 @@
 // +build Client
 
-package xsensgo
+package xsens
 
 import (
 	"go.uber.org/zap"
