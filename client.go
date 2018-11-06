@@ -16,6 +16,30 @@ type header struct {
 	LEN      byte
 }
 
+func (h *header) Read(r io.Reader) error {
+	var data [3]byte
+	// Wait for correct type of package
+	for data[0] != busIdentifier {
+		// Wait for the start of a package
+		var sentry [1]byte
+		for sentry[0] != packageStartIndicator {
+			err := binary.Read(r, binary.BigEndian, &sentry)
+			if err != nil {
+				return errors.Wrap(err, "could not read")
+			}
+		}
+		err := binary.Read(r, binary.BigEndian, &data)
+		if err != nil {
+			return errors.Wrap(err, "could not read")
+		}
+	}
+	h.Preamble = packageStartIndicator
+	h.BID = data[0]
+	h.MID = data[1]
+	h.LEN = data[2]
+	return nil
+}
+
 // All MIDs
 const (
 	mtData2               = 54
@@ -49,10 +73,9 @@ func DefaultSerialPort() (io.ReadWriteCloser, error) {
 
 // Check "Client config" on drive for xsens's config and more.
 func (x *Client) readMessages(callback ReceiverFunc) error {
+	var h header
 	for {
-		// Read the header of the message
-		h, err := readNextHeader(x.prt)
-		if err != nil {
+		if err := h.Read(x.prt); err != nil {
 			return errors.Wrap(err, "could not read header")
 		}
 
@@ -61,7 +84,7 @@ func (x *Client) readMessages(callback ReceiverFunc) error {
 			dataLength = uint16(h.LEN)
 		} else {
 			// If data package is of extended size. Will be this when following deepmap's setup + freeacc + mag.
-			err = binary.Read(x.prt, binary.BigEndian, &dataLength)
+			err := binary.Read(x.prt, binary.BigEndian, &dataLength)
 			if err != nil {
 				err = errors.Wrap(err, "error reading datalength from MTMessage")
 				callback(nil, err)
@@ -72,6 +95,7 @@ func (x *Client) readMessages(callback ReceiverFunc) error {
 		// Create a buffer and read the whole data part into this buffer
 		buf := make([]byte, dataLength)
 		var n int
+		var err error
 		for n < int(dataLength) && err == nil {
 			var nn int
 			nn, err = x.prt.Read(buf[n:])
@@ -121,36 +145,6 @@ func (x *Client) readMessages(callback ReceiverFunc) error {
 		// Set status from parsed data
 		callback(data, nil)
 	}
-}
-
-func readNextHeader(prt io.Reader) (*header, error) {
-	var data [3]byte
-
-	// Wait for correct type of package
-	for data[0] != busIdentifier {
-
-		// Wait for the start of a package
-		var sentry [1]byte
-		for sentry[0] != packageStartIndicator {
-			err := binary.Read(prt, binary.BigEndian, &sentry)
-			if err != nil {
-				return nil, errors.Wrap(err, "could not read")
-			}
-		}
-
-		err := binary.Read(prt, binary.BigEndian, &data)
-		if err != nil {
-			return nil, errors.Wrap(err, "could not read")
-		}
-	}
-
-	h := &header{}
-	h.Preamble = packageStartIndicator
-	h.BID = data[0]
-	h.MID = data[1]
-	h.LEN = data[2]
-
-	return h, nil
 }
 
 // Close the serial port connection

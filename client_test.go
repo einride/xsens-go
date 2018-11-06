@@ -1,6 +1,7 @@
 package xsensgo
 
 import (
+	"github.com/stretchr/testify/require"
 	"io"
 	"net"
 	"testing"
@@ -231,9 +232,9 @@ func TestReadNextHeader(t *testing.T) {
 				assert.Nil(t, err)
 			}()
 
-			header, err := readNextHeader(reader)
-			assert.Nil(t, err)
-			assert.Equal(t, uint8(42), header.LEN)
+			var h header
+			require.NoError(t, h.Read(reader))
+			assert.Equal(t, uint8(42), h.LEN)
 		})
 	}
 }
@@ -262,8 +263,9 @@ func TestReadNextHeader_Error_EOF(t *testing.T) {
 				assert.Nil(t, err)
 			}()
 
-			_, err := readNextHeader(reader)
-			assert.Equal(t, tc.expected, errors.Cause(err))
+			var h header
+			assert.Equal(t, tc.expected, errors.Cause(h.Read(reader)))
 		})
 	}
 }
+
