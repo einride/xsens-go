@@ -1,0 +1,26 @@
+PacketCounter:
+  Max
+SampleTimeFine:
+  Max
+UTCTime:
+  Max
+StatusWord:
+  Max
+EulerAngles(Float32):
+  100 Hz
+Acceleration(Float32):
+  100 Hz
+DeltaV(Float32):
+  100 Hz
+RateOfTurn(Float32):
+  100 Hz
+DeltaQ(Float32):
+  100 Hz
+LatLon(Float32):
+  100 Hz
+AltitudeEllipsoid(Float32):
+  100 Hz
+VelocityXYZ(Float32):
+  100 Hz
+GNSSPVTData:
+  4 Hz

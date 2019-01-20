@@ -1,0 +1,26 @@
+PacketCounter:
+  Max
+SampleTimeFine:
+  Max
+UTCTime:
+  Max
+StatusByte:
+  Max
+EulerAngles(FP1632):
+  100 Hz
+Acceleration(FP1632):
+  100 Hz
+DeltaV(FP1632):
+  100 Hz
+RateOfTurn(FP1632):
+  100 Hz
+DeltaQ(FP1632):
+  100 Hz
+LatLon(FP1632):
+  100 Hz
+AltitudeEllipsoid(FP1632):
+  100 Hz
+VelocityXYZ(FP1632):
+  100 Hz
+GNSSPVTData:
+  4 Hz
