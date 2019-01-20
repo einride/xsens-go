@@ -6,7 +6,7 @@ UTCTime:
   Max
 StatusByte:
   Max
-EulerAngles(Float64):
+EulerAngles(EastNorthUp,Float64):
   100 Hz
 Acceleration(Float64):
   100 Hz
@@ -20,7 +20,7 @@ LatLon(Float64):
   100 Hz
 AltitudeEllipsoid(Float64):
   100 Hz
-VelocityXYZ(Float64):
+VelocityXYZ(EastNorthUp,Float64):
   100 Hz
 GNSSPVTData:
   4 Hz

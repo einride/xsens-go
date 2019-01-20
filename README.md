@@ -1,17 +1,7 @@
 # Xsens Go
 
-A Go USB client for communicating with a Xsens MTI-710.
+A Go client for Xsens IMU(s).
 
 ## Usage
 
-```bash
-go get -u github.com/einride/xsens-go
-```
-
-## Example
-
-see /cmd/xsens
-
-## Run
-
-`make`
+See [cmd/xsens](./cmd/xsens) for examples.
