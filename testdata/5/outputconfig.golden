@@ -1,0 +1,28 @@
+PacketCounter:
+  Max
+SampleTimeFine:
+  Max
+SampleTimeCoarse:
+  Max
+UTCTime:
+  Max
+StatusWord:
+  Max
+RotationMatrix(Float32):
+  100 Hz
+FreeAcceleration(Float32):
+  100 Hz
+Quaternion(Float32):
+  100 Hz
+Temperature(Float32):
+  100 Hz
+PositionECEF(Float32):
+  100 Hz
+MagneticField(Float32):
+  100 Hz
+BaroPressure:
+  100 Hz
+GNSSPVTData:
+  4 Hz
+GNSSSatInfo:
+  4 Hz

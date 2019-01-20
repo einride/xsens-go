@@ -1,0 +1,26 @@
+PacketCounter:
+  Max
+SampleTimeFine:
+  Max
+UTCTime:
+  Max
+StatusByte:
+  Max
+EulerAngles(FP1220):
+  100 Hz
+Acceleration(FP1220):
+  100 Hz
+DeltaV(FP1220):
+  100 Hz
+RateOfTurn(FP1220):
+  100 Hz
+DeltaQ(FP1220):
+  100 Hz
+LatLon(FP1220):
+  100 Hz
+AltitudeEllipsoid(FP1220):
+  100 Hz
+VelocityXYZ(FP1220):
+  100 Hz
+GNSSPVTData:
+  4 Hz
