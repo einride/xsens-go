@@ -8,11 +8,11 @@ UTCTime:
   Max
 StatusWord:
   Max
-RotationMatrix(Float32):
+RotationMatrix(EastNorthUp,Float32):
   100 Hz
 FreeAcceleration(Float32):
   100 Hz
-Quaternion(Float32):
+Quaternion(EastNorthUp,Float32):
   100 Hz
 Temperature(Float32):
   100 Hz

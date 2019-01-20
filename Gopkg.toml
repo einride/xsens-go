@@ -1,6 +1,10 @@
+[prune]
+  go-tests = true
+  unused-packages = true
+
 [[constraint]]
+  name = "github.com/tarm/serial"
   branch = "master"
-  name = "github.com/jacobsa/go-serial"
 
 [[constraint]]
   name = "github.com/pkg/errors"
@@ -11,9 +15,5 @@
   version = "1.2.2"
 
 [[constraint]]
-  name = "go.uber.org/zap"
-  version = "1.9.1"
-
-[prune]
-  go-tests = true
-  unused-packages = true
+  name = "github.com/alecthomas/kingpin"
+  version = "2.2.6"
