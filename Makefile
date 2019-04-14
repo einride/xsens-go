@@ -2,11 +2,14 @@
 .PHONY: all
 all: \
 	markdown-lint \
+	mod-tidy \
 	dep-ensure \
 	go-lint \
 	go-test \
 	go-generate \
-	git-verify-no-diff
+	git-verify-nodiff
+
+export GO111MODULE = on
 
 .PHONY: build
 build:
@@ -15,11 +18,6 @@ build:
 include build/rules.mk
 build/rules.mk: build
 	@# included in submodule: build
-
-# git-verify-no-diff: verify that the working tree does not contain a diff
-.PHONY: git-verify-no-diff
-git-verify-no-diff:
-	git diff --quiet
 
 # go-test: run Go test suite
 .PHONY: go-test
@@ -30,6 +28,11 @@ go-test:
 .PHONY: go-lint
 go-lint: $(GOLANGCI_LINT)
 	$(GOLANGCI_LINT) run ./... --enable-all --skip-dirs vendor
+
+# mod-tidy: ensure Go module files are in sync
+.PHONY: mod-tidy
+mod-tidy:
+	go mod tidy
 
 # dep-ensure: update Go dependencies
 .PHONY: dep-ensure
