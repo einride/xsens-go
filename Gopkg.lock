@@ -37,14 +37,6 @@
   version = "v1.1.1"
 
 [[projects]]
-  digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
-  name = "github.com/pkg/errors"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
-  version = "v0.8.1"
-
-[[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
@@ -79,15 +71,26 @@
   pruneopts = "UT"
   revision = "2a47403f2ae58167c4d75973960ccc62b28cb0d8"
 
+[[projects]]
+  branch = "master"
+  digest = "1:d9d3a231c70b17470fc134900032da48d5c146f0f4a2ce12ceb92704dae8d67d"
+  name = "golang.org/x/xerrors"
+  packages = [
+    ".",
+    "internal",
+  ]
+  pruneopts = "UT"
+  revision = "1f06c39b43733b74392b1972507822714ced3242"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
     "github.com/alecthomas/kingpin",
-    "github.com/pkg/errors",
     "github.com/pmezard/go-difflib/difflib",
     "github.com/stretchr/testify/require",
     "github.com/tarm/serial",
+    "golang.org/x/xerrors",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
