@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/pkg/errors"
+	"golang.org/x/xerrors"
 )
 
 // Scalar contains a single scalar value.
@@ -39,9 +39,12 @@ func (s *Scalar) unmarshalMTData2Packet(packet MTData2Packet) error {
 	case PrecisionFloat64:
 		err = binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, s)
 	default:
-		err = errors.New("invalid output format")
+		err = xerrors.Errorf("invalid precision: %v", packet.Identifier().Precision)
 	}
-	return errors.Wrapf(err, "output format: %v", packet.Identifier().Precision)
+	if err != nil {
+		return xerrors.Errorf("precision %v: %w", packet.Identifier().Precision, err)
+	}
+	return nil
 }
 
 // VectorXYZ contains a vector with x, y and z-components.
@@ -82,9 +85,12 @@ func (t *VectorXYZ) unmarshalMTData2Packet(packet MTData2Packet) error {
 	case PrecisionFloat64:
 		err = binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, t)
 	default:
-		err = errors.New("invalid output format")
+		err = xerrors.Errorf("invalid precision: %v", packet.Identifier().Precision)
 	}
-	return errors.Wrapf(err, "output format: %v", packet.Identifier().Precision)
+	if err != nil {
+		return xerrors.Errorf("precision %v: %w", packet.Identifier().Precision, err)
+	}
+	return nil
 }
 
 // Quaternion contains a quaternion with q0, q1, q2 and q3-components.
@@ -128,9 +134,12 @@ func (t *Quaternion) unmarshalMTData2Packet(packet MTData2Packet) error {
 	case PrecisionFloat64:
 		err = binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, t)
 	default:
-		err = errors.New("invalid output format")
+		err = xerrors.Errorf("invalid precision: %v", packet.Identifier().Precision)
 	}
-	return errors.Wrapf(err, "output format: %v", packet.Identifier().Precision)
+	if err != nil {
+		return xerrors.Errorf("precision %v: %w", packet.Identifier().Precision, err)
+	}
+	return nil
 }
 
 // RotationMatrix contains a rotation matrix (DCM).
@@ -189,9 +198,12 @@ func (t *RotationMatrix) unmarshalMTData2Packet(packet MTData2Packet) error {
 	case PrecisionFloat64:
 		err = binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, t)
 	default:
-		err = errors.New("invalid output format")
+		err = xerrors.Errorf("invalid precision: %v", packet.Identifier().Precision)
 	}
-	return errors.Wrapf(err, "output format: %v", packet.Identifier().Precision)
+	if err != nil {
+		return xerrors.Errorf("precision %v: %w", packet.Identifier().Precision, err)
+	}
+	return nil
 }
 
 // LatLon contains latitude and longitude components.
@@ -229,9 +241,12 @@ func (t *LatLon) unmarshalMTData2Packet(packet MTData2Packet) error {
 	case PrecisionFloat64:
 		err = binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, t)
 	default:
-		err = errors.New("invalid output format")
+		err = xerrors.Errorf("invalid precision: %v", packet.Identifier().Precision)
 	}
-	return errors.Wrapf(err, "output format: %v", packet.Identifier().Precision)
+	if err != nil {
+		return xerrors.Errorf("precision %v: %w", packet.Identifier().Precision, err)
+	}
+	return nil
 }
 
 // StatusByte contains the 8bit status byte which is equal to bits 0-7 of an MTData2 StatusWord packet.

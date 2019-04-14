@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/pkg/errors"
+	"golang.org/x/xerrors"
 )
 
 // MeasurementData contains measurement data read from the Xsens device.
@@ -132,7 +132,7 @@ type MeasurementData struct {
 // UnmarshalMTData2 sets *m to the data contained in the provided MTData2 message.
 func (m *MeasurementData) UnmarshalMTData2(msg Message) error {
 	if msg.Identifier() != MessageIdentifierMTData2 {
-		return errors.Errorf("message is not %v", MessageIdentifierMTData2)
+		return xerrors.Errorf("message is not %v", MessageIdentifierMTData2)
 	}
 	*m = MeasurementData{DataIdentifiers: m.DataIdentifiers[:0]}
 	i := 0
@@ -146,7 +146,7 @@ func (m *MeasurementData) UnmarshalMTData2(msg Message) error {
 		m.DataIdentifiers = append(m.DataIdentifiers, packet.Identifier())
 		if measurementDataType, ok := m.getMeasurementDataType(packet.Identifier().DataType); ok {
 			if err := measurementDataType.unmarshalMTData2Packet(packet); err != nil {
-				return errors.Wrapf(measurementDataType.unmarshalMTData2Packet(packet), "packet: %v", packet)
+				return xerrors.Errorf("packet: %v: %w", packet, err)
 			}
 		}
 	}
