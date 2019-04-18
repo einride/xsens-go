@@ -4,6 +4,15 @@ package xsens
 
 import "strconv"
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[CoordinateSystemEastNorthUp-0]
+	_ = x[CoordinateSystemNorthEastDown-4]
+	_ = x[CoordinateSystemNorthWestUp-8]
+}
+
 const (
 	_CoordinateSystem_name_0 = "EastNorthUp"
 	_CoordinateSystem_name_1 = "NorthEastDown"

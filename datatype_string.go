@@ -4,6 +4,44 @@ package xsens
 
 import "strconv"
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[DataTypeTemperature-2064]
+	_ = x[DataTypeUTCTime-4112]
+	_ = x[DataTypePacketCounter-4128]
+	_ = x[DataTypeITOW-4144]
+	_ = x[DataTypeGPSAge-4160]
+	_ = x[DataTypePressureAge-4176]
+	_ = x[DataTypeSampleTimeFine-4192]
+	_ = x[DataTypeSampleTimeCoarse-4208]
+	_ = x[DataTypeQuaternion-8208]
+	_ = x[DataTypeRotationMatrix-8224]
+	_ = x[DataTypeEulerAngles-8240]
+	_ = x[DataTypeBaroPressure-12304]
+	_ = x[DataTypeDeltaV-16400]
+	_ = x[DataTypeAcceleration-16416]
+	_ = x[DataTypeFreeAcceleration-16432]
+	_ = x[DataTypeAccelerationHR-16448]
+	_ = x[DataTypeAltitudeEllipsoid-20512]
+	_ = x[DataTypePositionECEF-20528]
+	_ = x[DataTypeLatLon-20544]
+	_ = x[DataTypeGNSSPVTData-28688]
+	_ = x[DataTypeGNSSSatInfo-28704]
+	_ = x[DataTypeRateOfTurn-32800]
+	_ = x[DataTypeDeltaQ-32816]
+	_ = x[DataTypeRateOfTurnHR-32832]
+	_ = x[DataTypeGPSDOP-34864]
+	_ = x[DataTypeGPSSOL-34880]
+	_ = x[DataTypeGPSTimeUTC-34944]
+	_ = x[DataTypeGPSSVInfo-34976]
+	_ = x[DataTypeMagneticField-49184]
+	_ = x[DataTypeVelocityXYZ-53264]
+	_ = x[DataTypeStatusByte-57360]
+	_ = x[DataTypeStatusWord-57376]
+}
+
 const _DataType_name = "TemperatureUTCTimePacketCounterITOWGPSAgePressureAgeSampleTimeFineSampleTimeCoarseQuaternionRotationMatrixEulerAnglesBaroPressureDeltaVAccelerationFreeAccelerationAccelerationHRAltitudeEllipsoidPositionECEFLatLonGNSSPVTDataGNSSSatInfoRateOfTurnDeltaQRateOfTurnHRGPSDOPGPSSOLGPSTimeUTCGPSSVInfoMagneticFieldVelocityXYZStatusByteStatusWord"
 
 var _DataType_map = map[DataType]string{
