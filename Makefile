@@ -3,13 +3,12 @@
 all: \
 	markdown-lint \
 	mod-tidy \
-	dep-ensure \
+	go-generate \
 	go-lint \
 	go-test \
-	go-generate \
 	git-verify-nodiff
 
-export GO111MODULE = on
+export GO111MODULE := on
 
 .PHONY: build
 build:
@@ -32,12 +31,7 @@ go-lint: $(GOLANGCI_LINT)
 # mod-tidy: ensure Go module files are in sync
 .PHONY: mod-tidy
 mod-tidy:
-	go mod tidy
-
-# dep-ensure: update Go dependencies
-.PHONY: dep-ensure
-dep-ensure: $(DEP)
-	$(DEP) ensure -v
+	go mod tidy -v
 
 # markdown-lint: lint Markdown documentation
 .PHONY: markdown-lint
@@ -46,5 +40,5 @@ markdown-lint: $(MARKDOWNLINT)
 
 # go-generate: run Go code generators
 .PHONY: go-generate
-go-generate: $(STRINGER)
+go-generate: $(GOBIN)
 	go generate ./...

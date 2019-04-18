@@ -3,7 +3,7 @@ package xsens
 // ErrorCode represents an Xsens error code.
 type ErrorCode uint8
 
-//go:generate stringer -type ErrorCode -trimprefix ErrorCode
+//go:generate gobin -m -run golang.org/x/tools/cmd/stringer -type ErrorCode -trimprefix ErrorCode
 
 const (
 	// ErrorCodeOK: No error.

@@ -4,6 +4,36 @@ package xsens
 
 import "strconv"
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[ErrorCodeOK-0]
+	_ = x[ErrorCodeNoBus-1]
+	_ = x[ErrorCodeBusNotReady-2]
+	_ = x[ErrorCodeInvalidPeriod-3]
+	_ = x[ErrorCodeInvalidMessage-4]
+	_ = x[ErrorCodeInitBusFail1-16]
+	_ = x[ErrorCodeInitBusFail2-17]
+	_ = x[ErrorCodeInitBusFail3-18]
+	_ = x[ErrorCodeSetBIDFail1-20]
+	_ = x[ErrorCodeSetBIDFail2-21]
+	_ = x[ErrorCodeMeasurementFail1-24]
+	_ = x[ErrorCodeMeasurementFail2-25]
+	_ = x[ErrorCodeMeasurementFail3-26]
+	_ = x[ErrorCodeMeasurementFail4-27]
+	_ = x[ErrorCodeMeasurementFail5-28]
+	_ = x[ErrorCodeMeasurementFail6-29]
+	_ = x[ErrorCodeTimerOverflow-30]
+	_ = x[ErrorCodeBaudrateInvalid-32]
+	_ = x[ErrorCodeInvalidParam-33]
+	_ = x[ErrorCodeMeasurementFail7-35]
+	_ = x[ErrorCodeMeasurementFail8-36]
+	_ = x[ErrorCodeDeviceError-40]
+	_ = x[ErrorCodeDataOverflow-41]
+	_ = x[ErrorCodeBufferOverflow-42]
+}
+
 const (
 	_ErrorCode_name_0 = "OKNoBusBusNotReadyInvalidPeriodInvalidMessage"
 	_ErrorCode_name_1 = "InitBusFail1InitBusFail2InitBusFail3"
