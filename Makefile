@@ -2,11 +2,12 @@
 .PHONY: all
 all: \
 	markdown-lint \
-	mod-tidy \
 	go-generate \
 	go-lint \
 	go-test \
-	git-verify-nodiff
+	go-mod-tidy \
+	git-verify-nodiff \
+	git-verify-submodules
 
 export GO111MODULE := on
 
@@ -28,8 +29,8 @@ go-test:
 go-lint: $(GOLANGCI_LINT)
 	$(GOLANGCI_LINT) run ./... --enable-all --skip-dirs vendor
 
-# mod-tidy: ensure Go module files are in sync
-.PHONY: mod-tidy
+# go-mod-tidy: ensure Go module files are in sync
+.PHONY: go-mod-tidy
 mod-tidy:
 	go mod tidy -v
 
