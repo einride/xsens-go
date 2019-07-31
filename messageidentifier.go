@@ -3,8 +3,6 @@ package xsens
 // MessageIdentifier identifies the type of an Xsens message.
 type MessageIdentifier uint8
 
-//go:generate gobin -m -run golang.org/x/tools/cmd/stringer -type MessageIdentifier -trimprefix MessageIdentifier
-
 // Ack returns the message identifier's corresponding ack.
 func (mid MessageIdentifier) Ack() MessageIdentifier {
 	return mid + 1
