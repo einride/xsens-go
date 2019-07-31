@@ -39,7 +39,31 @@ mod-tidy:
 markdown-lint: $(MARKDOWNLINT)
 	$(MARKDOWNLINT) --ignore build --ignore vendor .
 
-# go-generate: run Go code generators
+# go-generate: generate Go code
 .PHONY: go-generate
-go-generate: $(GOBIN)
-	go generate ./...
+go-generate: \
+	coordinatesystem_string.go \
+	datatype_string.go \
+	errorcode_string.go \
+	messageidentifier_string.go \
+	precision_string.go
+
+coordinatesystem_string.go: coordinatesystem.go $(GOBIN)
+	$(GOBIN) -m -run golang.org/x/tools/cmd/stringer \
+		-type CoordinateSystem -trimprefix CoordinateSystem -output $@ $<
+
+datatype_string.go: datatype.go $(GOBIN)
+	$(GOBIN) -m -run golang.org/x/tools/cmd/stringer \
+		-type DataType -trimprefix DataType -output $@ $<
+
+errorcode_string.go: errorcode.go $(GOBIN)
+	$(GOBIN) -m -run golang.org/x/tools/cmd/stringer \
+		-type ErrorCode -trimprefix ErrorCode -output $@ $<
+
+messageidentifier_string.go: messageidentifier.go $(GOBIN)
+	$(GOBIN) -m -run golang.org/x/tools/cmd/stringer \
+		-type MessageIdentifier -trimprefix MessageIdentifier -output $@ $<
+
+precision_string.go: precision.go $(GOBIN)
+	$(GOBIN) -m -run golang.org/x/tools/cmd/stringer \
+		-type Precision -trimprefix Precision -output $@ $<
