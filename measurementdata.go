@@ -174,11 +174,11 @@ func (m *MeasurementData) MarshalText() (string, error) {
 	return strings.TrimSpace(buf.String()), nil
 }
 
-type measurementDataType interface {
+type MeasurementDataType interface {
 	unmarshalMTData2Packet(MTData2Packet) error
 }
 
-func (m *MeasurementData) getMeasurementDataType(dataType DataType) (measurementDataType, bool) {
+func (m *MeasurementData) getMeasurementDataType(dataType DataType) (MeasurementDataType, bool) {
 	switch dataType {
 	case DataTypeDeltaV:
 		return &m.DeltaV, true
