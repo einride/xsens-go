@@ -2,6 +2,7 @@
 .PHONY: all
 all: \
 	markdown-lint \
+	go-mocks \
 	go-generate \
 	go-lint \
 	go-test \
@@ -27,7 +28,8 @@ go-test:
 # go-lint: lint Go code
 .PHONY: go-lint
 go-lint: $(GOLANGCI_LINT)
-	$(GOLANGCI_LINT) run ./... --enable-all --skip-dirs vendor
+	# dupl: disabled due to duplication in tests
+	$(GOLANGCI_LINT) run ./... --enable-all --skip-dirs vendor --disable dupl
 
 # go-mod-tidy: ensure Go module files are in sync
 .PHONY: go-mod-tidy
@@ -72,3 +74,12 @@ precision_string.go: precision.go $(GOBIN)
 pkg/serial/baudrate_string.go: pkg/serial/baudrate.go $(GOBIN)
 	$(GOBIN) -m -run golang.org/x/tools/cmd/stringer \
 		-type BaudRate -trimprefix BaudRate -output $@ $<
+
+# go-mocks: generate Go mocks
+.PHONY: go-mocks
+go-mocks: test/mocks/xsens/mocks.go
+
+test/mocks/xsens/mocks.go: client.go $(GOBIN)
+	$(GOBIN) -m -run github.com/golang/mock/mockgen \
+		-destination $@ -package mockxsens \
+		github.com/einride/xsens-go SerialPort
