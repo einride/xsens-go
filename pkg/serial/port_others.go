@@ -36,3 +36,7 @@ func (portImpl) Read(_ []byte) (int, error) {
 func (portImpl) Write(_ []byte) (int, error) {
 	panic(notSupported())
 }
+
+func (portImpl) Close() error {
+	panic(notSupported())
+}

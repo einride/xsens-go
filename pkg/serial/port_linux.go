@@ -104,9 +104,16 @@ func (p *portImpl) Read(b []byte) (int, error) {
 func (p *portImpl) Write(b []byte) (int, error) {
 	n, err := p.f.Read(b)
 	if err != nil {
-		return n, xerrors.Errorf("serial port: %s: write: %w", p.f.Name(), err)
+		return n, xerrors.Errorf("serial port %s: write: %w", p.f.Name(), err)
 	}
 	return n, nil
+}
+
+func (p *portImpl) Close() error {
+	if err := p.f.Close(); err != nil {
+		return xerrors.Errorf("serial port %s: close: %w", p.f.Name(), err)
+	}
+	return nil
 }
 
 func toTermios(b BaudRate) (uint32, error) {
