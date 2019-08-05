@@ -1,6 +1,8 @@
 package xsens
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // DataIdentifier is an Xsens data identifier.
 //
@@ -16,9 +18,9 @@ import "fmt"
 //
 // Type combined with Group defines the actual type of the data.
 type DataIdentifier struct {
-	DataType
-	CoordinateSystem
-	Precision
+	DataType         DataType
+	CoordinateSystem CoordinateSystem
+	Precision        Precision
 }
 
 const (
@@ -27,13 +29,13 @@ const (
 	dataIdentifierPrecisionMask        uint16 = 0x0003
 )
 
-// MarshalUint16 returns the data identifier represented as a uint16.
-func (d DataIdentifier) MarshalUint16() uint16 {
+// Uint16 returns the data identifier represented as a uint16.
+func (d DataIdentifier) Uint16() uint16 {
 	return uint16(d.DataType) | uint16(d.CoordinateSystem) | uint16(d.Precision)
 }
 
-// MarshalUint16 sets the data identifier from a uint16 representation.
-func (d *DataIdentifier) UnmarshalUint16(value uint16) {
+// SetUint16 sets the data identifier from a uint16 representation.
+func (d *DataIdentifier) SetUint16(value uint16) {
 	d.DataType = DataType(value & dataIdentifierTypeMask)
 	d.CoordinateSystem = CoordinateSystem(value & dataIdentifierCoordinateSystemMask)
 	d.Precision = Precision(value & dataIdentifierPrecisionMask)
@@ -42,9 +44,9 @@ func (d *DataIdentifier) UnmarshalUint16(value uint16) {
 // String returns a string representation of the data identifier.
 func (d DataIdentifier) String() string {
 	switch {
-	case d.HasCoordinateSystem() && d.HasPrecision():
+	case d.DataType.HasCoordinateSystem() && d.DataType.HasPrecision():
 		return fmt.Sprintf("%v(%v,%v)", d.DataType, d.CoordinateSystem, d.Precision)
-	case d.HasPrecision():
+	case d.DataType.HasPrecision():
 		return fmt.Sprintf("%v(%v)", d.DataType, d.Precision)
 	default:
 		return fmt.Sprintf("%v", d.DataType)
