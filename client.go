@@ -121,6 +121,21 @@ func (c *Client) SetOutputConfiguration(ctx context.Context, configuration Outpu
 	return nil
 }
 
+// GetOutputConfiguration returns the Xsens output configuration.
+func (c *Client) GetOutputConfiguration(ctx context.Context) (OutputConfiguration, error) {
+	if err := c.send(ctx, NewMessage(MessageIdentifierReqOutputConfiguration, nil)); err != nil {
+		return nil, xerrors.Errorf("xsens client: get output configuration: %w", err)
+	}
+	if err := c.receiveUntil(ctx, MessageIdentifierReqOutputConfigurationAck); err != nil {
+		return nil, xerrors.Errorf("xsens client: get output configuration: %w", err)
+	}
+	var result OutputConfiguration
+	if err := result.Unmarshal(c.message.Data()); err != nil {
+		return nil, xerrors.Errorf("xsens client: get output configuration: %w", err)
+	}
+	return result, nil
+}
+
 // GoToMeasurement puts the Xsens device in measurement mode.
 func (c *Client) GoToMeasurement(ctx context.Context) error {
 	if err := c.send(ctx, NewMessage(MessageIdentifierGotoMeasurement, nil)); err != nil {
