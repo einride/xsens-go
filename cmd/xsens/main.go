@@ -13,8 +13,6 @@ import (
 	"github.com/einride/xsens-go/pkg/serial"
 )
 
-const baudRate = serial.BaudRate115200
-
 func main() {
 	ctx := withCancelOnSignal(context.Background(), os.Interrupt)
 	flags := flag.NewFlagSet("xsens", flag.ExitOnError)
@@ -43,20 +41,21 @@ usage:
 		return flags.Arg(i)
 	}
 	jsonFlag := flags.Bool("json", false, "use JSON output")
+	baudRateFlag := flags.Int("baudRate", int(serial.BaudRate115200), "baud rate for serial communication")
 	_ = flags.Parse(args)
 	switch subcommand {
 	case "read":
-		if err := readMain(ctx, arg(0), *jsonFlag); err != nil {
+		if err := readMain(ctx, arg(0), serial.BaudRate(*baudRateFlag), *jsonFlag); err != nil {
 			fmt.Println(err)
 			usage()
 		}
 	case "get-output-config":
-		if err := getOutputConfigMain(ctx, arg(0), *jsonFlag); err != nil {
+		if err := getOutputConfigMain(ctx, arg(0), serial.BaudRate(*baudRateFlag), *jsonFlag); err != nil {
 			fmt.Println(err)
 			usage()
 		}
 	case "set-output-config":
-		if err := setOutputConfigMain(ctx, arg(0), arg(1)); err != nil {
+		if err := setOutputConfigMain(ctx, arg(0), arg(1), serial.BaudRate(*baudRateFlag)); err != nil {
 			fmt.Println(err)
 			usage()
 		}
@@ -65,7 +64,7 @@ usage:
 	}
 }
 
-func readMain(_ context.Context, portName string, useJSON bool) (err error) {
+func readMain(_ context.Context, portName string, baudRate serial.BaudRate, useJSON bool) (err error) {
 	port, err := serial.Open(portName, baudRate)
 	if err != nil {
 		return err
@@ -121,7 +120,7 @@ loop:
 	return nil
 }
 
-func getOutputConfigMain(_ context.Context, portName string, useJSON bool) (err error) {
+func getOutputConfigMain(_ context.Context, portName string, baudRate serial.BaudRate, useJSON bool) (err error) {
 	port, err := serial.Open(portName, baudRate)
 	if err != nil {
 		return err
@@ -176,7 +175,7 @@ func getOutputConfigMain(_ context.Context, portName string, useJSON bool) (err 
 	return nil
 }
 
-func setOutputConfigMain(_ context.Context, portName string, jsonFile string) (err error) {
+func setOutputConfigMain(_ context.Context, portName string, jsonFile string, baudRate serial.BaudRate) (err error) {
 	port, err := serial.Open(portName, baudRate)
 	if err != nil {
 		return err
