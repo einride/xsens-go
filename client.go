@@ -152,6 +152,63 @@ func (c *Client) MessageIdentifier() MessageIdentifier {
 	return c.message.Identifier()
 }
 
+func (c *Client) MeasurementData() MeasurementDataType {
+	switch c.mtData2Packet.Identifier().DataType {
+	case DataTypeDeltaV:
+		return &c.deltaV
+	case DataTypeAcceleration:
+		return &c.acceleration
+	case DataTypeFreeAcceleration:
+		return &c.freeAcceleration
+	case DataTypeAccelerationHR:
+		return &c.accelerationHR
+	case DataTypeDeltaQ:
+		return &c.deltaQ
+	case DataTypeRateOfTurn:
+		return &c.rateOfTurn
+	case DataTypeRateOfTurnHR:
+		return &c.rateOfTurnHR
+	case DataTypeQuaternion:
+		return &c.quaternion
+	case DataTypeEulerAngles:
+		return &c.eulerAngles
+	case DataTypeRotationMatrix:
+		return &c.rotationMatrix
+	case DataTypeTemperature:
+		return &c.temperature
+	case DataTypeAltitudeEllipsoid:
+		return &c.altitudeEllipsoid
+	case DataTypePositionECEF:
+		return &c.positionECEF
+	case DataTypeLatLon:
+		return &c.latLon
+	case DataTypeVelocityXYZ:
+		return &c.velocityXYZ
+	case DataTypeStatusByte:
+		return &c.statusByte
+	case DataTypeStatusWord:
+		return &c.statusWord
+	case DataTypeUTCTime:
+		return &c.utcTime
+	case DataTypePacketCounter:
+		return &c.packetCounter
+	case DataTypeSampleTimeFine:
+		return &c.sampleTimeFine
+	case DataTypeSampleTimeCoarse:
+		return &c.sampleTimeCoarse
+	case DataTypeBaroPressure:
+		return &c.baroPressure
+	case DataTypeMagneticField:
+		return &c.magneticField
+	case DataTypeGNSSPVTData:
+		return &c.gnssPVTData
+	case DataTypeGNSSSatInfo:
+		return &c.gnssSatInfo
+	default:
+		return nil
+	}
+}
+
 // ScanMeasurementData advances to the next measurement data packet, when the current message contains measurement data.
 func (c *Client) ScanMeasurementData() bool {
 	if c.message.Identifier() != MessageIdentifierMTData2 {
@@ -163,60 +220,15 @@ func (c *Client) ScanMeasurementData() bool {
 	}
 	c.nextPacketIndex += len(packet)
 	c.mtData2Packet = packet
-	switch packet.Identifier().DataType {
-	case DataTypeDeltaV:
-		err = c.deltaV.unmarshalMTData2Packet(packet)
-	case DataTypeAcceleration:
-		err = c.acceleration.unmarshalMTData2Packet(packet)
-	case DataTypeFreeAcceleration:
-		err = c.freeAcceleration.unmarshalMTData2Packet(packet)
-	case DataTypeAccelerationHR:
-		err = c.accelerationHR.unmarshalMTData2Packet(packet)
-	case DataTypeDeltaQ:
-		err = c.deltaQ.unmarshalMTData2Packet(packet)
-	case DataTypeRateOfTurn:
-		err = c.rateOfTurn.unmarshalMTData2Packet(packet)
-	case DataTypeRateOfTurnHR:
-		err = c.rateOfTurnHR.unmarshalMTData2Packet(packet)
-	case DataTypeQuaternion:
-		err = c.quaternion.unmarshalMTData2Packet(packet)
-	case DataTypeEulerAngles:
-		err = c.eulerAngles.unmarshalMTData2Packet(packet)
-	case DataTypeRotationMatrix:
-		err = c.rotationMatrix.unmarshalMTData2Packet(packet)
-	case DataTypeTemperature:
-		err = c.temperature.unmarshalMTData2Packet(packet)
-	case DataTypeAltitudeEllipsoid:
-		err = c.altitudeEllipsoid.unmarshalMTData2Packet(packet)
-	case DataTypePositionECEF:
-		err = c.positionECEF.unmarshalMTData2Packet(packet)
-	case DataTypeLatLon:
-		err = c.latLon.unmarshalMTData2Packet(packet)
-	case DataTypeVelocityXYZ:
-		err = c.velocityXYZ.unmarshalMTData2Packet(packet)
-	case DataTypeStatusByte:
-		err = c.statusByte.unmarshalMTData2Packet(packet)
-	case DataTypeStatusWord:
-		err = c.statusWord.unmarshalMTData2Packet(packet)
-	case DataTypeUTCTime:
-		err = c.utcTime.unmarshalMTData2Packet(packet)
-	case DataTypePacketCounter:
-		err = c.packetCounter.unmarshalMTData2Packet(packet)
-	case DataTypeSampleTimeFine:
-		err = c.sampleTimeFine.unmarshalMTData2Packet(packet)
-	case DataTypeSampleTimeCoarse:
-		err = c.sampleTimeCoarse.unmarshalMTData2Packet(packet)
-	case DataTypeBaroPressure:
-		err = c.baroPressure.unmarshalMTData2Packet(packet)
-	case DataTypeMagneticField:
-		err = c.magneticField.unmarshalMTData2Packet(packet)
-	case DataTypeGNSSPVTData:
-		err = c.gnssPVTData.unmarshalMTData2Packet(packet)
-	case DataTypeGNSSSatInfo:
-		err = c.gnssSatInfo.unmarshalMTData2Packet(packet)
-	}
 	// TODO: Improve this API after removing MessageScanner
-	return err == nil
+	data := c.MeasurementData()
+	if data == nil {
+		return false
+	}
+	if err := data.unmarshalMTData2Packet(c.mtData2Packet); err != nil {
+		return false
+	}
+	return true
 }
 
 // RawPacket returns the raw bytes of the current measurement data packet.

@@ -199,9 +199,6 @@ func TestClient_ScanMeasurementData(t *testing.T) {
 				_, err := fmt.Fprintf(&actual, format, args...)
 				require.NoError(t, err)
 			}
-			printData := func(data interface{}) {
-				printf("\t%+v\n", data)
-			}
 			for {
 				err := client.Receive(ctx)
 				if xerrors.Is(err, io.EOF) {
@@ -211,56 +208,7 @@ func TestClient_ScanMeasurementData(t *testing.T) {
 				printf("%v\n", client.MessageIdentifier())
 				for client.ScanMeasurementData() {
 					printf("\t%v\n", client.DataType())
-					switch client.DataType() {
-					case xsens.DataTypePacketCounter:
-						printData(client.PacketCounter())
-					case xsens.DataTypeSampleTimeCoarse:
-						printData(client.SampleTimeCoarse())
-					case xsens.DataTypeSampleTimeFine:
-						printData(client.SampleTimeFine())
-					case xsens.DataTypeUTCTime:
-						printData(client.UTCTime())
-					case xsens.DataTypeStatusByte:
-						printData(client.StatusByte())
-					case xsens.DataTypeStatusWord:
-						printData(client.StatusWord())
-					case xsens.DataTypeEulerAngles:
-						printData(client.EulerAngles())
-					case xsens.DataTypeAcceleration:
-						printData(client.Acceleration())
-					case xsens.DataTypeDeltaV:
-						printData(client.DeltaV())
-					case xsens.DataTypeRateOfTurn:
-						printData(client.RateOfTurn())
-					case xsens.DataTypeDeltaQ:
-						printData(client.DeltaQ())
-					case xsens.DataTypeLatLon:
-						printData(client.LatLon())
-					case xsens.DataTypeAltitudeEllipsoid:
-						printData(client.AltitudeEllipsoid())
-					case xsens.DataTypeVelocityXYZ:
-						printData(client.VelocityXYZ())
-					case xsens.DataTypeGNSSPVTData:
-						printData(client.GNSSPVTData())
-					case xsens.DataTypeBaroPressure:
-						printData(client.BaroPressure())
-					case xsens.DataTypeTemperature:
-						printData(client.Temperature())
-					case xsens.DataTypeMagneticField:
-						printData(client.MagneticField())
-					case xsens.DataTypeRotationMatrix:
-						printData(client.RotationMatrix())
-					case xsens.DataTypeFreeAcceleration:
-						printData(client.FreeAcceleration())
-					case xsens.DataTypeQuaternion:
-						printData(client.Quaternion())
-					case xsens.DataTypeGNSSSatInfo:
-						printData(client.GNSSSatInfo())
-					case xsens.DataTypePositionECEF:
-						printData(client.PositionECEF())
-					default:
-						t.Fatalf("unhandled data type: %v", client.DataType())
-					}
+					printf("\t%+v\n", client.MeasurementData())
 				}
 				printf("\n")
 			}
