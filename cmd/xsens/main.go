@@ -1,53 +1,69 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/signal"
 
-	"github.com/alecthomas/kingpin"
 	"github.com/einride/xsens-go"
 	"github.com/tarm/serial"
 )
 
 func main() {
-	// define command line app
-	app := kingpin.New("xsens", "Xsens CLI tool.")
-	// read subcommand
-	readCmd := app.
-		Command("read", "Read MTData2 measurement data.")
-	readPortArg := readCmd.
-		Arg("port", "Xsens serial port to connect to.").Required().ExistingFile()
-	readJSONArg := readCmd.
-		Flag("json", "Use JSON output format.").Bool()
-	// get-output-config subcommand
-	getOutputConfigCmd := app.
-		Command("get-output-config", "Read out the current output config from the Xsens.")
-	getOutputConfigPortArg := getOutputConfigCmd.
-		Arg("port", "Xsens serial port to connect to.").Required().ExistingFile()
-	getOutputConfigJSONFlag := getOutputConfigCmd.
-		Flag("json", "Use JSON output format.").Bool()
-	// set-output-config subcommand
-	setOutputConfigCmd := app.
-		Command("set-output-config", "Read out the current output config from the Xsens.")
-	setOutputConfigPortArg := setOutputConfigCmd.
-		Arg("port", "Xsens serial port to connect to.").Required().ExistingFile()
-	setOutputConfigJSONFileArg := setOutputConfigCmd.
-		Arg("jsonFile", "JSON output configuration to set.").Required().ExistingFile()
-	// run command line app
-	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
-	case readCmd.FullCommand():
-		readMain(*readPortArg, *readJSONArg)
-	case getOutputConfigCmd.FullCommand():
-		getOutputConfigMain(*getOutputConfigPortArg, *getOutputConfigJSONFlag)
-	case setOutputConfigCmd.FullCommand():
-		setOutputConfigMain(*setOutputConfigPortArg, *setOutputConfigJSONFileArg)
+	ctx := withCancelOnSignal(context.Background(), os.Interrupt)
+	flags := flag.NewFlagSet("xsens", flag.ExitOnError)
+	usage := func() {
+		fmt.Print(`
+usage:
+
+	xsens read <port>
+	xsens get-output-config <port> [-json]
+	xsens set-ouptut-config <port> <config.json>
+
+`)
+		flags.PrintDefaults()
+		fmt.Println()
+		os.Exit(1)
+	}
+	flags.Usage = usage
+	if len(os.Args) < 2 {
+		usage()
+	}
+	subcommand, args := os.Args[1], os.Args[2:]
+	arg := func(i int) string {
+		if flags.Arg(i) == "" {
+			usage()
+		}
+		return flags.Arg(i)
+	}
+	jsonFlag := flags.Bool("json", false, "use JSON output")
+	_ = flags.Parse(args)
+	switch subcommand {
+	case "read":
+		if err := readMain(ctx, arg(0), *jsonFlag); err != nil {
+			fmt.Println(err)
+			usage()
+		}
+	case "get-output-config":
+		if err := getOutputConfigMain(ctx, arg(0), *jsonFlag); err != nil {
+			fmt.Println(err)
+			usage()
+		}
+	case "set-output-config":
+		if err := setOutputConfigMain(ctx, arg(0), arg(1)); err != nil {
+			fmt.Println(err)
+			usage()
+		}
+	default:
+		usage()
 	}
 }
 
-func readMain(portName string, useJSON bool) {
+func readMain(_ context.Context, portName string, useJSON bool) (err error) {
 	port, err := serial.OpenPort(&serial.Config{
 		Name:     portName,
 		Baud:     xsens.DefaultSerialBaudRate,
@@ -55,15 +71,15 @@ func readMain(portName string, useJSON bool) {
 		StopBits: xsens.DefaultSerialStopBits,
 	})
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer func() {
-		if err := port.Close(); err != nil {
-			panic(err)
+		if errClose := port.Close(); errClose != nil {
+			err = errClose
 		}
 	}()
 	if err := port.Flush(); err != nil {
-		panic(err)
+		return err
 	}
 	sc := xsens.NewMessageScanner(port)
 	// install interrupt handler
@@ -71,7 +87,7 @@ func readMain(portName string, useJSON bool) {
 	signal.Notify(interruptChan, os.Interrupt)
 	// go to measurement
 	if _, err := port.Write(xsens.NewMessage(xsens.MessageIdentifierGotoMeasurement, nil)); err != nil {
-		panic(err)
+		return err
 	}
 	var data xsens.MeasurementData
 loop:
@@ -86,28 +102,29 @@ loop:
 			continue
 		}
 		if err := data.UnmarshalMTData2(msg); err != nil {
-			panic(err)
+			return err
 		}
 		if useJSON {
 			js, err := json.Marshal(data)
 			if err != nil {
-				panic(err)
+				return err
 			}
 			fmt.Printf("%s\n", js)
 		} else {
 			text, err := data.MarshalText()
 			if err != nil {
-				panic(err)
+				return err
 			}
 			fmt.Printf("%s\n\n", text)
 		}
 	}
 	if err := sc.Err(); err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
 
-func getOutputConfigMain(portName string, useJSON bool) {
+func getOutputConfigMain(_ context.Context, portName string, useJSON bool) (err error) {
 	port, err := serial.OpenPort(&serial.Config{
 		Name:     portName,
 		Baud:     xsens.DefaultSerialBaudRate,
@@ -115,58 +132,59 @@ func getOutputConfigMain(portName string, useJSON bool) {
 		StopBits: xsens.DefaultSerialStopBits,
 	})
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer func() {
-		if err := port.Close(); err != nil {
-			panic(err)
+		if errClose := port.Close(); errClose != nil && err == nil {
+			err = errClose
 		}
 	}()
 	if err := port.Flush(); err != nil {
-		panic(err)
+		return err
 	}
 	sc := xsens.NewMessageScanner(port)
 	// go to config
 	if _, err := port.Write(xsens.NewMessage(xsens.MessageIdentifierGotoConfig, nil)); err != nil {
-		panic(err)
+		return err
 	}
 	for sc.Scan() && sc.Message().Identifier() != xsens.MessageIdentifierGotoConfig.Ack() {
 		// scan for ack
 	}
 	if sc.Err() != nil {
-		panic(err)
+		return err
 	}
 	// request output configuration
 	if _, err := port.Write(xsens.NewMessage(xsens.MessageIdentifierReqOutputConfiguration, nil)); err != nil {
-		panic(err)
+		return err
 	}
 	for sc.Scan() && sc.Message().Identifier() != xsens.MessageIdentifierReqOutputConfiguration.Ack() {
 		// scan for ack
 	}
 	if sc.Err() != nil {
-		panic(err)
+		return err
 	}
 	// parse and print output configuration
 	var outputConfiguration xsens.OutputConfiguration
 	if err := outputConfiguration.Unmarshal(sc.Message().Data()); err != nil {
-		panic(err)
+		return err
 	}
 	if useJSON {
 		js, err := json.Marshal(outputConfiguration)
 		if err != nil {
-			panic(err)
+			return err
 		}
 		fmt.Printf("%s\n", js)
 	} else {
 		txt, err := outputConfiguration.MarshalText()
 		if err != nil {
-			panic(err)
+			return err
 		}
 		fmt.Printf("\n%s\n", txt)
 	}
+	return nil
 }
 
-func setOutputConfigMain(portName string, jsonFile string) {
+func setOutputConfigMain(_ context.Context, portName string, jsonFile string) (err error) {
 	port, err := serial.OpenPort(&serial.Config{
 		Name:     portName,
 		Baud:     xsens.DefaultSerialBaudRate,
@@ -174,51 +192,64 @@ func setOutputConfigMain(portName string, jsonFile string) {
 		StopBits: xsens.DefaultSerialStopBits,
 	})
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer func() {
-		if err := port.Close(); err != nil {
-			panic(err)
+		if errClose := port.Close(); errClose != nil && err == nil {
+			err = errClose
 		}
 	}()
 	if err := port.Flush(); err != nil {
-		panic(err)
+		return err
 	}
 	sc := xsens.NewMessageScanner(port)
 	// parse output configuration
 	js, err := ioutil.ReadFile(jsonFile)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	var outputConfiguration xsens.OutputConfiguration
 	if err := json.Unmarshal(js, &outputConfiguration); err != nil {
-		panic(err)
+		return err
 	}
 	// print output configuration
 	txt, err := outputConfiguration.MarshalText()
 	if err != nil {
-		panic(err)
+		return err
 	}
 	fmt.Printf("Setting output configuration:\n\n%s\n", txt)
 	// go to config
 	if _, err := port.Write(xsens.NewMessage(xsens.MessageIdentifierGotoConfig, nil)); err != nil {
-		panic(err)
+		return err
 	}
 	for sc.Scan() && sc.Message().Identifier() != xsens.MessageIdentifierGotoConfig.Ack() {
 		// scan for ack
 	}
 	if sc.Err() != nil {
-		panic(err)
+		return err
 	}
 	// set output configuration
 	data, err := outputConfiguration.Marshal()
 	if err != nil {
-		panic(err)
+		return err
 	}
 	if _, err := port.Write(xsens.NewMessage(xsens.MessageIdentifierSetOutputConfiguration, data)); err != nil {
-		panic(err)
+		return err
 	}
 	for sc.Scan() && sc.Message().Identifier() != xsens.MessageIdentifierSetOutputConfiguration.Ack() {
 		// scan for ack
 	}
+	return nil
+}
+
+func withCancelOnSignal(ctx context.Context, sig ...os.Signal) context.Context {
+	ctx, cancel := context.WithCancel(ctx)
+	signalChan := make(chan os.Signal, len(sig))
+	signal.Notify(signalChan, sig...)
+	go func() {
+		<-signalChan
+		signal.Stop(signalChan)
+		cancel()
+	}()
+	return ctx
 }
