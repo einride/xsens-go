@@ -15,7 +15,7 @@ type MessageScanner struct {
 // NewMessageScanner creates a message scanner that scans for Xsens messages in the provided io.Reader.
 func NewMessageScanner(r io.Reader) *MessageScanner {
 	m := &MessageScanner{sc: bufio.NewScanner(r)}
-	m.sc.Split(m.scanMessages)
+	m.sc.Split(ScanMessages)
 	m.sc.Buffer(make([]byte, 0, maxLengthOfMessage), maxLengthOfMessage)
 	return m
 }
@@ -35,7 +35,7 @@ func (m *MessageScanner) Err() error {
 	return m.sc.Err()
 }
 
-func (m *MessageScanner) scanMessages(data []byte, atEOF bool) (advance int, token []byte, err error) {
+func ScanMessages(data []byte, atEOF bool) (advance int, token []byte, err error) {
 	if len(data) == 0 && atEOF {
 		return 0, nil, nil
 	}
