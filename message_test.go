@@ -1,6 +1,7 @@
 package xsens_test
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"testing"
@@ -26,9 +27,10 @@ func TestNewMessage_TestData(t *testing.T) {
 			defer func() {
 				require.NoError(t, f.Close())
 			}()
-			sc := xsens.NewMessageScanner(f)
+			sc := bufio.NewScanner(f)
+			sc.Split(xsens.ScanMessages)
 			for sc.Scan() {
-				msg := sc.Message()
+				msg := xsens.Message(sc.Bytes())
 				newMsg := xsens.NewMessage(msg.Identifier(), msg.Data())
 				require.NoError(t, newMsg.Validate())
 				require.Equal(t, msg, newMsg)
