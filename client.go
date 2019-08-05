@@ -32,22 +32,22 @@ type Client struct {
 	sampleTimeCoarse  SampleTimeCoarse
 	baroPressure      BaroPressure
 	utcTime           UTCTime
-	deltaV            VectorXYZ
-	acceleration      VectorXYZ
-	freeAcceleration  VectorXYZ
-	accelerationHR    VectorXYZ
-	deltaQ            Quaternion
-	rateOfTurn        VectorXYZ
-	rateOfTurnHR      VectorXYZ
+	deltaV            DeltaV
+	acceleration      Acceleration
+	freeAcceleration  FreeAcceleration
+	accelerationHR    AccelerationHR
+	deltaQ            DeltaQ
+	rateOfTurn        RateOfTurn
+	rateOfTurnHR      RateOfTurnHR
 	quaternion        Quaternion
-	eulerAngles       VectorXYZ
+	eulerAngles       EulerAngles
 	rotationMatrix    RotationMatrix
-	temperature       Scalar
-	altitudeEllipsoid Scalar
-	positionECEF      VectorXYZ
+	temperature       Temperature
+	altitudeEllipsoid AltitudeEllipsoid
+	positionECEF      PositionECEF
 	latLon            LatLon
-	velocityXYZ       VectorXYZ
-	magneticField     VectorXYZ
+	velocityXYZ       VelocityXYZ
+	magneticField     MagneticField
 	gnssPVTData       GNSSPVTData
 	gnssSatInfo       GNSSSatInfo
 }
@@ -152,7 +152,8 @@ func (c *Client) MessageIdentifier() MessageIdentifier {
 	return c.message.Identifier()
 }
 
-func (c *Client) MeasurementData() MeasurementDataType {
+// MeasurementData returns the last scanned measurement data.
+func (c *Client) MeasurementData() MeasurementData {
 	switch c.mtData2Packet.Identifier().DataType {
 	case DataTypeDeltaV:
 		return &c.deltaV
@@ -261,23 +262,23 @@ func (c *Client) StatusWord() *StatusWord {
 	return &c.statusWord
 }
 
-func (c *Client) EulerAngles() *VectorXYZ {
+func (c *Client) EulerAngles() *EulerAngles {
 	return &c.eulerAngles
 }
 
-func (c *Client) Acceleration() *VectorXYZ {
+func (c *Client) Acceleration() *Acceleration {
 	return &c.acceleration
 }
 
-func (c *Client) DeltaV() *VectorXYZ {
+func (c *Client) DeltaV() *DeltaV {
 	return &c.deltaV
 }
 
-func (c *Client) RateOfTurn() *VectorXYZ {
+func (c *Client) RateOfTurn() *RateOfTurn {
 	return &c.rateOfTurn
 }
 
-func (c *Client) DeltaQ() *Quaternion {
+func (c *Client) DeltaQ() *DeltaQ {
 	return &c.deltaQ
 }
 
@@ -285,11 +286,11 @@ func (c *Client) LatLon() *LatLon {
 	return &c.latLon
 }
 
-func (c *Client) AltitudeEllipsoid() *Scalar {
+func (c *Client) AltitudeEllipsoid() *AltitudeEllipsoid {
 	return &c.altitudeEllipsoid
 }
 
-func (c *Client) VelocityXYZ() *VectorXYZ {
+func (c *Client) VelocityXYZ() *VelocityXYZ {
 	return &c.velocityXYZ
 }
 
@@ -305,11 +306,11 @@ func (c *Client) BaroPressure() *BaroPressure {
 	return &c.baroPressure
 }
 
-func (c *Client) Temperature() *Scalar {
+func (c *Client) Temperature() *Temperature {
 	return &c.temperature
 }
 
-func (c *Client) MagneticField() *VectorXYZ {
+func (c *Client) MagneticField() *MagneticField {
 	return &c.magneticField
 }
 
@@ -317,7 +318,7 @@ func (c *Client) RotationMatrix() *RotationMatrix {
 	return &c.rotationMatrix
 }
 
-func (c *Client) FreeAcceleration() *VectorXYZ {
+func (c *Client) FreeAcceleration() *FreeAcceleration {
 	return &c.freeAcceleration
 }
 
@@ -329,7 +330,7 @@ func (c *Client) GNSSSatInfo() *GNSSSatInfo {
 	return &c.gnssSatInfo
 }
 
-func (c *Client) PositionECEF() *VectorXYZ {
+func (c *Client) PositionECEF() *PositionECEF {
 	return &c.positionECEF
 }
 

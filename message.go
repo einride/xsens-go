@@ -22,13 +22,6 @@ const (
 const (
 	minLengthOfExtendedData = 255
 	maxLengthOfExtendedData = 2048
-	maxLengthOfMessage      = lengthOfPreamble +
-		lengthOfBusIdentifier +
-		lengthOfMessageIdentifier +
-		lengthOfLength +
-		lengthOfExtendedLength +
-		maxLengthOfExtendedData +
-		lengthOfChecksum
 )
 
 // MinLengthOfMessage is the minimum length of a valid Xsens message.
