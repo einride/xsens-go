@@ -117,6 +117,46 @@ func TestClient_GetOutputConfiguration(t *testing.T) {
 	require.Equal(t, expected, actual)
 }
 
+func TestClient_SetOutputConfiguration(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	port := mockxsens.NewMockSerialPort(ctrl)
+	client := xsens.NewClient(port)
+	outputConfiguration := xsens.OutputConfiguration{
+		{
+			DataIdentifier: xsens.DataIdentifier{
+				DataType:  xsens.DataTypeLatLon,
+				Precision: xsens.PrecisionFloat32,
+			},
+			OutputFrequency: 100,
+		},
+		{
+			DataIdentifier: xsens.DataIdentifier{
+				DataType:         xsens.DataTypeQuaternion,
+				Precision:        xsens.PrecisionFloat64,
+				CoordinateSystem: xsens.CoordinateSystemEastNorthUp,
+			},
+			OutputFrequency: 200,
+		},
+	}
+	setOutputConfigurationAck := []byte{0xfa, 0xff, 0xc1, 0x0, 0x40}
+	expectedSetOutputConfiguration := []byte{0xfa, 0xff, 0xc0, 0x8, 0x50, 0x40, 0x0, 0x64, 0x20, 0x13, 0x0, 0xc8, 0x4a}
+	deadline := time.Unix(1, 2)
+	ctx, cancel := context.WithDeadline(context.Background(), deadline)
+	defer cancel()
+	// the client should send a SetOutputconfiguration message with the requested output configuration
+	port.EXPECT().SetWriteDeadline(deadline)
+	port.EXPECT().Write(expectedSetOutputConfiguration)
+	// and then it should await a SetOutputConfigurationAck message
+	port.EXPECT().SetReadDeadline(deadline)
+	port.EXPECT().Read(gomock.Any()).DoAndReturn(func(b []byte) (int, error) {
+		copy(b, setOutputConfigurationAck)
+		return len(setOutputConfigurationAck), nil
+	})
+	// when requesting to set the output configuration
+	require.NoError(t, client.SetOutputConfiguration(ctx, outputConfiguration))
+}
+
 func TestClient_Close(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
