@@ -1,6 +1,6 @@
 package xsens
 
-// Precision is an Xsens data output format.
+// Precision is an Xsens data output precision.
 type Precision uint8
 
 const (
