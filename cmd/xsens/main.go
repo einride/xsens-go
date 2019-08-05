@@ -10,8 +10,10 @@ import (
 	"os/signal"
 
 	"github.com/einride/xsens-go"
-	"github.com/tarm/serial"
+	"github.com/einride/xsens-go/pkg/serial"
 )
+
+const baudRate = serial.BaudRate115200
 
 func main() {
 	ctx := withCancelOnSignal(context.Background(), os.Interrupt)
@@ -64,12 +66,7 @@ usage:
 }
 
 func readMain(_ context.Context, portName string, useJSON bool) (err error) {
-	port, err := serial.OpenPort(&serial.Config{
-		Name:     portName,
-		Baud:     xsens.DefaultSerialBaudRate,
-		Size:     xsens.MinLengthOfMessage,
-		StopBits: xsens.DefaultSerialStopBits,
-	})
+	port, err := serial.Open(portName, baudRate)
 	if err != nil {
 		return err
 	}
@@ -125,12 +122,7 @@ loop:
 }
 
 func getOutputConfigMain(_ context.Context, portName string, useJSON bool) (err error) {
-	port, err := serial.OpenPort(&serial.Config{
-		Name:     portName,
-		Baud:     xsens.DefaultSerialBaudRate,
-		Size:     xsens.MinLengthOfMessage,
-		StopBits: xsens.DefaultSerialStopBits,
-	})
+	port, err := serial.Open(portName, baudRate)
 	if err != nil {
 		return err
 	}
@@ -185,12 +177,7 @@ func getOutputConfigMain(_ context.Context, portName string, useJSON bool) (err 
 }
 
 func setOutputConfigMain(_ context.Context, portName string, jsonFile string) (err error) {
-	port, err := serial.OpenPort(&serial.Config{
-		Name:     portName,
-		Baud:     xsens.DefaultSerialBaudRate,
-		Size:     xsens.MinLengthOfMessage,
-		StopBits: xsens.DefaultSerialStopBits,
-	})
+	port, err := serial.Open(portName, baudRate)
 	if err != nil {
 		return err
 	}
