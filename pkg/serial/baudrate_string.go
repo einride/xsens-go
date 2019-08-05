@@ -8,25 +8,54 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[BaudRate4800-0]
-	_ = x[BaudRate9600-1]
-	_ = x[BaudRate19200-2]
-	_ = x[BaudRate38400-3]
-	_ = x[BaudRate57600-4]
-	_ = x[BaudRate115200-5]
-	_ = x[BaudRate230400-6]
-	_ = x[BaudRate460800-7]
-	_ = x[BaudRate921600-8]
-	_ = x[BaudRate2000000-9]
+	_ = x[BaudRate4800-4800]
+	_ = x[BaudRate9600-9600]
+	_ = x[BaudRate19200-19200]
+	_ = x[BaudRate38400-38400]
+	_ = x[BaudRate57600-57600]
+	_ = x[BaudRate115200-115200]
+	_ = x[BaudRate230400-230400]
+	_ = x[BaudRate460800-460800]
+	_ = x[BaudRate921600-921600]
+	_ = x[BaudRate2000000-2000000]
 }
 
-const _BaudRate_name = "480096001920038400576001152002304004608009216002000000"
-
-var _BaudRate_index = [...]uint8{0, 4, 8, 13, 18, 23, 29, 35, 41, 47, 54}
+const (
+	_BaudRate_name_0 = "4800"
+	_BaudRate_name_1 = "9600"
+	_BaudRate_name_2 = "19200"
+	_BaudRate_name_3 = "38400"
+	_BaudRate_name_4 = "57600"
+	_BaudRate_name_5 = "115200"
+	_BaudRate_name_6 = "230400"
+	_BaudRate_name_7 = "460800"
+	_BaudRate_name_8 = "921600"
+	_BaudRate_name_9 = "2000000"
+)
 
 func (i BaudRate) String() string {
-	if i < 0 || i >= BaudRate(len(_BaudRate_index)-1) {
+	switch {
+	case i == 4800:
+		return _BaudRate_name_0
+	case i == 9600:
+		return _BaudRate_name_1
+	case i == 19200:
+		return _BaudRate_name_2
+	case i == 38400:
+		return _BaudRate_name_3
+	case i == 57600:
+		return _BaudRate_name_4
+	case i == 115200:
+		return _BaudRate_name_5
+	case i == 230400:
+		return _BaudRate_name_6
+	case i == 460800:
+		return _BaudRate_name_7
+	case i == 921600:
+		return _BaudRate_name_8
+	case i == 2000000:
+		return _BaudRate_name_9
+	default:
 		return "BaudRate(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
-	return _BaudRate_name[_BaudRate_index[i]:_BaudRate_index[i+1]]
 }
