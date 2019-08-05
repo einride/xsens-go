@@ -42,3 +42,8 @@ func (p *Port) Read(b []byte) (n int, err error) {
 func (p *Port) Write(b []byte) (int, error) {
 	return p.impl.Write(b)
 }
+
+// Close the port.
+func (p *Port) Close() error {
+	return p.impl.Close()
+}
