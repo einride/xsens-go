@@ -45,7 +45,7 @@ func (m MTData2Packet) String() string {
 // Identifier returns the packet's data identifier.
 func (m MTData2Packet) Identifier() DataIdentifier {
 	var identifier DataIdentifier
-	identifier.UnmarshalUint16(
+	identifier.SetUint16(
 		binary.BigEndian.Uint16(m[packetDataIdentifierStart : packetDataIdentifierStart+packetDataIdentifierLength]),
 	)
 	return identifier

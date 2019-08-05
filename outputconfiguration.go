@@ -23,7 +23,7 @@ func (o *OutputConfiguration) Unmarshal(data []byte) error {
 		*o = append((*o)[:cap(*o)], make([]OutputConfigurationSetting, settingsCount-cap(*o))...)
 	}
 	for i := 0; i < settingsCount; i++ {
-		(*o)[i].DataIdentifier.UnmarshalUint16(binary.BigEndian.Uint16(data[i*4:]))
+		(*o)[i].DataIdentifier.SetUint16(binary.BigEndian.Uint16(data[i*4:]))
 		(*o)[i].OutputFrequency = OutputFrequency(binary.BigEndian.Uint16(data[i*4+2:]))
 	}
 	return nil
@@ -33,7 +33,7 @@ func (o *OutputConfiguration) Unmarshal(data []byte) error {
 func (o *OutputConfiguration) Marshal() ([]byte, error) {
 	buf := make([]byte, len(*o)*4)
 	for i, setting := range *o {
-		binary.BigEndian.PutUint16(buf[i*4:], setting.DataIdentifier.MarshalUint16())
+		binary.BigEndian.PutUint16(buf[i*4:], setting.DataIdentifier.Uint16())
 		binary.BigEndian.PutUint16(buf[i*4+2:], uint16(setting.OutputFrequency))
 	}
 	return buf, nil
