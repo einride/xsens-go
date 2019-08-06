@@ -3,14 +3,16 @@
 package xsens_test
 
 import (
+	"context"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/einride/xsens-go"
+	"github.com/einride/xsens-go/pkg/serial"
 	"github.com/stretchr/testify/require"
-	"github.com/tarm/serial"
 )
 
 func TestRecord_TestData(t *testing.T) {
@@ -25,65 +27,91 @@ func TestRecord_TestData(t *testing.T) {
 			outputConfigFile: "testdata/1/outputconfig.bin",
 			outputConfig: xsens.OutputConfiguration{
 				{
-					DataType:        xsens.DataTypePacketCounter,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypePacketCounter,
+					},
 					OutputFrequency: xsens.MaxOutputFrequency,
 				},
 				{
-					DataType:        xsens.DataTypeSampleTimeFine,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypeSampleTimeFine,
+					},
 					OutputFrequency: xsens.MaxOutputFrequency,
 				},
 				{
-					DataType:        xsens.DataTypeUTCTime,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypeUTCTime,
+					},
 					OutputFrequency: xsens.MaxOutputFrequency,
 				},
 				{
-					DataType:        xsens.DataTypeStatusWord,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypeStatusWord,
+					},
 					OutputFrequency: xsens.MaxOutputFrequency,
 				},
 				{
-					DataType:         xsens.DataTypeEulerAngles,
-					CoordinateSystem: xsens.CoordinateSystemEastNorthUp,
-					Precision:        xsens.PrecisionFloat32,
-					OutputFrequency:  100,
-				},
-				{
-					DataType:        xsens.DataTypeAcceleration,
-					Precision:       xsens.PrecisionFloat32,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:         xsens.DataTypeEulerAngles,
+						CoordinateSystem: xsens.CoordinateSystemEastNorthUp,
+						Precision:        xsens.PrecisionFloat32,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeDeltaV,
-					Precision:       xsens.PrecisionFloat32,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeAcceleration,
+						Precision: xsens.PrecisionFloat32,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeRateOfTurn,
-					Precision:       xsens.PrecisionFloat32,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeDeltaV,
+						Precision: xsens.PrecisionFloat32,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeDeltaQ,
-					Precision:       xsens.PrecisionFloat32,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeRateOfTurn,
+						Precision: xsens.PrecisionFloat32,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeLatLon,
-					Precision:       xsens.PrecisionFloat32,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeDeltaQ,
+						Precision: xsens.PrecisionFloat32,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeAltitudeEllipsoid,
-					Precision:       xsens.PrecisionFloat32,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeLatLon,
+						Precision: xsens.PrecisionFloat32,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:         xsens.DataTypeVelocityXYZ,
-					CoordinateSystem: xsens.CoordinateSystemEastNorthUp,
-					Precision:        xsens.PrecisionFloat32,
-					OutputFrequency:  100,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeAltitudeEllipsoid,
+						Precision: xsens.PrecisionFloat32,
+					},
+					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeGNSSPVTData,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:         xsens.DataTypeVelocityXYZ,
+						CoordinateSystem: xsens.CoordinateSystemEastNorthUp,
+						Precision:        xsens.PrecisionFloat32,
+					},
+					OutputFrequency: 100,
+				},
+				{
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypeGNSSPVTData,
+					},
 					OutputFrequency: 4,
 				},
 			},
@@ -93,65 +121,91 @@ func TestRecord_TestData(t *testing.T) {
 			outputConfigFile: "testdata/2/outputconfig.bin",
 			outputConfig: xsens.OutputConfiguration{
 				{
-					DataType:        xsens.DataTypePacketCounter,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypePacketCounter,
+					},
 					OutputFrequency: xsens.MaxOutputFrequency,
 				},
 				{
-					DataType:        xsens.DataTypeSampleTimeFine,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypeSampleTimeFine,
+					},
 					OutputFrequency: xsens.MaxOutputFrequency,
 				},
 				{
-					DataType:        xsens.DataTypeUTCTime,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypeUTCTime,
+					},
 					OutputFrequency: xsens.MaxOutputFrequency,
 				},
 				{
-					DataType:        xsens.DataTypeStatusByte,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypeStatusByte,
+					},
 					OutputFrequency: xsens.MaxOutputFrequency,
 				},
 				{
-					DataType:         xsens.DataTypeEulerAngles,
-					CoordinateSystem: xsens.CoordinateSystemEastNorthUp,
-					Precision:        xsens.PrecisionFP1220,
-					OutputFrequency:  100,
-				},
-				{
-					DataType:        xsens.DataTypeAcceleration,
-					Precision:       xsens.PrecisionFP1220,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:         xsens.DataTypeEulerAngles,
+						CoordinateSystem: xsens.CoordinateSystemEastNorthUp,
+						Precision:        xsens.PrecisionFP1220,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeDeltaV,
-					Precision:       xsens.PrecisionFP1220,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeAcceleration,
+						Precision: xsens.PrecisionFP1220,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeRateOfTurn,
-					Precision:       xsens.PrecisionFP1220,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeDeltaV,
+						Precision: xsens.PrecisionFP1220,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeDeltaQ,
-					Precision:       xsens.PrecisionFP1220,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeRateOfTurn,
+						Precision: xsens.PrecisionFP1220,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeLatLon,
-					Precision:       xsens.PrecisionFP1220,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeDeltaQ,
+						Precision: xsens.PrecisionFP1220,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeAltitudeEllipsoid,
-					Precision:       xsens.PrecisionFP1220,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeLatLon,
+						Precision: xsens.PrecisionFP1220,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:         xsens.DataTypeVelocityXYZ,
-					CoordinateSystem: xsens.CoordinateSystemEastNorthUp,
-					Precision:        xsens.PrecisionFP1220,
-					OutputFrequency:  100,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeAltitudeEllipsoid,
+						Precision: xsens.PrecisionFP1220,
+					},
+					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeGNSSPVTData,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:         xsens.DataTypeVelocityXYZ,
+						CoordinateSystem: xsens.CoordinateSystemEastNorthUp,
+						Precision:        xsens.PrecisionFP1220,
+					},
+					OutputFrequency: 100,
+				},
+				{
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypeGNSSPVTData,
+					},
 					OutputFrequency: 4,
 				},
 			},
@@ -161,65 +215,91 @@ func TestRecord_TestData(t *testing.T) {
 			outputConfigFile: "testdata/3/outputconfig.bin",
 			outputConfig: xsens.OutputConfiguration{
 				{
-					DataType:        xsens.DataTypePacketCounter,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypePacketCounter,
+					},
 					OutputFrequency: xsens.MaxOutputFrequency,
 				},
 				{
-					DataType:        xsens.DataTypeSampleTimeFine,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypeSampleTimeFine,
+					},
 					OutputFrequency: xsens.MaxOutputFrequency,
 				},
 				{
-					DataType:        xsens.DataTypeUTCTime,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypeUTCTime,
+					},
 					OutputFrequency: xsens.MaxOutputFrequency,
 				},
 				{
-					DataType:        xsens.DataTypeStatusByte,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypeStatusByte,
+					},
 					OutputFrequency: xsens.MaxOutputFrequency,
 				},
 				{
-					DataType:         xsens.DataTypeEulerAngles,
-					CoordinateSystem: xsens.CoordinateSystemEastNorthUp,
-					Precision:        xsens.PrecisionFP1632,
-					OutputFrequency:  100,
-				},
-				{
-					DataType:        xsens.DataTypeAcceleration,
-					Precision:       xsens.PrecisionFP1632,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:         xsens.DataTypeEulerAngles,
+						CoordinateSystem: xsens.CoordinateSystemEastNorthUp,
+						Precision:        xsens.PrecisionFP1632,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeDeltaV,
-					Precision:       xsens.PrecisionFP1632,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeAcceleration,
+						Precision: xsens.PrecisionFP1632,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeRateOfTurn,
-					Precision:       xsens.PrecisionFP1632,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeDeltaV,
+						Precision: xsens.PrecisionFP1632,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeDeltaQ,
-					Precision:       xsens.PrecisionFP1632,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeRateOfTurn,
+						Precision: xsens.PrecisionFP1632,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeLatLon,
-					Precision:       xsens.PrecisionFP1632,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeDeltaQ,
+						Precision: xsens.PrecisionFP1632,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeAltitudeEllipsoid,
-					Precision:       xsens.PrecisionFP1632,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeLatLon,
+						Precision: xsens.PrecisionFP1632,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:         xsens.DataTypeVelocityXYZ,
-					CoordinateSystem: xsens.CoordinateSystemEastNorthUp,
-					Precision:        xsens.PrecisionFP1632,
-					OutputFrequency:  100,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeAltitudeEllipsoid,
+						Precision: xsens.PrecisionFP1632,
+					},
+					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeGNSSPVTData,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:         xsens.DataTypeVelocityXYZ,
+						CoordinateSystem: xsens.CoordinateSystemEastNorthUp,
+						Precision:        xsens.PrecisionFP1632,
+					},
+					OutputFrequency: 100,
+				},
+				{
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypeGNSSPVTData,
+					},
 					OutputFrequency: 4,
 				},
 			},
@@ -229,65 +309,91 @@ func TestRecord_TestData(t *testing.T) {
 			outputConfigFile: "testdata/4/outputconfig.bin",
 			outputConfig: xsens.OutputConfiguration{
 				{
-					DataType:        xsens.DataTypePacketCounter,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypePacketCounter,
+					},
 					OutputFrequency: xsens.MaxOutputFrequency,
 				},
 				{
-					DataType:        xsens.DataTypeSampleTimeFine,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypeSampleTimeFine,
+					},
 					OutputFrequency: xsens.MaxOutputFrequency,
 				},
 				{
-					DataType:        xsens.DataTypeUTCTime,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypeUTCTime,
+					},
 					OutputFrequency: xsens.MaxOutputFrequency,
 				},
 				{
-					DataType:        xsens.DataTypeStatusByte,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypeStatusByte,
+					},
 					OutputFrequency: xsens.MaxOutputFrequency,
 				},
 				{
-					DataType:         xsens.DataTypeEulerAngles,
-					CoordinateSystem: xsens.CoordinateSystemEastNorthUp,
-					Precision:        xsens.PrecisionFloat64,
-					OutputFrequency:  100,
-				},
-				{
-					DataType:        xsens.DataTypeAcceleration,
-					Precision:       xsens.PrecisionFloat64,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:         xsens.DataTypeEulerAngles,
+						CoordinateSystem: xsens.CoordinateSystemEastNorthUp,
+						Precision:        xsens.PrecisionFloat64,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeDeltaV,
-					Precision:       xsens.PrecisionFloat64,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeAcceleration,
+						Precision: xsens.PrecisionFloat64,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeRateOfTurn,
-					Precision:       xsens.PrecisionFloat64,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeDeltaV,
+						Precision: xsens.PrecisionFloat64,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeDeltaQ,
-					Precision:       xsens.PrecisionFloat64,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeRateOfTurn,
+						Precision: xsens.PrecisionFloat64,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeLatLon,
-					Precision:       xsens.PrecisionFloat64,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeDeltaQ,
+						Precision: xsens.PrecisionFloat64,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeAltitudeEllipsoid,
-					Precision:       xsens.PrecisionFloat64,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeLatLon,
+						Precision: xsens.PrecisionFloat64,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:         xsens.DataTypeVelocityXYZ,
-					CoordinateSystem: xsens.CoordinateSystemEastNorthUp,
-					Precision:        xsens.PrecisionFloat64,
-					OutputFrequency:  100,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeAltitudeEllipsoid,
+						Precision: xsens.PrecisionFloat64,
+					},
+					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeGNSSPVTData,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:         xsens.DataTypeVelocityXYZ,
+						CoordinateSystem: xsens.CoordinateSystemEastNorthUp,
+						Precision:        xsens.PrecisionFloat64,
+					},
+					OutputFrequency: 100,
+				},
+				{
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypeGNSSPVTData,
+					},
 					OutputFrequency: 4,
 				},
 			},
@@ -297,73 +403,103 @@ func TestRecord_TestData(t *testing.T) {
 			outputConfigFile: "testdata/5/outputconfig.bin",
 			outputConfig: xsens.OutputConfiguration{
 				{
-					DataType:        xsens.DataTypePacketCounter,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypePacketCounter,
+					},
 					OutputFrequency: xsens.MaxOutputFrequency,
 				},
 				{
-					DataType:        xsens.DataTypeSampleTimeFine,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypeSampleTimeFine,
+					},
 					OutputFrequency: xsens.MaxOutputFrequency,
 				},
 				{
-					DataType:        xsens.DataTypeSampleTimeCoarse,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypeSampleTimeCoarse,
+					},
 					OutputFrequency: xsens.MaxOutputFrequency,
 				},
 				{
-					DataType:        xsens.DataTypeUTCTime,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypeUTCTime,
+					},
 					OutputFrequency: xsens.MaxOutputFrequency,
 				},
 				{
-					DataType:        xsens.DataTypeStatusWord,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypeStatusWord,
+					},
 					OutputFrequency: xsens.MaxOutputFrequency,
 				},
 				{
-					DataType:         xsens.DataTypeRotationMatrix,
-					CoordinateSystem: xsens.CoordinateSystemEastNorthUp,
-					Precision:        xsens.PrecisionFloat32,
-					OutputFrequency:  100,
-				},
-				{
-					DataType:        xsens.DataTypeFreeAcceleration,
-					Precision:       xsens.PrecisionFloat32,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:         xsens.DataTypeRotationMatrix,
+						CoordinateSystem: xsens.CoordinateSystemEastNorthUp,
+						Precision:        xsens.PrecisionFloat32,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:         xsens.DataTypeQuaternion,
-					CoordinateSystem: xsens.CoordinateSystemEastNorthUp,
-					Precision:        xsens.PrecisionFloat32,
-					OutputFrequency:  100,
-				},
-				{
-					DataType:        xsens.DataTypeTemperature,
-					Precision:       xsens.PrecisionFloat32,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeFreeAcceleration,
+						Precision: xsens.PrecisionFloat32,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypePositionECEF,
-					Precision:       xsens.PrecisionFloat32,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:         xsens.DataTypeQuaternion,
+						CoordinateSystem: xsens.CoordinateSystemEastNorthUp,
+						Precision:        xsens.PrecisionFloat32,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeMagneticField,
-					Precision:       xsens.PrecisionFloat32,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeTemperature,
+						Precision: xsens.PrecisionFloat32,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeBaroPressure,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypePositionECEF,
+						Precision: xsens.PrecisionFloat32,
+					},
 					OutputFrequency: 100,
 				},
 				{
-					DataType:        xsens.DataTypeGNSSPVTData,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeMagneticField,
+						Precision: xsens.PrecisionFloat32,
+					},
+					OutputFrequency: 100,
+				},
+				{
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypeBaroPressure,
+					},
+					OutputFrequency: 100,
+				},
+				{
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypeGNSSPVTData,
+					},
 					OutputFrequency: 4,
 				},
 				{
-					DataType:        xsens.DataTypeGNSSSatInfo,
+					DataIdentifier: xsens.DataIdentifier{
+						DataType: xsens.DataTypeGNSSSatInfo,
+					},
 					OutputFrequency: 4,
 				},
 			},
 		},
 	} {
 		t.Run(tt.outputFile, func(t *testing.T) {
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
 			// ensure output folder present
 			require.NoError(t, os.MkdirAll(filepath.Dir(tt.outputFile), 0774))
 			// write output config
@@ -371,78 +507,24 @@ func TestRecord_TestData(t *testing.T) {
 			require.NoError(t, err)
 			require.NoError(t, ioutil.WriteFile(tt.outputConfigFile, outputConfigData, 0644))
 			// open Xsens port
-			port, err := serial.OpenPort(&serial.Config{
-				Name:     "/dev/ttyUSB0",
-				Baud:     xsens.DefaultSerialBaudRate,
-				Size:     xsens.MinLengthOfMessage,
-				StopBits: xsens.DefaultSerialStopBits,
-			})
+			port, err := serial.Open("/dev/ttyUSB0", serial.BaudRate115200)
 			require.NoError(t, err)
+			client := xsens.NewClient(port)
 			defer func() {
-				require.NoError(t, port.Close())
+				require.NoError(t, client.Close())
 			}()
-			sc := xsens.NewMessageScanner(port)
-			// go to config
-			if _, err := port.Write(xsens.NewMessage(xsens.MessageIdentifierGotoConfig, nil)); err != nil {
-				panic(err)
-			}
-			for sc.Scan() && sc.Message().Identifier() != xsens.MessageIdentifierGotoConfig.Ack() {
-				// scan for ack
-			}
-			if sc.Err() != nil {
-				panic(err)
-			}
-			// set output config
-			outputConfigMessage := xsens.NewMessage(xsens.MessageIdentifierSetOutputConfiguration, outputConfigData)
-			if _, err := port.Write(outputConfigMessage); err != nil {
-				panic(err)
-			}
-			for sc.Scan() && sc.Message().Identifier() != xsens.MessageIdentifierSetOutputConfiguration.Ack() {
-				// scan for ack
-			}
-			// go to measurement
-			if _, err := port.Write(xsens.NewMessage(xsens.MessageIdentifierGotoMeasurement, nil)); err != nil {
-				panic(err)
-			}
+			require.NoError(t, client.GoToConfig(ctx))
+			require.NoError(t, client.SetOutputConfiguration(ctx, tt.outputConfig))
+			require.NoError(t, client.GoToMeasurement(ctx))
 			out, err := os.Create(tt.outputFile)
 			require.NoError(t, err)
 			for i := 0; i < numMessages; {
-				require.True(t, sc.Scan())
-				msg := sc.Message()
-				require.NoError(t, msg.Validate())
-				if msg.Identifier() != xsens.MessageIdentifierMTData2 {
-					continue
-				}
+				require.NoError(t, client.Receive(ctx))
+				msg := client.RawMessage()
 				i++
 				_, err = out.Write(msg)
 				require.NoError(t, err)
 			}
-			require.NoError(t, sc.Err())
 		})
 	}
-}
-
-var _ = xsens.OutputConfiguration{
-	{
-		DataType:        xsens.DataTypePacketCounter,
-		OutputFrequency: xsens.MaxOutputFrequency,
-	},
-	{
-		DataType:        xsens.DataTypeSampleTimeFine,
-		OutputFrequency: xsens.MaxOutputFrequency,
-	},
-	{
-		DataType:        xsens.DataTypeUTCTime,
-		OutputFrequency: xsens.MaxOutputFrequency,
-	},
-	{
-		DataType:        xsens.DataTypeStatusWord,
-		OutputFrequency: xsens.MaxOutputFrequency,
-	},
-	{
-		DataType:         xsens.DataTypeEulerAngles,
-		CoordinateSystem: xsens.CoordinateSystemEastNorthUp,
-		Precision:        xsens.PrecisionFloat32,
-		OutputFrequency:  100,
-	},
 }
