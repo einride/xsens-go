@@ -84,6 +84,9 @@ func (c *Client) Receive(ctx context.Context) error {
 		return xerrors.Errorf("xsens client: receive: %w", c.sc.Err())
 	}
 	c.message = c.sc.Bytes()
+	if err := c.message.Validate(); err != nil {
+		return xerrors.Errorf("xsens client: receive: %w", c.sc.Err())
+	}
 	if c.message.Identifier() == MessageIdentifierMTData2 {
 		c.mtData2 = c.message.Data()
 	}
