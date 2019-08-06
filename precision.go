@@ -16,3 +16,20 @@ const (
 	// PrecisionFloat64 uses double-precision IEEE 64-bit floating point numbers.
 	PrecisionFloat64 Precision = 0x3
 )
+
+// Size returns the size (in bytes) of a value with the current precision.
+//
+// Returns 0 for unsupported precisions.
+func (p Precision) Size() uint8 {
+	switch p {
+	case PrecisionFloat32:
+		return 4
+	case PrecisionFP1220:
+		return 4
+	case PrecisionFP1632:
+		return 6
+	case PrecisionFloat64:
+		return 8
+	}
+	return 0
+}

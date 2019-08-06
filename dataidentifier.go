@@ -41,6 +41,57 @@ func (d *DataIdentifier) SetUint16(value uint16) {
 	d.Precision = Precision(value & dataIdentifierPrecisionMask)
 }
 
+// DataSize returns the data size (in bytes) of measurement data with the current identifier.
+//
+// Returns 0 for unsupported data identifiers.
+func (d DataIdentifier) DataSize() uint8 {
+	switch d.DataType {
+	// scalars
+	case DataTypeTemperature,
+		DataTypeAltitudeEllipsoid:
+		return d.Precision.Size()
+	// vectors
+	case DataTypeDeltaV,
+		DataTypeAcceleration,
+		DataTypeFreeAcceleration,
+		DataTypeAccelerationHR,
+		DataTypeRateOfTurn,
+		DataTypeRateOfTurnHR,
+		DataTypeEulerAngles,
+		DataTypePositionECEF,
+		DataTypeVelocityXYZ,
+		DataTypeMagneticField:
+		return 3 * d.Precision.Size()
+	// quaternions
+	case DataTypeDeltaQ,
+		DataTypeQuaternion:
+		return 4 * d.Precision.Size()
+	case DataTypeUTCTime:
+		return 12
+	case DataTypePacketCounter:
+		return 2
+	case DataTypeSampleTimeFine:
+		return 4
+	case DataTypeSampleTimeCoarse:
+		return 4
+	case DataTypeRotationMatrix:
+		return 9 * d.Precision.Size()
+	case DataTypeBaroPressure:
+		return 4
+	case DataTypeLatLon:
+		return 2
+	case DataTypeGNSSPVTData:
+		return 76
+	case DataTypeGNSSSatInfo:
+		return 8 // plus variable number of satellites
+	case DataTypeStatusByte:
+		return 1
+	case DataTypeStatusWord:
+		return 4
+	}
+	return 0
+}
+
 // String returns a string representation of the data identifier.
 func (d DataIdentifier) String() string {
 	switch {

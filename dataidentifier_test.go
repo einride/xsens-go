@@ -34,3 +34,37 @@ func TestDataIdentifier_GetSetUint16(t *testing.T) {
 		})
 	}
 }
+
+func TestDataIdentifier_DataSize(t *testing.T) {
+	for _, tt := range []struct {
+		dataIdentifier DataIdentifier
+		dataSize       uint8
+	}{
+		{
+			dataIdentifier: DataIdentifier{
+				DataType:  DataTypeTemperature,
+				Precision: PrecisionFloat64,
+			},
+			dataSize: 8,
+		},
+		{
+			dataIdentifier: DataIdentifier{
+				DataType:  DataTypeAcceleration,
+				Precision: PrecisionFP1220,
+			},
+			dataSize: 12,
+		},
+		{
+			dataIdentifier: DataIdentifier{
+				DataType:  DataTypeQuaternion,
+				Precision: PrecisionFloat32,
+			},
+			dataSize: 16,
+		},
+	} {
+		tt := tt
+		t.Run(tt.dataIdentifier.String(), func(t *testing.T) {
+			require.Equal(t, tt.dataSize, tt.dataIdentifier.DataSize())
+		})
+	}
+}
