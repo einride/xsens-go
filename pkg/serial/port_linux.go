@@ -102,7 +102,7 @@ func (p *portImpl) Read(b []byte) (int, error) {
 }
 
 func (p *portImpl) Write(b []byte) (int, error) {
-	n, err := p.f.Read(b)
+	n, err := p.f.Write(b)
 	if err != nil {
 		return n, xerrors.Errorf("serial port %s: write: %w", p.f.Name(), err)
 	}
