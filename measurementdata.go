@@ -426,7 +426,7 @@ type UTCTime struct {
 	Ns                               uint32
 	Year                             uint16
 	Month, Day, Hour, Minute, Second uint8
-	Flags                            uint8
+	Valid                            UTCValidity
 }
 
 // String returns the UTC time on RFC3339 (including nanoseconds) format.
@@ -449,11 +449,6 @@ func (u *UTCTime) Time() time.Time {
 		int(u.Second),
 		int(u.Ns),
 		time.UTC)
-}
-
-// IsValid returns true if the valid flag is set on the UTC time flags.
-func (u *UTCTime) IsValid() bool {
-	return u.Flags&0x04 > 0
 }
 
 // PacketCounter contains the packet counter.
@@ -552,7 +547,7 @@ type GNSSPVTData struct {
 	//  bit (0) = UTC Date is valid
 	//  bit (1) = UTC Time of Day is valid
 	//  bit (2) = UTC Time of Day has been fully resolved (i.e. no seconds uncertainty)
-	Valid uint8
+	Valid UTCValidity
 
 	// TAcc is the time accuracy estimate (UTC).
 	//
@@ -698,6 +693,18 @@ type GNSSPVTData struct {
 	//
 	//  Scale: 0.01
 	EDOP uint16
+}
+
+func (g *GNSSPVTData) Time() time.Time {
+	return time.Date(
+		int(g.Year),
+		time.Month(g.Month),
+		int(g.Day),
+		int(g.Hour),
+		int(g.Min),
+		int(g.Sec),
+		int(g.Nano),
+		time.UTC)
 }
 
 func (g *GNSSPVTData) unmarshalMTData2Packet(packet MTData2Packet) error {
