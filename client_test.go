@@ -38,6 +38,7 @@ func TestClient_GoToConfig(t *testing.T) {
 		return len(mtData2), nil
 	})
 	// until it receives a GoToConfigAck
+	port.EXPECT().SetReadDeadline(deadline)
 	port.EXPECT().Read(gomock.Any()).DoAndReturn(func(b []byte) (int, error) {
 		copy(b, goToConfigAck)
 		return len(goToConfigAck), nil
@@ -67,6 +68,7 @@ func TestClient_GoToMeasurement(t *testing.T) {
 		return len(goToConfigAck), nil
 	})
 	// until it receives MTData2
+	port.EXPECT().SetReadDeadline(deadline)
 	port.EXPECT().Read(gomock.Any()).DoAndReturn(func(b []byte) (int, error) {
 		copy(b, mtData2)
 		return len(mtData2), nil

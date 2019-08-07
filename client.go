@@ -77,6 +77,10 @@ func (c *Client) Receive(ctx context.Context) error {
 	c.mtData2Packet = nil
 	c.nextPacketIndex = 0
 	// receive new message
+	deadline, _ := ctx.Deadline()
+	if err := c.p.SetReadDeadline(deadline); err != nil {
+		return xerrors.Errorf("xsens client: receive: %w", err)
+	}
 	if !c.sc.Scan() {
 		if c.sc.Err() == nil {
 			return xerrors.Errorf("xsens client: receive: %w", io.EOF)
@@ -349,10 +353,6 @@ func (c *Client) send(ctx context.Context, message Message) error {
 }
 
 func (c *Client) receiveUntil(ctx context.Context, until MessageIdentifier) error {
-	deadline, _ := ctx.Deadline()
-	if err := c.p.SetReadDeadline(deadline); err != nil {
-		return xerrors.Errorf("receive until %v: %w", until, err)
-	}
 	for {
 		if err := c.Receive(ctx); err != nil {
 			return xerrors.Errorf("receive until %v: %w", until, err)
