@@ -559,15 +559,8 @@ type GNSSPVTData struct {
 	//  Unit: ns
 	Nano int32
 
-	// FixType is the GNSS fix type (range 0..5).
-	//
-	//  0x00 = No fix
-	//  0x01 = Dead reckoning only
-	//  0x02 = 2D fix
-	//  0x03 = 3D fix
-	//  0x04 = GNSS + dead reckoning combined
-	//  0x05 = Time only fix
-	FixType uint8
+	// FixType is the GNSS fix type.
+	FixType FixType
 
 	// Flags are the fix status flags
 	//

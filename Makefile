@@ -47,6 +47,7 @@ go-generate: \
 	coordinatesystem_string.go \
 	datatype_string.go \
 	errorcode_string.go \
+	fixtype_string.go \
 	messageidentifier_string.go \
 	precision_string.go \
 	pkg/serial/baudrate_string.go
@@ -62,6 +63,10 @@ datatype_string.go: datatype.go $(GOBIN)
 errorcode_string.go: errorcode.go $(GOBIN)
 	$(GOBIN) -m -run golang.org/x/tools/cmd/stringer \
 		-type ErrorCode -trimprefix ErrorCode -output $@ $<
+
+fixtype_string.go: fixtype.go $(GOBIN)
+	$(GOBIN) -m -run golang.org/x/tools/cmd/stringer \
+		-type FixType -trimprefix FixType -output $@ $<
 
 messageidentifier_string.go: messageidentifier.go $(GOBIN)
 	$(GOBIN) -m -run golang.org/x/tools/cmd/stringer \
