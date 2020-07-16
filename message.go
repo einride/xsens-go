@@ -4,8 +4,6 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
-
-	"golang.org/x/xerrors"
 )
 
 // field fixed lengths.
@@ -178,21 +176,21 @@ func (m Message) Checksum() uint8 {
 // Validate the length and checksum of the message.
 func (m Message) Validate() error {
 	if len(m) < MinLengthOfMessage {
-		return xerrors.Errorf("too few bytes: %v", len(m))
+		return fmt.Errorf("too few bytes: %v", len(m))
 	}
 	if m.Preamble() != valueOfPreamble {
-		return xerrors.Errorf("invalid preamble: %v", m.Preamble())
+		return fmt.Errorf("invalid preamble: %v", m.Preamble())
 	}
 	if m.BusIdentifier() != valueOfBusIdentifier {
-		return xerrors.Errorf("invalid bus identifier: %v", m.BusIdentifier())
+		return fmt.Errorf("invalid bus identifier: %v", m.BusIdentifier())
 	}
 	if m.IsExtended() {
 		if m.Length() < minLengthOfExtendedData || m.Length() > maxLengthOfExtendedData {
-			return xerrors.Errorf("invalid extended length: %v", m.Length())
+			return fmt.Errorf("invalid extended length: %v", m.Length())
 		}
 	}
 	if sum := m.Checksum(); sum != 0 {
-		return xerrors.Errorf("invalid checksum: %v", sum)
+		return fmt.Errorf("invalid checksum: %v", sum)
 	}
 	return nil
 }

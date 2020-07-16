@@ -4,18 +4,18 @@
 package serial
 
 import (
+	"fmt"
 	"os"
 	"syscall"
 	"time"
 
 	"golang.org/x/sys/unix"
-	"golang.org/x/xerrors"
 )
 
 func open(filename string, baudRate BaudRate) (*portImpl, error) {
-	fd, err := syscall.Open(filename, unix.O_RDWR|unix.O_NOCTTY|unix.O_NONBLOCK, 0666)
+	fd, err := syscall.Open(filename, unix.O_RDWR|unix.O_NOCTTY|unix.O_NONBLOCK, 0o666)
 	if err != nil {
-		return nil, xerrors.Errorf("open serial port %s: %w", filename, err)
+		return nil, fmt.Errorf("open serial port %s: %w", filename, err)
 	}
 	// Important: Setting non-block in Go >=1.12 registers the fd with the Go runtime poller.
 	//            This makes deadlines and wake-up on close work.
@@ -24,7 +24,7 @@ func open(filename string, baudRate BaudRate) (*portImpl, error) {
 	}
 	termiosBaudRate, err := toTermios(baudRate)
 	if err != nil {
-		return nil, xerrors.Errorf("open serial port %s: %w", filename, err)
+		return nil, fmt.Errorf("open serial port %s: %w", filename, err)
 	}
 	t := unix.Termios{
 		// From: https://www.cmrr.umn.edu/~strupp/serial.html
@@ -50,12 +50,12 @@ func open(filename string, baudRate BaudRate) (*portImpl, error) {
 	//
 	// TCSETS: Sets the serial port settings immediately.
 	if err := unix.IoctlSetTermios(fd, unix.TCSETS, &t); err != nil {
-		return nil, xerrors.Errorf("open serial port %s: %w", filename, err)
+		return nil, fmt.Errorf("open serial port %s: %w", filename, err)
 	}
 	f := os.NewFile(uintptr(fd), filename)
 	c, err := f.SyscallConn()
 	if err != nil {
-		return nil, xerrors.Errorf("open serial port %s: %w", filename, err)
+		return nil, fmt.Errorf("open serial port %s: %w", filename, err)
 	}
 	return &portImpl{f: f, c: c}, nil
 }
@@ -71,24 +71,24 @@ func (p *portImpl) Flush() error {
 		errFlush = unix.IoctlSetInt(int(fd), unix.TCFLSH, unix.TCIOFLUSH)
 	})
 	if err != nil {
-		return xerrors.Errorf("serial port %s: flush: %w", p.f.Name(), err)
+		return fmt.Errorf("serial port %s: flush: %w", p.f.Name(), err)
 	}
 	if errFlush != nil {
-		return xerrors.Errorf("serial port %s: flush: %w", p.f.Name(), err)
+		return fmt.Errorf("serial port %s: flush: %w", p.f.Name(), err)
 	}
 	return nil
 }
 
 func (p *portImpl) SetReadDeadline(t time.Time) error {
 	if err := p.f.SetReadDeadline(t); err != nil {
-		return xerrors.Errorf("serial port %s: set read deadline: %w", p.f.Name(), err)
+		return fmt.Errorf("serial port %s: set read deadline: %w", p.f.Name(), err)
 	}
 	return nil
 }
 
 func (p *portImpl) SetWriteDeadline(t time.Time) error {
 	if err := p.f.SetWriteDeadline(t); err != nil {
-		return xerrors.Errorf("serial port %s: set write deadline: %w", p.f.Name(), err)
+		return fmt.Errorf("serial port %s: set write deadline: %w", p.f.Name(), err)
 	}
 	return nil
 }
@@ -96,7 +96,7 @@ func (p *portImpl) SetWriteDeadline(t time.Time) error {
 func (p *portImpl) Read(b []byte) (int, error) {
 	n, err := p.f.Read(b)
 	if err != nil {
-		return n, xerrors.Errorf("serial port %s: read: %w", p.f.Name(), err)
+		return n, fmt.Errorf("serial port %s: read: %w", p.f.Name(), err)
 	}
 	return n, nil
 }
@@ -104,14 +104,14 @@ func (p *portImpl) Read(b []byte) (int, error) {
 func (p *portImpl) Write(b []byte) (int, error) {
 	n, err := p.f.Write(b)
 	if err != nil {
-		return n, xerrors.Errorf("serial port %s: write: %w", p.f.Name(), err)
+		return n, fmt.Errorf("serial port %s: write: %w", p.f.Name(), err)
 	}
 	return n, nil
 }
 
 func (p *portImpl) Close() error {
 	if err := p.f.Close(); err != nil {
-		return xerrors.Errorf("serial port %s: close: %w", p.f.Name(), err)
+		return fmt.Errorf("serial port %s: close: %w", p.f.Name(), err)
 	}
 	return nil
 }
@@ -139,6 +139,6 @@ func toTermios(b BaudRate) (uint32, error) {
 	case BaudRate2000000:
 		return unix.B2000000, nil
 	default:
-		return 0, xerrors.Errorf("baud rate to termios: unsupported value: %v", b)
+		return 0, fmt.Errorf("baud rate to termios: unsupported value: %v", b)
 	}
 }
