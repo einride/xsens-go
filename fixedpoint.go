@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-// fixed to floating point conversion factors
+// fixed to floating point conversion factors.
 const (
 	factorFP1220 = 1 << 20
 	factorFP1632 = 1 << 32

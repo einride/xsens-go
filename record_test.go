@@ -501,11 +501,11 @@ func TestRecord_TestData(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 			// ensure output folder present
-			assert.NilError(t, os.MkdirAll(filepath.Dir(tt.outputFile), 0774))
+			assert.NilError(t, os.MkdirAll(filepath.Dir(tt.outputFile), 0o774))
 			// write output config
 			outputConfigData, err := tt.outputConfig.Marshal()
 			assert.NilError(t, err)
-			assert.NilError(t, ioutil.WriteFile(tt.outputConfigFile, outputConfigData, 0644))
+			assert.NilError(t, ioutil.WriteFile(tt.outputConfigFile, outputConfigData, 0o644))
 			// open Xsens port
 			port, err := serial.Open("/dev/ttyUSB0", serial.BaudRate115200)
 			assert.NilError(t, err)
