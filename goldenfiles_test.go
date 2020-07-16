@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/pmezard/go-difflib/difflib"
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 )
 
 func TestMain(m *testing.M) {
@@ -30,7 +30,7 @@ func shouldUpdateGoldenFiles() bool {
 func requireGoldenFileContent(t *testing.T, goldenFile string, actual string) {
 	t.Helper()
 	goldenFileContent, err := ioutil.ReadFile(goldenFile)
-	require.NoError(t, err)
+	assert.NilError(t, err)
 	expected := string(goldenFileContent)
 	if expected != actual {
 		diff, err := difflib.GetUnifiedDiffString(difflib.UnifiedDiff{
@@ -39,7 +39,7 @@ func requireGoldenFileContent(t *testing.T, goldenFile string, actual string) {
 			B:        difflib.SplitLines(actual),
 			ToFile:   "Actual",
 		})
-		require.NoError(t, err)
+		assert.NilError(t, err)
 		t.Fatalf("\nGolden file mismatch:\n%s", diff)
 	}
 }

@@ -12,7 +12,7 @@ import (
 
 	"github.com/einride/xsens-go"
 	"github.com/einride/xsens-go/pkg/serial"
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 )
 
 func TestRecord_TestData(t *testing.T) {
@@ -501,29 +501,29 @@ func TestRecord_TestData(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 			// ensure output folder present
-			require.NoError(t, os.MkdirAll(filepath.Dir(tt.outputFile), 0774))
+			assert.NilError(t, os.MkdirAll(filepath.Dir(tt.outputFile), 0774))
 			// write output config
 			outputConfigData, err := tt.outputConfig.Marshal()
-			require.NoError(t, err)
-			require.NoError(t, ioutil.WriteFile(tt.outputConfigFile, outputConfigData, 0644))
+			assert.NilError(t, err)
+			assert.NilError(t, ioutil.WriteFile(tt.outputConfigFile, outputConfigData, 0644))
 			// open Xsens port
 			port, err := serial.Open("/dev/ttyUSB0", serial.BaudRate115200)
-			require.NoError(t, err)
+			assert.NilError(t, err)
 			client := xsens.NewClient(port)
 			defer func() {
-				require.NoError(t, client.Close())
+				assert.NilError(t, client.Close())
 			}()
-			require.NoError(t, client.GoToConfig(ctx))
-			require.NoError(t, client.SetOutputConfiguration(ctx, tt.outputConfig))
-			require.NoError(t, client.GoToMeasurement(ctx))
+			assert.NilError(t, client.GoToConfig(ctx))
+			assert.NilError(t, client.SetOutputConfiguration(ctx, tt.outputConfig))
+			assert.NilError(t, client.GoToMeasurement(ctx))
 			out, err := os.Create(tt.outputFile)
-			require.NoError(t, err)
+			assert.NilError(t, err)
 			for i := 0; i < numMessages; {
-				require.NoError(t, client.Receive(ctx))
+				assert.NilError(t, client.Receive(ctx))
 				msg := client.RawMessage()
 				i++
 				_, err = out.Write(msg)
-				require.NoError(t, err)
+				assert.NilError(t, err)
 			}
 		})
 	}

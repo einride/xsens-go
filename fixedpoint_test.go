@@ -3,7 +3,7 @@ package xsens
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 )
 
 func TestFP1220_Float64(t *testing.T) {
@@ -26,7 +26,7 @@ func TestFP1220_Float64(t *testing.T) {
 	} {
 		tt := tt
 		t.Run(tt.input.String(), func(t *testing.T) {
-			require.Equal(t, tt.expected, tt.input.Float64())
+			assert.Equal(t, tt.expected, tt.input.Float64())
 		})
 	}
 }
@@ -55,7 +55,7 @@ func TestFP1632_Float64(t *testing.T) {
 	} {
 		tt := tt
 		t.Run(tt.input.String(), func(t *testing.T) {
-			require.Equal(t, tt.expected, tt.input.Float64())
+			assert.Equal(t, tt.expected, tt.input.Float64())
 		})
 	}
 }

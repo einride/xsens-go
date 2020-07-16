@@ -13,8 +13,8 @@ import (
 	"github.com/einride/xsens-go"
 	mockxsens "github.com/einride/xsens-go/test/mocks/xsens"
 	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/require"
 	"golang.org/x/xerrors"
+	"gotest.tools/v3/assert"
 )
 
 func TestClient_GoToConfig(t *testing.T) {
@@ -44,7 +44,7 @@ func TestClient_GoToConfig(t *testing.T) {
 		return len(goToConfigAck), nil
 	})
 	// when requesting GoToConfig
-	require.NoError(t, client.GoToConfig(ctx))
+	assert.NilError(t, client.GoToConfig(ctx))
 }
 
 func TestClient_GoToMeasurement(t *testing.T) {
@@ -74,7 +74,7 @@ func TestClient_GoToMeasurement(t *testing.T) {
 		return len(mtData2), nil
 	})
 	// when requesting GoToMeasurement
-	require.NoError(t, client.GoToMeasurement(ctx))
+	assert.NilError(t, client.GoToMeasurement(ctx))
 }
 
 func TestClient_GetOutputConfiguration(t *testing.T) {
@@ -115,8 +115,8 @@ func TestClient_GetOutputConfiguration(t *testing.T) {
 	})
 	// it should return the parsed output configuration
 	actual, err := client.GetOutputConfiguration(ctx)
-	require.NoError(t, err)
-	require.Equal(t, expected, actual)
+	assert.NilError(t, err)
+	assert.DeepEqual(t, expected, actual)
 }
 
 func TestClient_SetOutputConfiguration(t *testing.T) {
@@ -156,7 +156,7 @@ func TestClient_SetOutputConfiguration(t *testing.T) {
 		return len(setOutputConfigurationAck), nil
 	})
 	// when requesting to set the output configuration
-	require.NoError(t, client.SetOutputConfiguration(ctx, outputConfiguration))
+	assert.NilError(t, client.SetOutputConfiguration(ctx, outputConfiguration))
 }
 
 func TestClient_Close(t *testing.T) {
@@ -166,7 +166,7 @@ func TestClient_Close(t *testing.T) {
 	client := xsens.NewClient(port)
 	err := xerrors.New("boom")
 	port.EXPECT().Close().Return(err)
-	require.True(t, xerrors.Is(client.Close(), err))
+	assert.Assert(t, xerrors.Is(client.Close(), err))
 }
 
 func TestClient_ScanMeasurementData(t *testing.T) {
@@ -183,9 +183,9 @@ func TestClient_ScanMeasurementData(t *testing.T) {
 		tt := tt
 		t.Run(tt.inputFile, func(t *testing.T) {
 			f, err := os.Open(tt.inputFile)
-			require.NoError(t, err)
+			assert.NilError(t, err)
 			defer func() {
-				require.NoError(t, f.Close())
+				assert.NilError(t, f.Close())
 			}()
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
@@ -199,14 +199,14 @@ func TestClient_ScanMeasurementData(t *testing.T) {
 			var actual bytes.Buffer
 			printf := func(format string, args ...interface{}) {
 				_, err := fmt.Fprintf(&actual, format, args...)
-				require.NoError(t, err)
+				assert.NilError(t, err)
 			}
 			for {
 				err := client.Receive(ctx)
 				if xerrors.Is(err, io.EOF) {
 					break
 				}
-				require.NoError(t, err)
+				assert.NilError(t, err)
 				printf("%v\n", client.MessageIdentifier())
 				for client.ScanMeasurementData() {
 					printf("\t%v\n", client.DataType())
@@ -215,7 +215,7 @@ func TestClient_ScanMeasurementData(t *testing.T) {
 				printf("\n")
 			}
 			if shouldUpdateGoldenFiles() {
-				require.NoError(t, ioutil.WriteFile(tt.goldenFile, actual.Bytes(), 0644))
+				assert.NilError(t, ioutil.WriteFile(tt.goldenFile, actual.Bytes(), 0644))
 			}
 			requireGoldenFileContent(t, tt.goldenFile, actual.String())
 		})

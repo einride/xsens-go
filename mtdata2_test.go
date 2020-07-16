@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
+	is "gotest.tools/v3/assert/cmp"
 )
 
 func TestMTData2_PacketAt(t *testing.T) {
@@ -27,8 +28,8 @@ func TestMTData2_PacketAt(t *testing.T) {
 		tt := tt
 		t.Run(fmt.Sprintf("%v,%v", tt.data, tt.i), func(t *testing.T) {
 			packet, err := tt.data.PacketAt(tt.i)
-			require.NoError(t, err)
-			require.Equal(t, tt.packet, packet)
+			assert.NilError(t, err)
+			assert.DeepEqual(t, tt.packet, packet)
 		})
 	}
 }
@@ -46,13 +47,13 @@ func TestMTData2_PacketAt_Error(t *testing.T) {
 		tt := tt
 		t.Run(fmt.Sprintf("%v[%v]", tt.data, tt.i), func(t *testing.T) {
 			_, err := tt.data.PacketAt(tt.i)
-			require.Error(t, err)
+			assert.Assert(t, is.ErrorContains(err, ""))
 		})
 	}
 }
 
 func TestMTData2Packet_Identifier(t *testing.T) {
-	require.Equal(t, DataIdentifier{
+	assert.DeepEqual(t, DataIdentifier{
 		DataType:         DataTypeQuaternion,
 		CoordinateSystem: CoordinateSystemNorthEastDown,
 		Precision:        PrecisionFP1632,
@@ -75,7 +76,7 @@ func TestMTData2Packet_Data(t *testing.T) {
 	} {
 		tt := tt
 		t.Run(tt.packet.String(), func(t *testing.T) {
-			require.Equal(t, tt.data, tt.packet.Data())
+			assert.DeepEqual(t, tt.data, tt.packet.Data())
 		})
 	}
 }
