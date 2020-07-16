@@ -3,10 +3,9 @@ package xsens
 import (
 	"bufio"
 	"context"
+	"fmt"
 	"io"
 	"time"
-
-	"golang.org/x/xerrors"
 )
 
 // SerialPort is an interface for a serial used by the Client for communication with an Xsens device.
@@ -62,7 +61,7 @@ func NewClient(p SerialPort) *Client {
 // Close the client's serial port.
 func (c *Client) Close() error {
 	if err := c.p.Close(); err != nil {
-		return xerrors.Errorf("xsens client: close: %w", err)
+		return fmt.Errorf("xsens client: close: %w", err)
 	}
 	return nil
 }
@@ -79,17 +78,17 @@ func (c *Client) Receive(ctx context.Context) error {
 	// receive new message
 	deadline, _ := ctx.Deadline()
 	if err := c.p.SetReadDeadline(deadline); err != nil {
-		return xerrors.Errorf("xsens client: receive: %w", err)
+		return fmt.Errorf("xsens client: receive: %w", err)
 	}
 	if !c.sc.Scan() {
 		if c.sc.Err() == nil {
-			return xerrors.Errorf("xsens client: receive: %w", io.EOF)
+			return fmt.Errorf("xsens client: receive: %w", io.EOF)
 		}
-		return xerrors.Errorf("xsens client: receive: %w", c.sc.Err())
+		return fmt.Errorf("xsens client: receive: %w", c.sc.Err())
 	}
 	c.message = c.sc.Bytes()
 	if err := c.message.Validate(); err != nil {
-		return xerrors.Errorf("xsens client: receive: %w", c.sc.Err())
+		return fmt.Errorf("xsens client: receive: %w", c.sc.Err())
 	}
 	if c.message.Identifier() == MessageIdentifierMTData2 {
 		c.mtData2 = c.message.Data()
@@ -105,10 +104,10 @@ func (c *Client) RawMessage() []byte {
 // GoToConfig puts the Xsens device in config mode.
 func (c *Client) GoToConfig(ctx context.Context) error {
 	if err := c.send(ctx, NewMessage(MessageIdentifierGotoConfig, nil)); err != nil {
-		return xerrors.Errorf("xsens client: go to config: %w", err)
+		return fmt.Errorf("xsens client: go to config: %w", err)
 	}
 	if err := c.receiveUntil(ctx, MessageIdentifierGotoConfigAck); err != nil {
-		return xerrors.Errorf("xsens client: go to config: %w", err)
+		return fmt.Errorf("xsens client: go to config: %w", err)
 	}
 	return nil
 }
@@ -117,13 +116,13 @@ func (c *Client) GoToConfig(ctx context.Context) error {
 func (c *Client) SetOutputConfiguration(ctx context.Context, configuration OutputConfiguration) error {
 	data, err := configuration.Marshal()
 	if err != nil {
-		return xerrors.Errorf("xsens client: set output configuration: %w", err)
+		return fmt.Errorf("xsens client: set output configuration: %w", err)
 	}
 	if err := c.send(ctx, NewMessage(MessageIdentifierSetOutputConfiguration, data)); err != nil {
-		return xerrors.Errorf("xsens client: set output configuration: %w", err)
+		return fmt.Errorf("xsens client: set output configuration: %w", err)
 	}
 	if err := c.receiveUntil(ctx, MessageIdentifierSetOutputConfigurationAck); err != nil {
-		return xerrors.Errorf("xsens client: set output configuration: %w", err)
+		return fmt.Errorf("xsens client: set output configuration: %w", err)
 	}
 	return nil
 }
@@ -131,14 +130,14 @@ func (c *Client) SetOutputConfiguration(ctx context.Context, configuration Outpu
 // GetOutputConfiguration returns the Xsens output configuration.
 func (c *Client) GetOutputConfiguration(ctx context.Context) (OutputConfiguration, error) {
 	if err := c.send(ctx, NewMessage(MessageIdentifierReqOutputConfiguration, nil)); err != nil {
-		return nil, xerrors.Errorf("xsens client: get output configuration: %w", err)
+		return nil, fmt.Errorf("xsens client: get output configuration: %w", err)
 	}
 	if err := c.receiveUntil(ctx, MessageIdentifierReqOutputConfigurationAck); err != nil {
-		return nil, xerrors.Errorf("xsens client: get output configuration: %w", err)
+		return nil, fmt.Errorf("xsens client: get output configuration: %w", err)
 	}
 	var result OutputConfiguration
 	if err := result.Unmarshal(c.message.Data()); err != nil {
-		return nil, xerrors.Errorf("xsens client: get output configuration: %w", err)
+		return nil, fmt.Errorf("xsens client: get output configuration: %w", err)
 	}
 	return result, nil
 }
@@ -146,10 +145,10 @@ func (c *Client) GetOutputConfiguration(ctx context.Context) (OutputConfiguratio
 // GoToMeasurement puts the Xsens device in measurement mode.
 func (c *Client) GoToMeasurement(ctx context.Context) error {
 	if err := c.send(ctx, NewMessage(MessageIdentifierGotoMeasurement, nil)); err != nil {
-		return xerrors.Errorf("xsens client: go to measurement: %w", err)
+		return fmt.Errorf("xsens client: go to measurement: %w", err)
 	}
 	if err := c.receiveUntil(ctx, MessageIdentifierMTData2); err != nil {
-		return xerrors.Errorf("xsens client: go to config: %w", err)
+		return fmt.Errorf("xsens client: go to config: %w", err)
 	}
 	return nil
 }
@@ -344,10 +343,10 @@ func (c *Client) PositionECEF() *PositionECEF {
 func (c *Client) send(ctx context.Context, message Message) error {
 	deadline, _ := ctx.Deadline()
 	if err := c.p.SetWriteDeadline(deadline); err != nil {
-		return xerrors.Errorf("send %v: %w", message.Identifier(), err)
+		return fmt.Errorf("send %v: %w", message.Identifier(), err)
 	}
 	if _, err := c.p.Write(message); err != nil {
-		return xerrors.Errorf("send %v: %w", message.Identifier(), err)
+		return fmt.Errorf("send %v: %w", message.Identifier(), err)
 	}
 	return nil
 }
@@ -355,7 +354,7 @@ func (c *Client) send(ctx context.Context, message Message) error {
 func (c *Client) receiveUntil(ctx context.Context, until MessageIdentifier) error {
 	for {
 		if err := c.Receive(ctx); err != nil {
-			return xerrors.Errorf("receive until %v: %w", until, err)
+			return fmt.Errorf("receive until %v: %w", until, err)
 		}
 		if c.MessageIdentifier() != until {
 			continue

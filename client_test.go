@@ -3,6 +3,7 @@ package xsens_test
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -13,7 +14,6 @@ import (
 	"github.com/einride/xsens-go"
 	mockxsens "github.com/einride/xsens-go/test/mocks/xsens"
 	"github.com/golang/mock/gomock"
-	"golang.org/x/xerrors"
 	"gotest.tools/v3/assert"
 )
 
@@ -164,9 +164,9 @@ func TestClient_Close(t *testing.T) {
 	defer ctrl.Finish()
 	port := mockxsens.NewMockSerialPort(ctrl)
 	client := xsens.NewClient(port)
-	err := xerrors.New("boom")
+	err := errors.New("boom")
 	port.EXPECT().Close().Return(err)
-	assert.Assert(t, xerrors.Is(client.Close(), err))
+	assert.Assert(t, errors.Is(client.Close(), err))
 }
 
 func TestClient_ScanMeasurementData(t *testing.T) {
@@ -203,7 +203,7 @@ func TestClient_ScanMeasurementData(t *testing.T) {
 			}
 			for {
 				err := client.Receive(ctx)
-				if xerrors.Is(err, io.EOF) {
+				if errors.Is(err, io.EOF) {
 					break
 				}
 				assert.NilError(t, err)
@@ -215,7 +215,7 @@ func TestClient_ScanMeasurementData(t *testing.T) {
 				printf("\n")
 			}
 			if shouldUpdateGoldenFiles() {
-				assert.NilError(t, ioutil.WriteFile(tt.goldenFile, actual.Bytes(), 0644))
+				assert.NilError(t, ioutil.WriteFile(tt.goldenFile, actual.Bytes(), 0o644))
 			}
 			requireGoldenFileContent(t, tt.goldenFile, actual.String())
 		})

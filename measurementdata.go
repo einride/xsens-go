@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"strconv"
 	"time"
-
-	"golang.org/x/xerrors"
 )
 
 // MeasurementData is a generic interface for any measurement data produced by an Xsens device.
@@ -44,10 +42,10 @@ func (s *Scalar) unmarshalMTData2Packet(packet MTData2Packet) error {
 	case PrecisionFloat64:
 		err = binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, s)
 	default:
-		err = xerrors.Errorf("invalid precision: %v", packet.Identifier().Precision)
+		err = fmt.Errorf("invalid precision: %v", packet.Identifier().Precision)
 	}
 	if err != nil {
-		return xerrors.Errorf("precision %v: %w", packet.Identifier().Precision, err)
+		return fmt.Errorf("precision %v: %w", packet.Identifier().Precision, err)
 	}
 	return nil
 }
@@ -90,10 +88,10 @@ func (t *VectorXYZ) unmarshalMTData2Packet(packet MTData2Packet) error {
 	case PrecisionFloat64:
 		err = binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, t)
 	default:
-		err = xerrors.Errorf("invalid precision: %v", packet.Identifier().Precision)
+		err = fmt.Errorf("invalid precision: %v", packet.Identifier().Precision)
 	}
 	if err != nil {
-		return xerrors.Errorf("precision %v: %w", packet.Identifier().Precision, err)
+		return fmt.Errorf("precision %v: %w", packet.Identifier().Precision, err)
 	}
 	return nil
 }
@@ -139,10 +137,10 @@ func (t *Quaternion) unmarshalMTData2Packet(packet MTData2Packet) error {
 	case PrecisionFloat64:
 		err = binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, t)
 	default:
-		err = xerrors.Errorf("invalid precision: %v", packet.Identifier().Precision)
+		err = fmt.Errorf("invalid precision: %v", packet.Identifier().Precision)
 	}
 	if err != nil {
-		return xerrors.Errorf("precision %v: %w", packet.Identifier().Precision, err)
+		return fmt.Errorf("precision %v: %w", packet.Identifier().Precision, err)
 	}
 	return nil
 }
@@ -277,10 +275,10 @@ func (t *RotationMatrix) unmarshalMTData2Packet(packet MTData2Packet) error {
 	case PrecisionFloat64:
 		err = binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, t)
 	default:
-		err = xerrors.Errorf("invalid precision: %v", packet.Identifier().Precision)
+		err = fmt.Errorf("invalid precision: %v", packet.Identifier().Precision)
 	}
 	if err != nil {
-		return xerrors.Errorf("precision %v: %w", packet.Identifier().Precision, err)
+		return fmt.Errorf("precision %v: %w", packet.Identifier().Precision, err)
 	}
 	return nil
 }
@@ -320,10 +318,10 @@ func (t *LatLon) unmarshalMTData2Packet(packet MTData2Packet) error {
 	case PrecisionFloat64:
 		err = binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, t)
 	default:
-		err = xerrors.Errorf("invalid precision: %v", packet.Identifier().Precision)
+		err = fmt.Errorf("invalid precision: %v", packet.Identifier().Precision)
 	}
 	if err != nil {
-		return xerrors.Errorf("precision %v: %w", packet.Identifier().Precision, err)
+		return fmt.Errorf("precision %v: %w", packet.Identifier().Precision, err)
 	}
 	return nil
 }
