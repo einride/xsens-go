@@ -3,7 +3,7 @@ package xsens
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 )
 
 func TestMessageIdentifier_Ack(t *testing.T) {
@@ -16,12 +16,12 @@ func TestMessageIdentifier_Ack(t *testing.T) {
 	} {
 		tt := tt
 		t.Run(tt.id.String(), func(t *testing.T) {
-			require.Equal(t, tt.ack, tt.id.Ack())
+			assert.Equal(t, tt.ack, tt.id.Ack())
 		})
 	}
 }
 
 func TestMessageIdentifier_IsAck(t *testing.T) {
-	require.False(t, MessageIdentifierGotoConfig.IsAck())
-	require.True(t, MessageIdentifierGotoConfigAck.IsAck())
+	assert.Assert(t, !MessageIdentifierGotoConfig.IsAck())
+	assert.Assert(t, MessageIdentifierGotoConfigAck.IsAck())
 }

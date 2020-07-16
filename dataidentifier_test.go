@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 )
 
 func TestDataIdentifier_GetSetUint16(t *testing.T) {
@@ -24,12 +24,12 @@ func TestDataIdentifier_GetSetUint16(t *testing.T) {
 		tt := tt
 		t.Run(fmt.Sprintf("%#x", tt.value), func(t *testing.T) {
 			t.Run("Uint16", func(t *testing.T) {
-				require.Equal(t, tt.value, tt.dataIdentifier.Uint16())
+				assert.Equal(t, tt.value, tt.dataIdentifier.Uint16())
 			})
 			t.Run("SetUint16", func(t *testing.T) {
 				var actual DataIdentifier
 				actual.SetUint16(tt.value)
-				require.Equal(t, tt.dataIdentifier, actual)
+				assert.DeepEqual(t, tt.dataIdentifier, actual)
 			})
 		})
 	}
@@ -64,7 +64,7 @@ func TestDataIdentifier_DataSize(t *testing.T) {
 	} {
 		tt := tt
 		t.Run(tt.dataIdentifier.String(), func(t *testing.T) {
-			require.Equal(t, tt.dataSize, tt.dataIdentifier.DataSize())
+			assert.Equal(t, tt.dataSize, tt.dataIdentifier.DataSize())
 		})
 	}
 }

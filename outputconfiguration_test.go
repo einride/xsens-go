@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/einride/xsens-go"
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 )
 
 func TestOutputConfiguration_UnmarshalMarshal_TestData(t *testing.T) {
@@ -21,12 +21,12 @@ func TestOutputConfiguration_UnmarshalMarshal_TestData(t *testing.T) {
 		tt := tt
 		t.Run(tt.inputFile, func(t *testing.T) {
 			golden, err := ioutil.ReadFile(tt.inputFile)
-			require.NoError(t, err)
+			assert.NilError(t, err)
 			var outputConfiguration xsens.OutputConfiguration
-			require.NoError(t, outputConfiguration.Unmarshal(golden))
+			assert.NilError(t, outputConfiguration.Unmarshal(golden))
 			actual, err := outputConfiguration.Marshal()
-			require.NoError(t, err)
-			require.Equal(t, golden, actual)
+			assert.NilError(t, err)
+			assert.DeepEqual(t, golden, actual)
 		})
 	}
 }
@@ -45,13 +45,13 @@ func TestOutputConfiguration_MarshalText_TestData(t *testing.T) {
 		tt := tt
 		t.Run(tt.inputFile, func(t *testing.T) {
 			input, err := ioutil.ReadFile(tt.inputFile)
-			require.NoError(t, err)
+			assert.NilError(t, err)
 			var outputConfiguration xsens.OutputConfiguration
-			require.NoError(t, outputConfiguration.Unmarshal(input))
+			assert.NilError(t, outputConfiguration.Unmarshal(input))
 			txt, err := outputConfiguration.MarshalText()
-			require.NoError(t, err)
+			assert.NilError(t, err)
 			if shouldUpdateGoldenFiles() {
-				require.NoError(t, ioutil.WriteFile(tt.goldenFile, []byte(txt), 0644))
+				assert.NilError(t, ioutil.WriteFile(tt.goldenFile, []byte(txt), 0644))
 			}
 			requireGoldenFileContent(t, tt.goldenFile, txt)
 		})

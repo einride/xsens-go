@@ -3,7 +3,7 @@ package xsens
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 )
 
 func TestPrecision_Size(t *testing.T) {
@@ -18,7 +18,7 @@ func TestPrecision_Size(t *testing.T) {
 	} {
 		tt := tt
 		t.Run(tt.precision.String(), func(t *testing.T) {
-			require.Equal(t, tt.size, tt.precision.Size())
+			assert.Equal(t, tt.size, tt.precision.Size())
 		})
 	}
 }

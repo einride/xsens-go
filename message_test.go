@@ -7,7 +7,8 @@ import (
 	"testing"
 
 	"github.com/einride/xsens-go"
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
+	is "gotest.tools/v3/assert/cmp"
 )
 
 func TestNewMessage_TestData(t *testing.T) {
@@ -23,19 +24,19 @@ func TestNewMessage_TestData(t *testing.T) {
 		tt := tt
 		t.Run(tt.inputFile, func(t *testing.T) {
 			f, err := os.Open(tt.inputFile)
-			require.NoError(t, err)
+			assert.NilError(t, err)
 			defer func() {
-				require.NoError(t, f.Close())
+				assert.NilError(t, f.Close())
 			}()
 			sc := bufio.NewScanner(f)
 			sc.Split(xsens.ScanMessages)
 			for sc.Scan() {
 				msg := xsens.Message(sc.Bytes())
 				newMsg := xsens.NewMessage(msg.Identifier(), msg.Data())
-				require.NoError(t, newMsg.Validate())
-				require.Equal(t, msg, newMsg)
+				assert.NilError(t, newMsg.Validate())
+				assert.DeepEqual(t, msg, newMsg)
 			}
-			require.NoError(t, sc.Err())
+			assert.NilError(t, sc.Err())
 		})
 	}
 }
@@ -56,9 +57,9 @@ func TestNewMessage(t *testing.T) {
 	} {
 		tt := tt
 		t.Run(fmt.Sprintf("%v", tt.actual), func(t *testing.T) {
-			require.Equal(t, tt.expected, tt.actual)
+			assert.DeepEqual(t, tt.expected, tt.actual)
 			t.Run("Validate", func(t *testing.T) {
-				require.NoError(t, tt.actual.Validate())
+				assert.NilError(t, tt.actual.Validate())
 			})
 		})
 	}
@@ -72,7 +73,7 @@ func TestMessage_Validate_Error(t *testing.T) {
 	} {
 		tt := tt
 		t.Run(tt.String(), func(t *testing.T) {
-			require.Error(t, tt.Validate())
+			assert.Assert(t, is.ErrorContains(tt.Validate(), ""))
 		})
 	}
 }
