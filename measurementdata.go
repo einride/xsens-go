@@ -198,7 +198,7 @@ type RateOfTurnHR = VectorXYZ
 // EulerAngles contains the three Euler angles in degrees that represent the orientation of the device.
 type EulerAngles = VectorXYZ
 
-// Temperature contains the internal temperature of the sensor in degrees Celsius
+// Temperature contains the internal temperature of the sensor in degrees Celsius.
 type Temperature = Scalar
 
 // AltitudeEllipsoid contains the altitude of the MTi-G in meters above the WGS-84 Ellipsoid.
@@ -283,7 +283,7 @@ func (t *RotationMatrix) unmarshalMTData2Packet(packet MTData2Packet) error {
 	return nil
 }
 
-// LatLon contains the latitude and longitude in degrees of the MTi-G position
+// LatLon contains the latitude and longitude in degrees of the MTi-G position.
 type LatLon struct {
 	Lat, Lon float64
 }
@@ -407,7 +407,7 @@ func (t *StatusByte) unmarshalMTData2Packet(packet MTData2Packet) error {
 //
 // 26-31: Reserved
 //
-// Reserved for future use
+// Reserved for future use.
 type StatusWord uint32
 
 // String returns a string representation of the status word.

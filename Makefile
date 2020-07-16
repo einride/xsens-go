@@ -1,45 +1,25 @@
-# all: run all targets included in a full build
 .PHONY: all
 all: \
-	markdown-lint \
-	go-mocks \
+	mockgen-generate \
 	go-generate \
 	go-lint \
 	go-test \
 	go-mod-tidy \
-	git-verify-nodiff \
-	git-verify-submodules
+	git-verify-nodiff
 
-export GO111MODULE := on
+include tools/git-verify-nodiff/rules.mk
+include tools/golangci-lint/rules.mk
+include tools/gomock/rules.mk
+include tools/goreview/rules.mk
+include tools/xtools/rules.mk
 
-.PHONY: build
-build:
-	@git submodule update --init --recursive $@
-
-include build/rules.mk
-build/rules.mk: build
-	@# included in submodule: build
-
-# go-test: run Go test suite
 .PHONY: go-test
 go-test:
 	go test -race -cover ./...
 
-# go-lint: lint Go code
-.PHONY: go-lint
-go-lint: $(GOLANGCI_LINT)
-	# dupl: disabled due to duplication in tests
-	$(GOLANGCI_LINT) run ./... --enable-all --skip-dirs vendor --disable dupl
-
-# go-mod-tidy: ensure Go module files are in sync
 .PHONY: go-mod-tidy
-mod-tidy:
-	go mod tidy -v
-
-# markdown-lint: lint Markdown documentation
-.PHONY: markdown-lint
-markdown-lint: $(MARKDOWNLINT)
-	$(MARKDOWNLINT) --ignore build --ignore vendor .
+go-mod-tidy:
+	find . -name go.mod -execdir go mod tidy -v \;
 
 # go-generate: generate Go code
 .PHONY: go-generate
@@ -52,39 +32,30 @@ go-generate: \
 	precision_string.go \
 	pkg/serial/baudrate_string.go
 
-coordinatesystem_string.go: coordinatesystem.go $(GOBIN)
-	$(GOBIN) -m -run golang.org/x/tools/cmd/stringer \
-		-type CoordinateSystem -trimprefix CoordinateSystem -output $@ $<
+coordinatesystem_string.go: coordinatesystem.go $(stringer)
+	$(stringer) -type CoordinateSystem -trimprefix CoordinateSystem -output $@ $<
 
-datatype_string.go: datatype.go $(GOBIN)
-	$(GOBIN) -m -run golang.org/x/tools/cmd/stringer \
-		-type DataType -trimprefix DataType -output $@ $<
+datatype_string.go: datatype.go $(stringer)
+	$(stringer) -type DataType -trimprefix DataType -output $@ $<
 
-errorcode_string.go: errorcode.go $(GOBIN)
-	$(GOBIN) -m -run golang.org/x/tools/cmd/stringer \
-		-type ErrorCode -trimprefix ErrorCode -output $@ $<
+errorcode_string.go: errorcode.go $(stringer)
+	$(stringer) -type ErrorCode -trimprefix ErrorCode -output $@ $<
 
-fixtype_string.go: fixtype.go $(GOBIN)
-	$(GOBIN) -m -run golang.org/x/tools/cmd/stringer \
-		-type FixType -trimprefix FixType -output $@ $<
+fixtype_string.go: fixtype.go $(stringer)
+	$(stringer) -type FixType -trimprefix FixType -output $@ $<
 
-messageidentifier_string.go: messageidentifier.go $(GOBIN)
-	$(GOBIN) -m -run golang.org/x/tools/cmd/stringer \
-		-type MessageIdentifier -trimprefix MessageIdentifier -output $@ $<
+messageidentifier_string.go: messageidentifier.go $(stringer)
+	$(stringer) -type MessageIdentifier -trimprefix MessageIdentifier -output $@ $<
 
-precision_string.go: precision.go $(GOBIN)
-	$(GOBIN) -m -run golang.org/x/tools/cmd/stringer \
-		-type Precision -trimprefix Precision -output $@ $<
+precision_string.go: precision.go $(stringer)
+	$(stringer) -type Precision -trimprefix Precision -output $@ $<
 
-pkg/serial/baudrate_string.go: pkg/serial/baudrate.go $(GOBIN)
-	$(GOBIN) -m -run golang.org/x/tools/cmd/stringer \
-		-type BaudRate -trimprefix BaudRate -output $@ $<
+pkg/serial/baudrate_string.go: pkg/serial/baudrate.go $(stringer)
+	$(stringer) -type BaudRate -trimprefix BaudRate -output $@ $<
 
-# go-mocks: generate Go mocks
-.PHONY: go-mocks
-go-mocks: test/mocks/xsens/mocks.go
+.PHONY: mockgen-generate
+mockgen-generate: test/mocks/xsens/mocks.go
 
-test/mocks/xsens/mocks.go: client.go $(GOBIN)
-	$(GOBIN) -m -run github.com/golang/mock/mockgen \
-		-destination $@ -package mockxsens \
+test/mocks/xsens/mocks.go: client.go $(mockgen)
+	$(mockgen) -destination $@ -package mockxsens \
 		github.com/einride/xsens-go SerialPort

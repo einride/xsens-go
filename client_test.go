@@ -215,7 +215,7 @@ func TestClient_ScanMeasurementData(t *testing.T) {
 				printf("\n")
 			}
 			if shouldUpdateGoldenFiles() {
-				assert.NilError(t, ioutil.WriteFile(tt.goldenFile, actual.Bytes(), 0o644))
+				assert.NilError(t, ioutil.WriteFile(tt.goldenFile, actual.Bytes(), 0o600))
 			}
 			requireGoldenFileContent(t, tt.goldenFile, actual.String())
 		})
