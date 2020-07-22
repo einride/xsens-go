@@ -1,4 +1,4 @@
-module tools/x/tools
+module tools/xtools
 
 go 1.14
 
