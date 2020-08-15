@@ -80,3 +80,14 @@ func TestMTData2Packet_Data(t *testing.T) {
 		})
 	}
 }
+
+func TestIdentifier(t *testing.T) {
+	id := DataIdentifier{
+		DataType:  DataTypeLatLon,
+		Precision: PrecisionFloat32,
+	}
+
+	packet := make(MTData2Packet, packetDataStart+id.Precision.Size())
+	packet.SetIdentifier(id)
+	assert.Equal(t, id, packet.Identifier())
+}
