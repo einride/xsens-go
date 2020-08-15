@@ -2,6 +2,7 @@
 all: \
 	mockgen-generate \
 	go-generate \
+	go-review \
 	go-lint \
 	go-test \
 	go-mod-tidy \

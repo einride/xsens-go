@@ -1,6 +1,7 @@
 package xsens
 
 import (
+	"bytes"
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
@@ -35,6 +36,21 @@ func (fp FP1220) Float64() float64 {
 	i := int32(u) // reinterpret as signed
 	f := float64(i) / factorFP1220
 	return f
+}
+
+func (fp *FP1220) FromFloat64(f float64) {
+	binary.BigEndian.PutUint32(fp[:], uint32(f*factorFP1220))
+}
+
+func (fp *FP1220) fromBinary(data []byte) error {
+	return binary.Read(bytes.NewReader(data), binary.BigEndian, fp)
+}
+
+func (fp *FP1220) toBinary(data []byte) {
+	data[0] = fp[0]
+	data[1] = fp[1]
+	data[2] = fp[2]
+	data[3] = fp[3]
 }
 
 // FP1220 is a fixed point 16.32 value.
@@ -73,4 +89,28 @@ func (fp FP1632) Float64() float64 {
 	i := int64(u) // reinterpret as signed
 	f := float64(i) / factorFP1632
 	return f
+}
+
+func (fp *FP1632) FromFloat64(f float64) {
+	data := make([]byte, 8)
+	binary.BigEndian.PutUint64(data, uint64(f*factorFP1632))
+	fp[0] = data[4]
+	fp[1] = data[5]
+	fp[2] = data[6]
+	fp[3] = data[7]
+	fp[4] = data[2]
+	fp[5] = data[3]
+}
+
+func (fp *FP1632) fromBinary(data []byte) error {
+	return binary.Read(bytes.NewReader(data), binary.BigEndian, fp)
+}
+
+func (fp *FP1632) toBinary(data []byte) {
+	data[0] = fp[0]
+	data[1] = fp[1]
+	data[2] = fp[2]
+	data[3] = fp[3]
+	data[4] = fp[4]
+	data[5] = fp[5]
 }

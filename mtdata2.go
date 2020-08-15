@@ -37,6 +37,13 @@ func (m MTData2) PacketAt(i int) (MTData2Packet, error) {
 // MTData2Packet represents an individual packet of an XSens MTData2 message.
 type MTData2Packet []byte
 
+func NewMTData2Package(length uint8, identifier DataIdentifier) MTData2Packet {
+	d := make(MTData2Packet, packetDataStart+length)
+	d.SetLength(length)
+	d.SetIdentifier(identifier)
+	return d
+}
+
 // String returns a string representation of the packet.
 func (m MTData2Packet) String() string {
 	return fmt.Sprintf("MTData2Packet(%s)", hex.EncodeToString(m))
@@ -49,6 +56,17 @@ func (m MTData2Packet) Identifier() DataIdentifier {
 		binary.BigEndian.Uint16(m[packetDataIdentifierStart : packetDataIdentifierStart+packetDataIdentifierLength]),
 	)
 	return identifier
+}
+
+func (m MTData2Packet) SetIdentifier(id DataIdentifier) {
+	binary.BigEndian.PutUint16(
+		m[packetDataIdentifierStart:packetDataIdentifierStart+packetDataIdentifierLength],
+		id.Uint16(),
+	)
+}
+
+func (m MTData2Packet) SetLength(length uint8) {
+	m[packetDataLengthStart] = length
 }
 
 // Data returns the packet data.

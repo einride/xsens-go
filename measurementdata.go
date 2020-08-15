@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"math"
 	"strconv"
 	"time"
 )
@@ -11,6 +12,7 @@ import (
 // MeasurementData is a generic interface for any measurement data produced by an Xsens device.
 type MeasurementData interface {
 	unmarshalMTData2Packet(MTData2Packet) error
+	marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error)
 }
 
 // Scalar contains a single scalar value.
@@ -31,12 +33,12 @@ func (s *Scalar) unmarshalMTData2Packet(packet MTData2Packet) error {
 		}
 	case PrecisionFP1220:
 		var value FP1220
-		if err = binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, &value); err == nil {
+		if err = value.fromBinary(packet.Data()); err == nil {
 			*s = Scalar(value.Float64())
 		}
 	case PrecisionFP1632:
 		var value FP1632
-		if err = binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, &value); err == nil {
+		if err = value.fromBinary(packet.Data()); err == nil {
 			*s = Scalar(value.Float64())
 		}
 	case PrecisionFloat64:
@@ -48,6 +50,25 @@ func (s *Scalar) unmarshalMTData2Packet(packet MTData2Packet) error {
 		return fmt.Errorf("precision %v: %w", packet.Identifier().Precision, err)
 	}
 	return nil
+}
+
+func (s *Scalar) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+	packet := NewMTData2Package(id.Precision.Size(), id)
+	switch id.Precision {
+	case PrecisionFloat32:
+		binary.BigEndian.PutUint32(packet.Data(), math.Float32bits(float32(*s)))
+	case PrecisionFP1220:
+		var f FP1220
+		f.FromFloat64(float64(*s))
+		f.toBinary(packet.Data())
+	case PrecisionFP1632:
+		var f FP1632
+		f.FromFloat64(float64(*s))
+		f.toBinary(packet.Data())
+	case PrecisionFloat64:
+		binary.BigEndian.PutUint64(packet.Data(), math.Float64bits(float64(*s)))
+	}
+	return packet, nil
 }
 
 // VectorXYZ contains a vector with x, y and z-components.
@@ -94,6 +115,37 @@ func (t *VectorXYZ) unmarshalMTData2Packet(packet MTData2Packet) error {
 		return fmt.Errorf("precision %v: %w", packet.Identifier().Precision, err)
 	}
 	return nil
+}
+
+func (t *VectorXYZ) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+	packet := NewMTData2Package(id.Precision.Size()*3, id)
+	switch id.Precision {
+	case PrecisionFloat32:
+		binary.BigEndian.PutUint32(packet.Data(), math.Float32bits(float32(t.X)))
+		binary.BigEndian.PutUint32(packet.Data()[id.Precision.Size()*1:], math.Float32bits(float32(t.Y)))
+		binary.BigEndian.PutUint32(packet.Data()[id.Precision.Size()*2:], math.Float32bits(float32(t.Z)))
+	case PrecisionFP1220:
+		var x, y, z FP1220
+		x.FromFloat64(t.X)
+		y.FromFloat64(t.Y)
+		z.FromFloat64(t.Z)
+		x.toBinary(packet.Data())
+		y.toBinary(packet.Data()[id.Precision.Size():])
+		z.toBinary(packet.Data()[id.Precision.Size()*2:])
+	case PrecisionFP1632:
+		var x, y, z FP1632
+		x.FromFloat64(t.X)
+		y.FromFloat64(t.Y)
+		z.FromFloat64(t.Z)
+		x.toBinary(packet.Data())
+		y.toBinary(packet.Data()[id.Precision.Size():])
+		z.toBinary(packet.Data()[id.Precision.Size()*2:])
+	case PrecisionFloat64:
+		binary.BigEndian.PutUint64(packet.Data(), math.Float64bits((t.X)))
+		binary.BigEndian.PutUint64(packet.Data()[id.Precision.Size()*1:], math.Float64bits((t.Y)))
+		binary.BigEndian.PutUint64(packet.Data()[id.Precision.Size()*2:], math.Float64bits((t.Z)))
+	}
+	return packet, nil
 }
 
 // Quaternion contains a quaternion with q0, q1, q2 and q3-components.
@@ -143,6 +195,43 @@ func (t *Quaternion) unmarshalMTData2Packet(packet MTData2Packet) error {
 		return fmt.Errorf("precision %v: %w", packet.Identifier().Precision, err)
 	}
 	return nil
+}
+
+func (t *Quaternion) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+	packet := NewMTData2Package(id.Precision.Size()*4, id)
+	switch id.Precision {
+	case PrecisionFloat32:
+		binary.BigEndian.PutUint32(packet.Data(), math.Float32bits(float32(t.Q0)))
+		binary.BigEndian.PutUint32(packet.Data()[id.Precision.Size()*1:], math.Float32bits(float32(t.Q1)))
+		binary.BigEndian.PutUint32(packet.Data()[id.Precision.Size()*2:], math.Float32bits(float32(t.Q2)))
+		binary.BigEndian.PutUint32(packet.Data()[id.Precision.Size()*3:], math.Float32bits(float32(t.Q3)))
+	case PrecisionFP1220:
+		var q0, q1, q2, q3 FP1220
+		q0.FromFloat64(t.Q0)
+		q1.FromFloat64(t.Q1)
+		q2.FromFloat64(t.Q2)
+		q3.FromFloat64(t.Q3)
+		q0.toBinary(packet.Data())
+		q1.toBinary(packet.Data()[id.Precision.Size():])
+		q2.toBinary(packet.Data()[id.Precision.Size()*2:])
+		q3.toBinary(packet.Data()[id.Precision.Size()*3:])
+	case PrecisionFP1632:
+		var q0, q1, q2, q3 FP1632
+		q0.FromFloat64(t.Q0)
+		q1.FromFloat64(t.Q1)
+		q2.FromFloat64(t.Q2)
+		q3.FromFloat64(t.Q3)
+		q0.toBinary(packet.Data())
+		q1.toBinary(packet.Data()[id.Precision.Size():])
+		q2.toBinary(packet.Data()[id.Precision.Size()*2:])
+		q3.toBinary(packet.Data()[id.Precision.Size()*3:])
+	case PrecisionFloat64:
+		binary.BigEndian.PutUint64(packet.Data(), math.Float64bits((t.Q0)))
+		binary.BigEndian.PutUint64(packet.Data()[id.Precision.Size()*1:], math.Float64bits((t.Q1)))
+		binary.BigEndian.PutUint64(packet.Data()[id.Precision.Size()*2:], math.Float64bits((t.Q2)))
+		binary.BigEndian.PutUint64(packet.Data()[id.Precision.Size()*3:], math.Float64bits((t.Q3)))
+	}
+	return packet, nil
 }
 
 // DeltaV contains the delta velocity value of the SDI output in m/s.
@@ -283,6 +372,34 @@ func (t *RotationMatrix) unmarshalMTData2Packet(packet MTData2Packet) error {
 	return nil
 }
 
+func (t *RotationMatrix) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+	packet := NewMTData2Package(id.Precision.Size()*9, id)
+	vals := []float64{t.A, t.B, t.C, t.D, t.E, t.F, t.G, t.H, t.I}
+	switch id.Precision {
+	case PrecisionFloat32:
+		for i, v := range vals {
+			binary.BigEndian.PutUint32(packet.Data()[id.Precision.Size()*uint8(i):], math.Float32bits(float32(v)))
+		}
+	case PrecisionFP1220:
+		for i, v := range vals {
+			var temp FP1220
+			temp.FromFloat64(v)
+			temp.toBinary(packet.Data()[id.Precision.Size()*uint8(i):])
+		}
+	case PrecisionFP1632:
+		for i, v := range vals {
+			var temp FP1632
+			temp.FromFloat64(v)
+			temp.toBinary(packet.Data()[id.Precision.Size()*uint8(i):])
+		}
+	case PrecisionFloat64:
+		for i, v := range vals {
+			binary.BigEndian.PutUint64(packet.Data()[id.Precision.Size()*uint8(i):], math.Float64bits(v))
+		}
+	}
+	return packet, nil
+}
+
 // LatLon contains the latitude and longitude in degrees of the MTi-G position.
 type LatLon struct {
 	Lat, Lon float64
@@ -326,6 +443,34 @@ func (t *LatLon) unmarshalMTData2Packet(packet MTData2Packet) error {
 	return nil
 }
 
+func (t *LatLon) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+	packet := NewMTData2Package(id.Precision.Size()*2, id)
+	vals := []float64{t.Lat, t.Lon}
+	switch id.Precision {
+	case PrecisionFloat32:
+		for i, v := range vals {
+			binary.BigEndian.PutUint32(packet.Data()[id.Precision.Size()*uint8(i):], math.Float32bits(float32(v)))
+		}
+	case PrecisionFP1220:
+		for i, v := range vals {
+			var temp FP1220
+			temp.FromFloat64(v)
+			temp.toBinary(packet.Data()[id.Precision.Size()*uint8(i):])
+		}
+	case PrecisionFP1632:
+		for i, v := range vals {
+			var temp FP1632
+			temp.FromFloat64(v)
+			temp.toBinary(packet.Data()[id.Precision.Size()*uint8(i):])
+		}
+	case PrecisionFloat64:
+		for i, v := range vals {
+			binary.BigEndian.PutUint64(packet.Data()[id.Precision.Size()*uint8(i):], math.Float64bits(v))
+		}
+	}
+	return packet, nil
+}
+
 // StatusByte contains the 8bit status byte which is equal to bits 0-7 of an MTData2 StatusWord packet.
 type StatusByte uint8
 
@@ -335,6 +480,12 @@ func (t *StatusByte) String() string {
 
 func (t *StatusByte) unmarshalMTData2Packet(packet MTData2Packet) error {
 	return binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, t)
+}
+
+func (t *StatusByte) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+	packet := NewMTData2Package(1, id)
+	packet.Data()[0] = uint8(*t)
+	return packet, nil
 }
 
 // StatusWord contains the 32bit status word.
@@ -419,6 +570,12 @@ func (t *StatusWord) unmarshalMTData2Packet(packet MTData2Packet) error {
 	return binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, t)
 }
 
+func (t *StatusWord) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+	packet := NewMTData2Package(4, id)
+	binary.BigEndian.PutUint32(packet.Data(), uint32(*t))
+	return packet, nil
+}
+
 // UTCTime contains the timestamp expressed as the UTC time.
 type UTCTime struct {
 	Ns                               uint32
@@ -436,6 +593,19 @@ func (u *UTCTime) unmarshalMTData2Packet(packet MTData2Packet) error {
 	return binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, u)
 }
 
+func (u *UTCTime) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+	packet := NewMTData2Package(12, id)
+	binary.BigEndian.PutUint32(packet.Data(), u.Ns)
+	binary.BigEndian.PutUint16(packet.Data()[4:], u.Year)
+	packet.Data()[6] = u.Month
+	packet.Data()[7] = u.Day
+	packet.Data()[8] = u.Hour
+	packet.Data()[9] = u.Minute
+	packet.Data()[10] = u.Second
+	packet.Data()[11] = uint8(u.Valid)
+	return packet, nil
+}
+
 // Time returns the native Go representation of the UTC time.
 func (u *UTCTime) Time() time.Time {
 	return time.Date(
@@ -447,6 +617,17 @@ func (u *UTCTime) Time() time.Time {
 		int(u.Second),
 		int(u.Ns),
 		time.UTC)
+}
+
+func (u *UTCTime) UnmarshalTime(ts time.Time) {
+	t := ts.UTC()
+	u.Year = uint16(t.Year())
+	u.Month = uint8(t.Month())
+	u.Day = uint8(t.Day())
+	u.Hour = uint8(t.Hour())
+	u.Minute = uint8(t.Minute())
+	u.Second = uint8(t.Second())
+	u.Ns = uint32(t.Nanosecond())
 }
 
 // PacketCounter contains the packet counter.
@@ -463,6 +644,12 @@ func (p *PacketCounter) unmarshalMTData2Packet(packet MTData2Packet) error {
 	return binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, p)
 }
 
+func (p *PacketCounter) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+	packet := NewMTData2Package(2, id)
+	binary.BigEndian.PutUint16(packet.Data(), uint16(*p))
+	return packet, nil
+}
+
 // SampleTimeFine contains the sample time of an output expressed in 10kHz ticks.
 //
 // When there is no GNSS-fix in the MTi-G-710, this value is arbitrary for GNSS messages.
@@ -475,6 +662,12 @@ func (s *SampleTimeFine) String() string {
 
 func (s *SampleTimeFine) unmarshalMTData2Packet(packet MTData2Packet) error {
 	return binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, s)
+}
+
+func (s *SampleTimeFine) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+	packet := NewMTData2Package(4, id)
+	binary.BigEndian.PutUint32(packet.Data(), uint32(*s))
+	return packet, nil
 }
 
 // SampleTimeCoarse contains the sample time of an output expressed in seconds.
@@ -491,6 +684,12 @@ func (s *SampleTimeCoarse) unmarshalMTData2Packet(packet MTData2Packet) error {
 	return binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, s)
 }
 
+func (s *SampleTimeCoarse) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+	packet := NewMTData2Package(4, id)
+	binary.BigEndian.PutUint32(packet.Data(), uint32(*s))
+	return packet, nil
+}
+
 // BaroPressure contains the pressure as measured by the internal barometer expressed in Pascal.
 type BaroPressure uint32
 
@@ -501,6 +700,12 @@ func (b *BaroPressure) String() string {
 
 func (b *BaroPressure) unmarshalMTData2Packet(packet MTData2Packet) error {
 	return binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, b)
+}
+
+func (b *BaroPressure) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+	packet := NewMTData2Package(4, id)
+	binary.BigEndian.PutUint32(packet.Data(), uint32(*b))
+	return packet, nil
 }
 
 // GNSSPVTData contains the current GNSS position, velocity and time data.
@@ -702,6 +907,46 @@ func (g *GNSSPVTData) unmarshalMTData2Packet(packet MTData2Packet) error {
 	return binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, g)
 }
 
+func (g *GNSSPVTData) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+	packet := NewMTData2Package(94, id)
+	binary.BigEndian.PutUint32(packet.Data(), g.ITOW)
+	binary.BigEndian.PutUint16(packet.Data()[4:], g.Year)
+	packet.Data()[6] = g.Month
+	packet.Data()[7] = g.Day
+	packet.Data()[8] = g.Hour
+	packet.Data()[9] = g.Min
+	packet.Data()[10] = g.Sec
+	packet.Data()[11] = uint8(g.Valid)
+	binary.BigEndian.PutUint32(packet.Data()[12:], g.TAcc)
+	binary.BigEndian.PutUint32(packet.Data()[16:], uint32(g.Nano))
+	packet.Data()[20] = uint8(g.FixType)
+	packet.Data()[21] = g.Flags
+	packet.Data()[22] = g.NumSV
+	packet.Data()[23] = g.Reserved1
+	binary.BigEndian.PutUint32(packet.Data()[24:], uint32(g.Lon))
+	binary.BigEndian.PutUint32(packet.Data()[28:], uint32(g.Lat))
+	binary.BigEndian.PutUint32(packet.Data()[32:], uint32(g.Height))
+	binary.BigEndian.PutUint32(packet.Data()[36:], uint32(g.HMSL))
+	binary.BigEndian.PutUint32(packet.Data()[40:], g.HAcc)
+	binary.BigEndian.PutUint32(packet.Data()[44:], g.VAcc)
+	binary.BigEndian.PutUint32(packet.Data()[48:], uint32(g.VelN))
+	binary.BigEndian.PutUint32(packet.Data()[52:], uint32(g.VelE))
+	binary.BigEndian.PutUint32(packet.Data()[56:], uint32(g.VelD))
+	binary.BigEndian.PutUint32(packet.Data()[60:], uint32(g.GSpeed))
+	binary.BigEndian.PutUint32(packet.Data()[64:], uint32(g.HeadMot))
+	binary.BigEndian.PutUint32(packet.Data()[68:], g.SAcc)
+	binary.BigEndian.PutUint32(packet.Data()[72:], g.HeadAcc)
+	binary.BigEndian.PutUint32(packet.Data()[76:], g.HeadVeh)
+	binary.BigEndian.PutUint16(packet.Data()[80:], g.GDOP)
+	binary.BigEndian.PutUint16(packet.Data()[82:], g.PDOP)
+	binary.BigEndian.PutUint16(packet.Data()[84:], g.TDOP)
+	binary.BigEndian.PutUint16(packet.Data()[86:], g.VDOP)
+	binary.BigEndian.PutUint16(packet.Data()[88:], g.HDOP)
+	binary.BigEndian.PutUint16(packet.Data()[90:], g.NDOP)
+	binary.BigEndian.PutUint16(packet.Data()[92:], g.EDOP)
+	return packet, nil
+}
+
 // GNSSSatInfo contains info on the currently used GNSS satellites.
 type GNSSSatInfo struct {
 	// ITOW is the GPS time of week.
@@ -724,6 +969,17 @@ type GNSSSatInfo struct {
 
 func (g *GNSSSatInfo) unmarshalMTData2Packet(packet MTData2Packet) error {
 	return binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, g)
+}
+
+func (g *GNSSSatInfo) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+	packet := NewMTData2Package(8, id)
+	packet.SetIdentifier(id)
+	binary.BigEndian.PutUint32(packet.Data(), g.ITOW)
+	packet.Data()[4] = g.NumSVS
+	packet.Data()[5] = g.Res1
+	packet.Data()[6] = g.Res2
+	packet.Data()[7] = g.Res3
+	return packet, nil
 }
 
 type GNSSSat struct {
