@@ -85,6 +85,8 @@ func (e *Emulator) Close() error {
 }
 
 func (e *Emulator) SetOutputConguration(configuration OutputConfiguration) {
+	e.mutex.Lock()
+	defer e.mutex.Unlock()
 	e.outputConf = configuration
 }
 
@@ -96,10 +98,10 @@ func (e *Emulator) Receive(ctx context.Context) error {
 	for {
 		deadline, ok := ctx.Deadline()
 		if !ok {
-			return fmt.Errorf("no deadline")
+			return errors.New("no deadline")
 		}
 		if err := e.port.SetReadDeadline(deadline); err != nil {
-			return fmt.Errorf("xsens client: receive: %w", err)
+			return fmt.Errorf("emulator receive: %w", err)
 		}
 		if !e.sc.Scan() {
 			if e.sc.Err() != nil {
