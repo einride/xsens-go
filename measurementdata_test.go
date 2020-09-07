@@ -244,7 +244,7 @@ func TestConvert_GNSSPVTData(t *testing.T) {
 				Hour:      6,
 				Min:       7,
 				Sec:       8,
-				Valid:     9,
+				Valid:     UTCDateValidFlag | UTCTimeOfDayValidFlag | UTCTimeOfDayValidFlag,
 				TAcc:      10,
 				Nano:      11,
 				FixType:   12,
@@ -386,7 +386,7 @@ func TestConvert_UTCTime(t *testing.T) {
 				Hour:   5,
 				Minute: 6,
 				Second: 7,
-				Valid:  8,
+				Valid:  UTCDateValidFlag | UTCTimeOfDayValidFlag | UTCTimeOfDayFullyResolvedFlag,
 			}
 			data, err := org.marshalMTData2Packet(tt)
 			assert.NilError(t, err)
