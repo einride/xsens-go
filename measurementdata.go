@@ -616,7 +616,8 @@ func (u *UTCTime) Time() time.Time {
 		int(u.Minute),
 		int(u.Second),
 		int(u.Ns),
-		time.UTC)
+		time.UTC,
+	)
 }
 
 func (u *UTCTime) UnmarshalTime(ts time.Time) {
@@ -900,7 +901,8 @@ func (g *GNSSPVTData) Time() time.Time {
 		int(g.Min),
 		int(g.Sec),
 		int(g.Nano),
-		time.UTC)
+		time.UTC,
+	)
 }
 
 func (g *GNSSPVTData) unmarshalMTData2Packet(packet MTData2Packet) error {
