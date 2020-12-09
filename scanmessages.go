@@ -34,7 +34,8 @@ func ScanMessages(data []byte, atEOF bool) (advance int, token []byte, err error
 		}
 		indexOfData = indexOfExtendedData
 		lengthOfData = int(binary.BigEndian.Uint16(
-			message[indexOfExtendedLength : indexOfExtendedLength+lengthOfExtendedLength]))
+			message[indexOfExtendedLength : indexOfExtendedLength+lengthOfExtendedLength],
+		))
 	}
 	lengthOfMessage := indexOfData + lengthOfData + lengthOfChecksum
 	if len(message) < lengthOfMessage {
