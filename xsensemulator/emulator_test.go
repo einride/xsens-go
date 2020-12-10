@@ -1,4 +1,4 @@
-package xsens_test
+package xsensemulator_test
 
 import (
 	"bytes"
@@ -12,6 +12,7 @@ import (
 
 	"github.com/einride/xsens-go"
 	mockxsens "github.com/einride/xsens-go/test/mocks/xsens"
+	"github.com/einride/xsens-go/xsensemulator"
 	"github.com/golang/mock/gomock"
 	"golang.org/x/sync/errgroup"
 	"gotest.tools/v3/assert"
@@ -64,7 +65,7 @@ func TestEmulator_Convert(t *testing.T) {
 	// then emulator receives
 	port2 := mockxsens.NewMockSerialPort(ctrl)
 	port2.EXPECT().Write(gomock.Any()).AnyTimes().DoAndReturn(writer.Write)
-	emulator := xsens.NewEmulator(port2)
+	emulator := xsensemulator.NewEmulator(port2)
 	emulator.SetOutputConguration(xsens.OutputConfiguration{
 		{
 			DataIdentifier: xsens.DataIdentifier{
@@ -88,10 +89,10 @@ func TestEmulator_Output(t *testing.T) {
 		inputFile               string
 		outputConfigurationFile string
 	}{
-		{inputFile: "testdata/1/output.bin", outputConfigurationFile: "testdata/1/outputconfig.bin"},
-		{inputFile: "testdata/2/output.bin", outputConfigurationFile: "testdata/2/outputconfig.bin"},
-		{inputFile: "testdata/3/output.bin", outputConfigurationFile: "testdata/3/outputconfig.bin"},
-		{inputFile: "testdata/4/output.bin", outputConfigurationFile: "testdata/4/outputconfig.bin"},
+		{inputFile: "../testdata/1/output.bin", outputConfigurationFile: "../testdata/1/outputconfig.bin"},
+		{inputFile: "../testdata/2/output.bin", outputConfigurationFile: "../testdata/2/outputconfig.bin"},
+		{inputFile: "../testdata/3/output.bin", outputConfigurationFile: "../testdata/3/outputconfig.bin"},
+		{inputFile: "../testdata/4/output.bin", outputConfigurationFile: "../testdata/4/outputconfig.bin"},
 	} {
 		tt := tt
 		t.Run(tt.inputFile, func(t *testing.T) {
@@ -117,7 +118,7 @@ func TestEmulator_Output(t *testing.T) {
 			port1.EXPECT().Read(gomock.Any()).AnyTimes().DoAndReturn(f.Read)
 
 			port2 := mockxsens.NewMockSerialPort(ctrl)
-			emulator := xsens.NewEmulator(port2)
+			emulator := xsensemulator.NewEmulator(port2)
 			emulator.SetOutputConguration(o)
 			emulator.SetSendMode()
 			var g errgroup.Group

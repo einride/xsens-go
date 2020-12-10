@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/einride/xsens-go"
-	"github.com/einride/xsens-go/pkg/serial"
+	"github.com/einride/xsens-go/serial"
 	"golang.org/x/sync/errgroup"
 )
 

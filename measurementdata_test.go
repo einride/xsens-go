@@ -30,10 +30,10 @@ func TestConvert_Scalar(t *testing.T) {
 		tt := tt
 		t.Run(fmt.Sprintf("precision %v", tt), func(t *testing.T) {
 			var scalar Scalar = 1
-			data, err := scalar.marshalMTData2Packet(tt)
+			data, err := scalar.MarshalMTData2Packet(tt)
 			assert.NilError(t, err)
 			var newScalar Scalar
-			err = newScalar.unmarshalMTData2Packet(data)
+			err = newScalar.UnmarshalMTData2Packet(data)
 			assert.Equal(t, err, nil)
 			assert.Equal(t, scalar, newScalar)
 		})
@@ -62,10 +62,10 @@ func TestConvert_VectorXYZ(t *testing.T) {
 		tt := tt
 		t.Run(fmt.Sprintf("vector %v", tt), func(t *testing.T) {
 			vec := VectorXYZ{X: 1, Y: 2, Z: 3}
-			data, err := vec.marshalMTData2Packet(tt)
+			data, err := vec.MarshalMTData2Packet(tt)
 			assert.NilError(t, err)
 			var newVec VectorXYZ
-			err = newVec.unmarshalMTData2Packet(data)
+			err = newVec.UnmarshalMTData2Packet(data)
 			assert.NilError(t, err)
 			assert.Equal(t, vec, newVec)
 		})
@@ -94,10 +94,10 @@ func TestConvert_Quaternion(t *testing.T) {
 		tt := tt
 		t.Run(fmt.Sprintf("quat %v", tt), func(t *testing.T) {
 			vec := Quaternion{Q0: 1, Q1: 2, Q2: 3, Q3: 4}
-			data, err := vec.marshalMTData2Packet(tt)
+			data, err := vec.MarshalMTData2Packet(tt)
 			assert.NilError(t, err)
 			var n Quaternion
-			err = n.unmarshalMTData2Packet(data)
+			err = n.UnmarshalMTData2Packet(data)
 			assert.NilError(t, err)
 			assert.Equal(t, vec, n)
 		})
@@ -136,10 +136,10 @@ func TestConvert_RotationMatrix(t *testing.T) {
 				H: 8,
 				I: 9,
 			}
-			data, err := org.marshalMTData2Packet(tt)
+			data, err := org.MarshalMTData2Packet(tt)
 			assert.NilError(t, err)
 			var n RotationMatrix
-			err = n.unmarshalMTData2Packet(data)
+			err = n.UnmarshalMTData2Packet(data)
 			assert.NilError(t, err)
 			assert.Equal(t, org, n)
 		})
@@ -171,10 +171,10 @@ func TestConvert_LatLon(t *testing.T) {
 				Lat: 1,
 				Lon: 2,
 			}
-			data, err := org.marshalMTData2Packet(tt)
+			data, err := org.MarshalMTData2Packet(tt)
 			assert.NilError(t, err)
 			var n LatLon
-			err = n.unmarshalMTData2Packet(data)
+			err = n.UnmarshalMTData2Packet(data)
 			assert.NilError(t, err)
 			assert.Equal(t, org, n)
 		})
@@ -204,10 +204,10 @@ func TestConvert_StatusByte(t *testing.T) {
 		tt := tt
 		t.Run(fmt.Sprintf("rotation matrix %v", tt), func(t *testing.T) {
 			org := StatusByte(1)
-			data, err := org.marshalMTData2Packet(tt)
+			data, err := org.MarshalMTData2Packet(tt)
 			assert.NilError(t, err)
 			var n StatusByte
-			err = n.unmarshalMTData2Packet(data)
+			err = n.UnmarshalMTData2Packet(data)
 			assert.NilError(t, err)
 			assert.Equal(t, org, n)
 		})
@@ -273,10 +273,10 @@ func TestConvert_GNSSPVTData(t *testing.T) {
 				NDOP:      36,
 				EDOP:      37,
 			}
-			data, err := org.marshalMTData2Packet(tt)
+			data, err := org.MarshalMTData2Packet(tt)
 			assert.NilError(t, err)
 			var n GNSSPVTData
-			err = n.unmarshalMTData2Packet(data)
+			err = n.UnmarshalMTData2Packet(data)
 			assert.NilError(t, err)
 			assert.Equal(t, org, n)
 		})
@@ -306,10 +306,10 @@ func TestConvert_SampleTimeFine(t *testing.T) {
 		tt := tt
 		t.Run(fmt.Sprintf("SampleTimeFine %v", tt), func(t *testing.T) {
 			org := SampleTimeFine(1)
-			data, err := org.marshalMTData2Packet(tt)
+			data, err := org.MarshalMTData2Packet(tt)
 			assert.NilError(t, err)
 			var n SampleTimeFine
-			err = n.unmarshalMTData2Packet(data)
+			err = n.UnmarshalMTData2Packet(data)
 			assert.NilError(t, err)
 			assert.Equal(t, org, n)
 		})
@@ -339,10 +339,10 @@ func TestConvert_SampleTimeCoarse(t *testing.T) {
 		tt := tt
 		t.Run(fmt.Sprintf("SampleTimeCoarse %v", tt), func(t *testing.T) {
 			org := SampleTimeCoarse(1)
-			data, err := org.marshalMTData2Packet(tt)
+			data, err := org.MarshalMTData2Packet(tt)
 			assert.NilError(t, err)
 			var n SampleTimeCoarse
-			err = n.unmarshalMTData2Packet(data)
+			err = n.UnmarshalMTData2Packet(data)
 			assert.NilError(t, err)
 			assert.Equal(t, org, n)
 		})
@@ -388,10 +388,10 @@ func TestConvert_UTCTime(t *testing.T) {
 				Second: 7,
 				Valid:  UTCDateValidFlag | UTCTimeOfDayValidFlag | UTCTimeOfDayFullyResolvedFlag,
 			}
-			data, err := org.marshalMTData2Packet(tt)
+			data, err := org.MarshalMTData2Packet(tt)
 			assert.NilError(t, err)
 			var n UTCTime
-			err = n.unmarshalMTData2Packet(data)
+			err = n.UnmarshalMTData2Packet(data)
 			assert.NilError(t, err)
 			assert.Equal(t, org, n)
 		})
@@ -421,10 +421,10 @@ func TestConvert_PacketCounter(t *testing.T) {
 		tt := tt
 		t.Run(fmt.Sprintf("PacketCounter %v", tt), func(t *testing.T) {
 			org := PacketCounter(43875)
-			data, err := org.marshalMTData2Packet(tt)
+			data, err := org.MarshalMTData2Packet(tt)
 			assert.NilError(t, err)
 			var n PacketCounter
-			err = n.unmarshalMTData2Packet(data)
+			err = n.UnmarshalMTData2Packet(data)
 			assert.NilError(t, err)
 			assert.Equal(t, org, n)
 		})
@@ -460,10 +460,10 @@ func TestConvert_GNSSSatInfo(t *testing.T) {
 				Res2:   4,
 				Res3:   5,
 			}
-			data, err := org.marshalMTData2Packet(tt)
+			data, err := org.MarshalMTData2Packet(tt)
 			assert.NilError(t, err)
 			var n GNSSSatInfo
-			err = n.unmarshalMTData2Packet(data)
+			err = n.UnmarshalMTData2Packet(data)
 			assert.NilError(t, err)
 			assert.Equal(t, org, n)
 		})
@@ -493,10 +493,10 @@ func TestConvert_StatusWord(t *testing.T) {
 		tt := tt
 		t.Run(fmt.Sprintf("StatusWord %v", tt), func(t *testing.T) {
 			org := StatusWord(1)
-			data, err := org.marshalMTData2Packet(tt)
+			data, err := org.MarshalMTData2Packet(tt)
 			assert.NilError(t, err)
 			var n StatusWord
-			err = n.unmarshalMTData2Packet(data)
+			err = n.UnmarshalMTData2Packet(data)
 			assert.NilError(t, err)
 			assert.Equal(t, org, n)
 		})
@@ -526,10 +526,10 @@ func TestConvert_BaroPressure(t *testing.T) {
 		tt := tt
 		t.Run(fmt.Sprintf("BaroPressure %v", tt), func(t *testing.T) {
 			org := BaroPressure(1)
-			data, err := org.marshalMTData2Packet(tt)
+			data, err := org.MarshalMTData2Packet(tt)
 			assert.NilError(t, err)
 			var n BaroPressure
-			err = n.unmarshalMTData2Packet(data)
+			err = n.UnmarshalMTData2Packet(data)
 			assert.NilError(t, err)
 			assert.Equal(t, org, n)
 		})
