@@ -1,4 +1,4 @@
-package xsens
+package xsensemulator
 
 import (
 	"bufio"
@@ -10,6 +10,8 @@ import (
 	"net"
 	"sync"
 	"time"
+
+	"github.com/einride/xsens-go"
 )
 
 type UDPSerialPort struct {
@@ -58,18 +60,18 @@ func (t *UDPSerialPort) SetWriteDeadline(t2 time.Time) error {
 }
 
 type Emulator struct {
-	port SerialPort
+	port xsens.SerialPort
 	w    *bufio.Writer
 	sc   *bufio.Scanner
 
 	mutex                 sync.Mutex
-	outputConf            OutputConfiguration
-	lastMessageIdentifier MessageIdentifier
+	outputConf            xsens.OutputConfiguration
+	lastMessageIdentifier xsens.MessageIdentifier
 }
 
-func NewEmulator(p SerialPort) *Emulator {
+func NewEmulator(p xsens.SerialPort) *Emulator {
 	sc := bufio.NewScanner(p)
-	sc.Split(ScanMessages)
+	sc.Split(xsens.ScanMessages)
 	return &Emulator{
 		w:    bufio.NewWriter(p),
 		sc:   sc,
@@ -84,12 +86,12 @@ func (e *Emulator) Close() error {
 	return nil
 }
 
-func (e *Emulator) SetOutputConguration(configuration OutputConfiguration) {
+func (e *Emulator) SetOutputConguration(configuration xsens.OutputConfiguration) {
 	e.outputConf = configuration
 }
 
 func (e *Emulator) SetSendMode() {
-	e.lastMessageIdentifier = MessageIdentifierMTData2
+	e.lastMessageIdentifier = xsens.MessageIdentifierMTData2
 }
 
 func (e *Emulator) Receive(ctx context.Context) error {
@@ -107,35 +109,35 @@ func (e *Emulator) Receive(ctx context.Context) error {
 			}
 			return fmt.Errorf("receive: %w", io.EOF)
 		}
-		var m Message = e.sc.Bytes()
+		var m xsens.Message = e.sc.Bytes()
 		if err := m.Validate(); err != nil {
 			return fmt.Errorf("receive: %w", err)
 		}
 		switch m.Identifier() {
-		case MessageIdentifierGotoConfig:
-			_, err := e.port.Write(NewMessage(MessageIdentifierGotoConfigAck, nil))
+		case xsens.MessageIdentifierGotoConfig:
+			_, err := e.port.Write(xsens.NewMessage(xsens.MessageIdentifierGotoConfigAck, nil))
 			if err != nil {
 				return fmt.Errorf("receive: %w", err)
 			}
 			log.Println("GOTO MessageIdentifierGotoConfig")
 			continue
-		case MessageIdentifierSetOutputConfiguration:
+		case xsens.MessageIdentifierSetOutputConfiguration:
 			log.Println("GOTO MessageIdentifierSetOutputConfiguration")
 			if err := e.outputConf.Unmarshal(m.Data()); err != nil {
 				return fmt.Errorf("receive: %w", err)
 			}
 			e.mutex.Lock()
 			e.mutex.Unlock()
-			_, err := e.port.Write(NewMessage(MessageIdentifierSetOutputConfigurationAck, nil))
+			_, err := e.port.Write(xsens.NewMessage(xsens.MessageIdentifierSetOutputConfigurationAck, nil))
 			if err != nil {
 				return fmt.Errorf("receive: %w", err)
 			}
 			continue
-		case MessageIdentifierGotoMeasurement:
+		case xsens.MessageIdentifierGotoMeasurement:
 			e.mutex.Lock()
-			e.lastMessageIdentifier = MessageIdentifierMTData2
+			e.lastMessageIdentifier = xsens.MessageIdentifierMTData2
 			e.mutex.Unlock()
-			_, err := e.port.Write(NewMessage(MessageIdentifierMTData2, nil))
+			_, err := e.port.Write(xsens.NewMessage(xsens.MessageIdentifierMTData2, nil))
 			if err != nil {
 				return fmt.Errorf("receive: %w", err)
 			}
@@ -144,8 +146,8 @@ func (e *Emulator) Receive(ctx context.Context) error {
 	}
 }
 
-func (e *Emulator) Transmit(m Message) error {
-	if e.lastMessageIdentifier != MessageIdentifierMTData2 {
+func (e *Emulator) Transmit(m xsens.Message) error {
+	if e.lastMessageIdentifier != xsens.MessageIdentifierMTData2 {
 		return nil
 	}
 	if err := m.Validate(); err != nil {
@@ -157,8 +159,8 @@ func (e *Emulator) Transmit(m Message) error {
 	return nil
 }
 
-func (e *Emulator) MarshalMessage(measurement MeasurementData, dataType DataType) ([]byte, error) {
-	var id DataIdentifier
+func (e *Emulator) MarshalMessage(measurement xsens.MeasurementData, dataType xsens.DataType) ([]byte, error) {
+	var id xsens.DataIdentifier
 	var isSet bool
 	for _, d := range e.outputConf {
 		if d.DataType != dataType {
@@ -170,7 +172,7 @@ func (e *Emulator) MarshalMessage(measurement MeasurementData, dataType DataType
 	if !isSet {
 		return nil, errors.New("not in output configuration")
 	}
-	packetData, err := measurement.marshalMTData2Packet(id)
+	packetData, err := measurement.MarshalMTData2Packet(id)
 	if err != nil {
 		return nil, fmt.Errorf("transmit: %w", err)
 	}

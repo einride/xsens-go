@@ -14,6 +14,7 @@ import (
 
 	"github.com/einride/xsens-go"
 	mockxsens "github.com/einride/xsens-go/test/mocks/xsens"
+	"github.com/einride/xsens-go/xsensemulator"
 	"github.com/golang/mock/gomock"
 	"golang.org/x/sync/errgroup"
 	"gotest.tools/v3/assert"
@@ -227,9 +228,9 @@ func TestClient_ScanMeasurementData(t *testing.T) {
 func TestUDPEmulator(t *testing.T) {
 	addrEmulator := "127.0.0.1:24001"
 	addrClient := "127.0.0.1:24002"
-	connEmulator, err := xsens.NewUDPSerialPort(addrEmulator, addrClient)
+	connEmulator, err := xsensemulator.NewUDPSerialPort(addrEmulator, addrClient)
 	assert.NilError(t, err)
-	connClient, err := xsens.NewUDPSerialPort(addrClient, addrEmulator)
+	connClient, err := xsensemulator.NewUDPSerialPort(addrClient, addrEmulator)
 	assert.NilError(t, err)
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(100*time.Millisecond))
 	defer cancel()
@@ -237,7 +238,7 @@ func TestUDPEmulator(t *testing.T) {
 		assert.NilError(t, connEmulator.Close())
 	}()
 
-	emu := xsens.NewEmulator(connEmulator)
+	emu := xsensemulator.NewEmulator(connEmulator)
 	var g errgroup.Group
 	g.Go(func() error {
 		err := emu.Receive(ctx)

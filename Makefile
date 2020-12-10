@@ -43,7 +43,7 @@ go-generate: \
 	fixtype_string.go \
 	messageidentifier_string.go \
 	precision_string.go \
-	pkg/serial/baudrate_string.go
+	serial
 
 coordinatesystem_string.go: coordinatesystem.go $(stringer)
 	$(info generating $@...)
@@ -69,7 +69,7 @@ precision_string.go: precision.go $(stringer)
 	$(info generating $@...)
 	@$(stringer) -type Precision -trimprefix Precision -output $@ $<
 
-pkg/serial/baudrate_string.go: pkg/serial/baudrate.go $(stringer)
+pkg/serial/baudrate_string.go: serial $(stringer)
 	$(info generating $@...)
 	@$(stringer) -type BaudRate -trimprefix BaudRate -output $@ $<
 

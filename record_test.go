@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/einride/xsens-go"
-	"github.com/einride/xsens-go/pkg/serial"
+	"github.com/einride/xsens-go/serial"
 	"gotest.tools/v3/assert"
 )
 

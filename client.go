@@ -232,7 +232,7 @@ func (c *Client) ScanMeasurementData() bool {
 	if data == nil {
 		return false
 	}
-	if err := data.unmarshalMTData2Packet(c.mtData2Packet); err != nil {
+	if err := data.UnmarshalMTData2Packet(c.mtData2Packet); err != nil {
 		return false
 	}
 	return true

@@ -11,8 +11,8 @@ import (
 
 // MeasurementData is a generic interface for any measurement data produced by an Xsens device.
 type MeasurementData interface {
-	unmarshalMTData2Packet(MTData2Packet) error
-	marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error)
+	UnmarshalMTData2Packet(MTData2Packet) error
+	MarshalMTData2Packet(id DataIdentifier) (MTData2Packet, error)
 }
 
 // Scalar contains a single scalar value.
@@ -23,7 +23,7 @@ func (s *Scalar) String() string {
 	return strconv.FormatFloat(float64(*s), 'f', -1, 64)
 }
 
-func (s *Scalar) unmarshalMTData2Packet(packet MTData2Packet) error {
+func (s *Scalar) UnmarshalMTData2Packet(packet MTData2Packet) error {
 	var err error
 	switch packet.Identifier().Precision {
 	case PrecisionFloat32:
@@ -52,7 +52,7 @@ func (s *Scalar) unmarshalMTData2Packet(packet MTData2Packet) error {
 	return nil
 }
 
-func (s *Scalar) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+func (s *Scalar) MarshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
 	packet := NewMTData2Package(id.Precision.Size(), id)
 	switch id.Precision {
 	case PrecisionFloat32:
@@ -76,7 +76,7 @@ type VectorXYZ struct {
 	X, Y, Z float64
 }
 
-func (t *VectorXYZ) unmarshalMTData2Packet(packet MTData2Packet) error {
+func (t *VectorXYZ) UnmarshalMTData2Packet(packet MTData2Packet) error {
 	var err error
 	switch packet.Identifier().Precision {
 	case PrecisionFloat32:
@@ -117,7 +117,7 @@ func (t *VectorXYZ) unmarshalMTData2Packet(packet MTData2Packet) error {
 	return nil
 }
 
-func (t *VectorXYZ) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+func (t *VectorXYZ) MarshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
 	packet := NewMTData2Package(id.Precision.Size()*3, id)
 	switch id.Precision {
 	case PrecisionFloat32:
@@ -153,7 +153,7 @@ type Quaternion struct {
 	Q0, Q1, Q2, Q3 float64
 }
 
-func (t *Quaternion) unmarshalMTData2Packet(packet MTData2Packet) error {
+func (t *Quaternion) UnmarshalMTData2Packet(packet MTData2Packet) error {
 	var err error
 	switch packet.Identifier().Precision {
 	case PrecisionFloat32:
@@ -197,7 +197,7 @@ func (t *Quaternion) unmarshalMTData2Packet(packet MTData2Packet) error {
 	return nil
 }
 
-func (t *Quaternion) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+func (t *Quaternion) MarshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
 	packet := NewMTData2Package(id.Precision.Size()*4, id)
 	switch id.Precision {
 	case PrecisionFloat32:
@@ -313,7 +313,7 @@ type RotationMatrix struct {
 	A, B, C, D, E, F, G, H, I float64
 }
 
-func (t *RotationMatrix) unmarshalMTData2Packet(packet MTData2Packet) error {
+func (t *RotationMatrix) UnmarshalMTData2Packet(packet MTData2Packet) error {
 	var err error
 	switch packet.Identifier().Precision {
 	case PrecisionFloat32:
@@ -372,7 +372,7 @@ func (t *RotationMatrix) unmarshalMTData2Packet(packet MTData2Packet) error {
 	return nil
 }
 
-func (t *RotationMatrix) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+func (t *RotationMatrix) MarshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
 	packet := NewMTData2Package(id.Precision.Size()*9, id)
 	vals := []float64{t.A, t.B, t.C, t.D, t.E, t.F, t.G, t.H, t.I}
 	switch id.Precision {
@@ -405,7 +405,7 @@ type LatLon struct {
 	Lat, Lon float64
 }
 
-func (t *LatLon) unmarshalMTData2Packet(packet MTData2Packet) error {
+func (t *LatLon) UnmarshalMTData2Packet(packet MTData2Packet) error {
 	var err error
 	switch packet.Identifier().Precision {
 	case PrecisionFloat32:
@@ -443,7 +443,7 @@ func (t *LatLon) unmarshalMTData2Packet(packet MTData2Packet) error {
 	return nil
 }
 
-func (t *LatLon) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+func (t *LatLon) MarshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
 	packet := NewMTData2Package(id.Precision.Size()*2, id)
 	vals := []float64{t.Lat, t.Lon}
 	switch id.Precision {
@@ -478,11 +478,11 @@ func (t *StatusByte) String() string {
 	return fmt.Sprintf("%08b", *t)
 }
 
-func (t *StatusByte) unmarshalMTData2Packet(packet MTData2Packet) error {
+func (t *StatusByte) UnmarshalMTData2Packet(packet MTData2Packet) error {
 	return binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, t)
 }
 
-func (t *StatusByte) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+func (t *StatusByte) MarshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
 	packet := NewMTData2Package(1, id)
 	packet.Data()[0] = uint8(*t)
 	return packet, nil
@@ -566,11 +566,11 @@ func (t *StatusWord) String() string {
 	return fmt.Sprintf("%032b", *t)
 }
 
-func (t *StatusWord) unmarshalMTData2Packet(packet MTData2Packet) error {
+func (t *StatusWord) UnmarshalMTData2Packet(packet MTData2Packet) error {
 	return binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, t)
 }
 
-func (t *StatusWord) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+func (t *StatusWord) MarshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
 	packet := NewMTData2Package(4, id)
 	binary.BigEndian.PutUint32(packet.Data(), uint32(*t))
 	return packet, nil
@@ -589,11 +589,11 @@ func (u *UTCTime) String() string {
 	return u.Time().Format(time.RFC3339Nano)
 }
 
-func (u *UTCTime) unmarshalMTData2Packet(packet MTData2Packet) error {
+func (u *UTCTime) UnmarshalMTData2Packet(packet MTData2Packet) error {
 	return binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, u)
 }
 
-func (u *UTCTime) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+func (u *UTCTime) MarshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
 	packet := NewMTData2Package(12, id)
 	binary.BigEndian.PutUint32(packet.Data(), u.Ns)
 	binary.BigEndian.PutUint16(packet.Data()[4:], u.Year)
@@ -641,11 +641,11 @@ func (p *PacketCounter) String() string {
 	return strconv.Itoa(int(*p))
 }
 
-func (p *PacketCounter) unmarshalMTData2Packet(packet MTData2Packet) error {
+func (p *PacketCounter) UnmarshalMTData2Packet(packet MTData2Packet) error {
 	return binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, p)
 }
 
-func (p *PacketCounter) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+func (p *PacketCounter) MarshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
 	packet := NewMTData2Package(2, id)
 	binary.BigEndian.PutUint16(packet.Data(), uint16(*p))
 	return packet, nil
@@ -661,11 +661,11 @@ func (s *SampleTimeFine) String() string {
 	return strconv.Itoa(int(*s))
 }
 
-func (s *SampleTimeFine) unmarshalMTData2Packet(packet MTData2Packet) error {
+func (s *SampleTimeFine) UnmarshalMTData2Packet(packet MTData2Packet) error {
 	return binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, s)
 }
 
-func (s *SampleTimeFine) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+func (s *SampleTimeFine) MarshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
 	packet := NewMTData2Package(4, id)
 	binary.BigEndian.PutUint32(packet.Data(), uint32(*s))
 	return packet, nil
@@ -681,11 +681,11 @@ func (s *SampleTimeCoarse) String() string {
 	return strconv.Itoa(int(*s))
 }
 
-func (s *SampleTimeCoarse) unmarshalMTData2Packet(packet MTData2Packet) error {
+func (s *SampleTimeCoarse) UnmarshalMTData2Packet(packet MTData2Packet) error {
 	return binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, s)
 }
 
-func (s *SampleTimeCoarse) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+func (s *SampleTimeCoarse) MarshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
 	packet := NewMTData2Package(4, id)
 	binary.BigEndian.PutUint32(packet.Data(), uint32(*s))
 	return packet, nil
@@ -699,11 +699,11 @@ func (b *BaroPressure) String() string {
 	return strconv.Itoa(int(*b))
 }
 
-func (b *BaroPressure) unmarshalMTData2Packet(packet MTData2Packet) error {
+func (b *BaroPressure) UnmarshalMTData2Packet(packet MTData2Packet) error {
 	return binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, b)
 }
 
-func (b *BaroPressure) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+func (b *BaroPressure) MarshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
 	packet := NewMTData2Package(4, id)
 	binary.BigEndian.PutUint32(packet.Data(), uint32(*b))
 	return packet, nil
@@ -905,11 +905,11 @@ func (g *GNSSPVTData) Time() time.Time {
 	)
 }
 
-func (g *GNSSPVTData) unmarshalMTData2Packet(packet MTData2Packet) error {
+func (g *GNSSPVTData) UnmarshalMTData2Packet(packet MTData2Packet) error {
 	return binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, g)
 }
 
-func (g *GNSSPVTData) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+func (g *GNSSPVTData) MarshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
 	packet := NewMTData2Package(94, id)
 	binary.BigEndian.PutUint32(packet.Data(), g.ITOW)
 	binary.BigEndian.PutUint16(packet.Data()[4:], g.Year)
@@ -969,11 +969,11 @@ type GNSSSatInfo struct {
 	Res3 uint8
 }
 
-func (g *GNSSSatInfo) unmarshalMTData2Packet(packet MTData2Packet) error {
+func (g *GNSSSatInfo) UnmarshalMTData2Packet(packet MTData2Packet) error {
 	return binary.Read(bytes.NewReader(packet.Data()), binary.BigEndian, g)
 }
 
-func (g *GNSSSatInfo) marshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
+func (g *GNSSSatInfo) MarshalMTData2Packet(id DataIdentifier) (MTData2Packet, error) {
 	packet := NewMTData2Package(8, id)
 	packet.SetIdentifier(id)
 	binary.BigEndian.PutUint32(packet.Data(), g.ITOW)
