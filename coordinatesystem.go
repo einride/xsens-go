@@ -3,6 +3,8 @@ package xsens
 // CoordinateSystem represents the coordinate system of a measurement data output.
 type CoordinateSystem uint8
 
+//go:generate stringer -type CoordinateSystem -trimprefix CoordinateSystem
+
 // Coordinate systems.
 const (
 	CoordinateSystemEastNorthUp   CoordinateSystem = 0x0

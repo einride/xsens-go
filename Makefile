@@ -4,7 +4,6 @@ SHELL := /bin/bash
 all: \
 	commitlint \
 	prettier-markdown \
-	mockgen-generate \
 	go-generate \
 	go-lint \
 	go-review \
@@ -24,6 +23,7 @@ include tools/stringer/rules.mk
 clean:
 	$(info [$@] cleaning generated files...)
 	@find -name '*_string.go' -exec rm {} \+
+	@rm -rf internal/gen
 
 .PHONY: go-test
 go-test:
@@ -43,40 +43,13 @@ go-generate: \
 	fixtype_string.go \
 	messageidentifier_string.go \
 	precision_string.go \
-	serial
+	serial/baudrate_string.go \
+	internal/gen/mockxsens/mocks.go
 
-coordinatesystem_string.go: coordinatesystem.go $(stringer)
+%_string.go: %.go $(stringer)
+	$(info generating $*.go)
+	go generate ./$<
+
+internal/gen/mockxsens/mocks.go: client.go go.mod
 	$(info generating $@...)
-	@$(stringer) -type CoordinateSystem -trimprefix CoordinateSystem -output $@ $<
-
-datatype_string.go: datatype.go $(stringer)
-	$(info generating $@...)
-	@$(stringer) -type DataType -trimprefix DataType -output $@ $<
-
-errorcode_string.go: errorcode.go $(stringer)
-	$(info generating $@...)
-	@$(stringer) -type ErrorCode -trimprefix ErrorCode -output $@ $<
-
-fixtype_string.go: fixtype.go $(stringer)
-	$(info generating $@...)
-	@$(stringer) -type FixType -trimprefix FixType -output $@ $<
-
-messageidentifier_string.go: messageidentifier.go $(stringer)
-	$(info generating $@...)
-	@$(stringer) -type MessageIdentifier -trimprefix MessageIdentifier -output $@ $<
-
-precision_string.go: precision.go $(stringer)
-	$(info generating $@...)
-	@$(stringer) -type Precision -trimprefix Precision -output $@ $<
-
-pkg/serial/baudrate_string.go: serial $(stringer)
-	$(info generating $@...)
-	@$(stringer) -type BaudRate -trimprefix BaudRate -output $@ $<
-
-.PHONY: mockgen-generate
-mockgen-generate: test/mocks/xsens/mocks.go
-
-test/mocks/xsens/mocks.go: client.go go.mod
-	go run github.com/golang/mock/mockgen \
-		-destination $@ -package mockxsens \
-		github.com/einride/xsens-go SerialPort
+	@go generate ./$<

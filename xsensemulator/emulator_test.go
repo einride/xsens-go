@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/einride/xsens-go"
-	mockxsens "github.com/einride/xsens-go/test/mocks/xsens"
+	"github.com/einride/xsens-go/internal/gen/mockxsens"
 	"github.com/einride/xsens-go/xsensemulator"
 	"github.com/golang/mock/gomock"
 	"golang.org/x/sync/errgroup"

@@ -3,6 +3,8 @@ package xsens
 // DataType represents an Xsens data type.
 type DataType uint16
 
+//go:generate stringer -type DataType -trimprefix DataType
+
 // Data group: Temperature.
 const (
 	DataTypeTemperature DataType = 0x0810

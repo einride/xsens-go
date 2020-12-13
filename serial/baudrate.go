@@ -3,6 +3,8 @@ package serial
 // BaudRate represents a serial communication baud rate.
 type BaudRate int
 
+//go:generate stringer -type BaudRate -trimprefix BaudRate
+
 const (
 	BaudRate4800    BaudRate = 4800
 	BaudRate9600    BaudRate = 9600

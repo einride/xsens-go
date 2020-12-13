@@ -3,6 +3,8 @@ package xsens
 // Precision is an Xsens data output precision.
 type Precision uint8
 
+//go:generate stringer -type Precision -trimprefix Precision
+
 const (
 	// PrecisionFloat32 uses single-precision IEEE 32-bit floating point numbers.
 	PrecisionFloat32 Precision = 0x0
