@@ -15,6 +15,9 @@ type SerialPort interface {
 	SetWriteDeadline(time.Time) error
 }
 
+// nolint:lll
+//go:generate go run github.com/golang/mock/mockgen -destination internal/gen/mockxsens/mocks.go -package mockxsens . SerialPort
+
 // Client for communicating with an Xsens device.
 type Client struct {
 	p               SerialPort
