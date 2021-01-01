@@ -1,40 +1,3 @@
-# Xsens Go
-
-A Go client for [Xsens][xsens] IMU(s).
-
-**Disclaimer**: This is a 3rd party SDK with no official support.
-
-For 1st party support on Xsens devices, turn to the Xsens online support
-platform [BASE][base].
-
-[xsens]: https://xsens.com
-[base]: https://base.xsens.com/hc/en-us
-
-## Documentation
-
-The SDK implements the [Xsens MT Low Level Communication
-Protocol][mt-protocol].
-
-[mt-protocol]: https://www.xsens.com/hubfs/Downloads/Manuals/MT_Low-Level_Documentation.pdf
-
-## Supported devices
-
-This SDK has primarily been tested on the Xsens MTi-G-710, but should be
-compatible with all products in the [MTi product line][mti-products].
-
-[mti-products]: https://www.xsens.com/mti-products
-
-## Usage
-
-```bash
-$ go get -u go.einride.tech/xsens
-```
-
-## Examples
-
-### Read measurement data
-
-```go
 package main
 
 import (
@@ -80,4 +43,3 @@ func main() {
 		}
 	}
 }
-```
