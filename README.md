@@ -1,5 +1,16 @@
 # Xsens Go
 
+[![PkgGoDev][pkg-badge]][pkg]
+[![GoReportCard][report-badge]][report]
+[![Codecov][codecov-badge]][codecov]
+
+[pkg-badge]: https://pkg.go.dev/badge/go.einride.tech/xsens
+[pkg]: https://pkg.go.dev/go.einride.tech/xsens
+[report-badge]: https://goreportcard.com/badge/go.einride.tech/xsens
+[report]: https://goreportcard.com/report/go.einride.tech/xsens
+[codecov-badge]: https://codecov.io/gh/einride/xsens-go/branch/master/graph/badge.svg
+[codecov]: https://codecov.io/gh/einride/xsens-go
+
 A Go client for [Xsens][xsens] IMU(s).
 
 **Disclaimer**: This is a 3rd party SDK with no official support.
