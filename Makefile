@@ -24,11 +24,13 @@ clean:
 	$(info [$@] cleaning generated files...)
 	@find -name '*_string.go' -exec rm {} \+
 	@rm -rf internal/gen
+	@rm -rf build
 
 .PHONY: go-test
 go-test:
 	$(info [$@] running Go tests...)
-	@go test -count 1 -cover -race ./...
+	@mkdir -p build/coverage
+	@go test -count 1 -short -race -coverprofile=build/coverage/$@.txt -covermode=atomic ./...
 
 .PHONY: go-mod-tidy
 go-mod-tidy:
