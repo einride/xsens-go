@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/einride/xsens-go"
+	"go.einride.tech/xsens"
 )
 
 type UDPSerialPort struct {
