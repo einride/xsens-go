@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/einride/xsens-go"
+	"go.einride.tech/xsens"
 	"gotest.tools/v3/assert"
 )
 

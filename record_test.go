@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/einride/xsens-go"
-	"github.com/einride/xsens-go/serial"
+	"go.einride.tech/xsens"
+	"go.einride.tech/xsens/serial"
 	"gotest.tools/v3/assert"
 )
 

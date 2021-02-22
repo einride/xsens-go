@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/einride/xsens-go"
+	"go.einride.tech/xsens"
 	"gotest.tools/v3/assert"
 	is "gotest.tools/v3/assert/cmp"
 )

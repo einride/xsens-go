@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/einride/xsens-go"
-	"github.com/einride/xsens-go/internal/gen/mockxsens"
-	"github.com/einride/xsens-go/xsensemulator"
 	"github.com/golang/mock/gomock"
+	"go.einride.tech/xsens"
+	"go.einride.tech/xsens/internal/gen/mockxsens"
+	"go.einride.tech/xsens/xsensemulator"
 	"golang.org/x/sync/errgroup"
 	"gotest.tools/v3/assert"
 )

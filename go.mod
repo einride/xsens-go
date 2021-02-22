@@ -1,4 +1,4 @@
-module github.com/einride/xsens-go
+module go.einride.tech/xsens
 
 go 1.14
 
