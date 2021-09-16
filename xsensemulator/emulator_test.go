@@ -148,3 +148,57 @@ func TestEmulator_Output(t *testing.T) {
 		})
 	}
 }
+
+func TestEmulator_Transmit(t *testing.T) {
+	expectedData := &xsens.LatLon{
+		Lat: 1,
+		Lon: 2,
+	}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	for _, tc := range []struct {
+		name          string
+		expectFunc    func(emulator *xsensemulator.Emulator, port *mockxsens.MockSerialPort)
+		expectedError error
+	}{
+		{
+			name: "not measurement mode (by default)",
+			expectFunc: func(emulator *xsensemulator.Emulator, port *mockxsens.MockSerialPort) {
+			},
+			expectedError: xsensemulator.ErrNotInMeasurementMode,
+		},
+
+		{
+			name: "in measurement mode",
+			expectFunc: func(emulator *xsensemulator.Emulator, port *mockxsens.MockSerialPort) {
+				emulator.SetSendMode()
+				port.EXPECT().Write(gomock.Any())
+			},
+			expectedError: nil,
+		},
+	} {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			// given
+			port2 := mockxsens.NewMockSerialPort(ctrl)
+			emulator := xsensemulator.NewEmulator(port2)
+			emulator.SetOutputConguration(xsens.OutputConfiguration{
+				{
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeLatLon,
+						Precision: xsens.PrecisionFP1632,
+					},
+					OutputFrequency: 100,
+				},
+			})
+			// then expect
+			tc.expectFunc(emulator, port2)
+			// when
+			m, err := emulator.MarshalMessage(expectedData, xsens.DataTypeLatLon)
+			assert.NilError(t, err)
+			msg := xsens.NewMessage(xsens.MessageIdentifierMTData2, m)
+			err = emulator.Transmit(msg)
+			assert.Assert(t, errors.Is(err, tc.expectedError))
+		})
+	}
+}

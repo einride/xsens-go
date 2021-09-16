@@ -13,6 +13,8 @@ import (
 	"go.einride.tech/xsens"
 )
 
+var ErrNotInMeasurementMode = errors.New("not in measurement mode")
+
 type UDPSerialPort struct {
 	OriginConn      *net.UDPConn
 	DestinationAddr *net.UDPAddr
@@ -145,7 +147,7 @@ func (e *Emulator) Receive(ctx context.Context) error {
 
 func (e *Emulator) Transmit(m xsens.Message) error {
 	if e.lastMessageIdentifier != xsens.MessageIdentifierMTData2 {
-		return nil
+		return fmt.Errorf("transmit: %w", ErrNotInMeasurementMode)
 	}
 	if err := m.Validate(); err != nil {
 		return fmt.Errorf("transmit: %w", err)
