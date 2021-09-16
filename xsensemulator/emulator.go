@@ -116,6 +116,9 @@ func (e *Emulator) Receive(ctx context.Context) error {
 		}
 		switch m.Identifier() {
 		case xsens.MessageIdentifierGotoConfig:
+			e.mutex.Lock()
+			e.lastMessageIdentifier = xsens.MessageIdentifierGotoConfig
+			e.mutex.Unlock()
 			_, err := e.port.Write(xsens.NewMessage(xsens.MessageIdentifierGotoConfigAck, nil))
 			if err != nil {
 				return fmt.Errorf("receive: %w", err)
@@ -126,6 +129,7 @@ func (e *Emulator) Receive(ctx context.Context) error {
 				return fmt.Errorf("receive: %w", err)
 			}
 			e.mutex.Lock()
+			e.lastMessageIdentifier = xsens.MessageIdentifierSetOutputConfiguration
 			e.mutex.Unlock()
 			_, err := e.port.Write(xsens.NewMessage(xsens.MessageIdentifierSetOutputConfigurationAck, nil))
 			if err != nil {
@@ -176,4 +180,12 @@ func (e *Emulator) MarshalMessage(measurement xsens.MeasurementData, dataType xs
 		return nil, fmt.Errorf("transmit: %w", err)
 	}
 	return packetData, nil
+}
+
+func (e *Emulator) LastMessageIdentifier() xsens.MessageIdentifier {
+	var id xsens.MessageIdentifier
+	e.mutex.Lock()
+	id = e.lastMessageIdentifier
+	e.mutex.Unlock()
+	return id
 }
