@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"sync"
 	"time"
@@ -119,10 +118,8 @@ func (e *Emulator) Receive(ctx context.Context) error {
 			if err != nil {
 				return fmt.Errorf("receive: %w", err)
 			}
-			log.Println("GOTO MessageIdentifierGotoConfig")
 			continue
 		case xsens.MessageIdentifierSetOutputConfiguration:
-			log.Println("GOTO MessageIdentifierSetOutputConfiguration")
 			if err := e.outputConf.Unmarshal(m.Data()); err != nil {
 				return fmt.Errorf("receive: %w", err)
 			}
