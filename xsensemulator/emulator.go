@@ -146,6 +146,13 @@ func (e *Emulator) Receive(ctx context.Context) error {
 			}
 			continue
 		}
+
+		// Give a chance to quit upon context cancellation
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
 	}
 }
 
