@@ -20,3 +20,16 @@ linters:
     - exhaustive # TODO: fix and enable
     - gofumpt # TODO: enable when whitespace diff issue is resolved
     - nlreturn # don't require blank line before return
+    - paralleltest # unwanted convention
+    - exhaustivestruct
+    - scopelint # deprecated
+    - golint # deprecated
+    - maligned # deprecated
+    - wrapcheck
+    - forbidigo
+
+linters-settings:
+  cyclop:
+    # the maximal code complexity to report
+    max-complexity: 26
+

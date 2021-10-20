@@ -214,9 +214,8 @@ func (c *Client) MeasurementData() MeasurementData {
 		return &c.gnssPVTData
 	case DataTypeGNSSSatInfo:
 		return &c.gnssSatInfo
-	default:
-		return nil
 	}
+	return nil
 }
 
 // ScanMeasurementData advances to the next measurement data packet, when the current message contains measurement data.

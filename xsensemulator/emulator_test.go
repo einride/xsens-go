@@ -53,7 +53,8 @@ func TestEmulator_Convert(t *testing.T) {
 				return err
 			}
 			for c.ScanMeasurementData() {
-				n := c.MeasurementData().(*xsens.LatLon)
+				n, ok := c.MeasurementData().(*xsens.LatLon)
+				assert.Equal(t, ok, true)
 				assert.Equal(t, expectedData.Lon, n.Lon)
 				assert.Equal(t, expectedData.Lat, n.Lat)
 				didReachEnd = true
