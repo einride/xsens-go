@@ -1,5 +1,5 @@
+//go:build linux
 // +build linux
-// +build go1.12
 
 package serial
 

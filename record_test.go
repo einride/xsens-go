@@ -1,3 +1,4 @@
+//go:build record
 // +build record
 
 package xsens_test

@@ -1,3 +1,4 @@
+//go:build !linux || !go1.12
 // +build !linux !go1.12
 
 package serial
