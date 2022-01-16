@@ -1,3 +1,2 @@
 .idea/
-tools/*/*/
-build/
+.mage/tools/

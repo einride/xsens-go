@@ -27,7 +27,7 @@ func shouldUpdateGoldenFiles() bool {
 	return *update
 }
 
-func requireGoldenFileContent(t *testing.T, goldenFile string, actual string) {
+func requireGoldenFileContent(t *testing.T, goldenFile, actual string) {
 	t.Helper()
 	goldenFileContent, err := ioutil.ReadFile(goldenFile)
 	assert.NilError(t, err)

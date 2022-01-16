@@ -20,7 +20,7 @@ type UDPSerialPort struct {
 	DestinationAddr *net.UDPAddr
 }
 
-func NewUDPSerialPort(origin string, destination string) (*UDPSerialPort, error) {
+func NewUDPSerialPort(origin, destination string) (*UDPSerialPort, error) {
 	udpOriginAddr, err := net.ResolveUDPAddr("udp", origin)
 	if err != nil {
 		return nil, fmt.Errorf("new udp serial port: %w", err)

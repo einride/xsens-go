@@ -1011,8 +1011,8 @@ type GNSSSat struct {
 	//   1 = searching signal
 	//   2 = signal acquired
 	//   3 = signal detected but unusable
-	//   4 = code locked and time synchronised
-	//   5, 6, 7 = code & carrier locked; time synchronised
+	//   4 = code locked and time synchronized
+	//   5, 6, 7 = code & carrier locked; time synchronized
 	//  bit (3) = SV is being used for navigation
 	//  bit (4..5) = SV health flag
 	//    0 = unknown
