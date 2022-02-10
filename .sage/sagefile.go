@@ -25,7 +25,7 @@ func main() {
 
 func All(ctx context.Context) error {
 	sg.Deps(ctx, ConvcoCheck, FormatMarkdown, FormatYAML, GoGenerate)
-	sg.Deps(ctx, GolangciLint, GoReview, GoTest)
+	sg.Deps(ctx, GoLint, GoReview, GoTest)
 	sg.SerialDeps(ctx, GoModTidy, GitVerifyNoDiff)
 	return nil
 }
@@ -50,7 +50,7 @@ func GoReview(ctx context.Context) error {
 	return sggoreview.Command(ctx, "-c", "1", "./...").Run()
 }
 
-func GolangciLint(ctx context.Context) error {
+func GoLint(ctx context.Context) error {
 	sg.Logger(ctx).Println("linting Go files...")
 	return sggolangcilint.Run(ctx)
 }

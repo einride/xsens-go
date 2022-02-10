@@ -12,6 +12,10 @@ $(sagefile):
 .PHONY: sage
 sage: $(sagefile)
 
+.PHONY: update-sage
+update-sage:
+	@cd .sage && go get -d go.einride.tech/sage@latest && go mod tidy && go run .
+
 .PHONY: clean-sage
 clean-sage:
 	@git clean -fdx .sage/tools .sage/bin .sage/build
@@ -40,6 +44,10 @@ git-verify-no-diff: $(sagefile)
 go-generate: $(sagefile)
 	@$(sagefile) GoGenerate
 
+.PHONY: go-lint
+go-lint: $(sagefile)
+	@$(sagefile) GoLint
+
 .PHONY: go-mod-tidy
 go-mod-tidy: $(sagefile)
 	@$(sagefile) GoModTidy
@@ -51,10 +59,6 @@ go-review: $(sagefile)
 .PHONY: go-test
 go-test: $(sagefile)
 	@$(sagefile) GoTest
-
-.PHONY: golangci-lint
-golangci-lint: $(sagefile)
-	@$(sagefile) GolangciLint
 
 .PHONY: stringer
 stringer: $(sagefile)
