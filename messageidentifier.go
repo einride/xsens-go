@@ -269,4 +269,13 @@ const (
 	MessageIdentifierStoreEmtsAck                  MessageIdentifier = 0x97
 	MessageIdentifierGotoTransparentMode           MessageIdentifier = 0x50
 	MessageIdentifierGotoTransparentModeAck        MessageIdentifier = 0x51
+
+	MessageIdentifierSetCANConfig          MessageIdentifier = 0xE6
+	MessageIdentifierSetCANConfigAck       MessageIdentifier = 0xE7
+	MessageIdentifierReqCANConfig          MessageIdentifier = 0xE6
+	MessageIdentifierReqCANConfigAck       MessageIdentifier = 0xE7
+	MessageIdentifierSetCANOutputConfig    MessageIdentifier = 0xE8
+	MessageIdentifierSetCANOutputConfigAck MessageIdentifier = 0xE9
+	MessageIdentifierReqCANOutputConfig    MessageIdentifier = 0xE8
+	MessageIdentifierReqCANOutputConfigAck MessageIdentifier = 0xE9
 )
