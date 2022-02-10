@@ -145,6 +145,66 @@ func (c *Client) GetOutputConfiguration(ctx context.Context) (OutputConfiguratio
 	return result, nil
 }
 
+// SetCANOutputConfiguration sets the Xsens device CAN output configuration.
+func (c *Client) SetCANOutputConfiguration(ctx context.Context, configuration CANOutputConfiguration) error {
+	data, err := configuration.MarshalBinary()
+	if err != nil {
+		return fmt.Errorf("xsens client: set CAN output configuration: %w", err)
+	}
+	if err := c.send(ctx, NewMessage(MessageIdentifierSetCANOutputConfig, data)); err != nil {
+		return fmt.Errorf("xsens client: set CAN output configuration: %w", err)
+	}
+	if err := c.receiveUntil(ctx, MessageIdentifierSetCANOutputConfigAck); err != nil {
+		return fmt.Errorf("xsens client: set CAN output configuration: %w", err)
+	}
+	return nil
+}
+
+// GetCANOutputConfiguration returns the Xsens CAN output configuration.
+func (c *Client) GetCANOutputConfiguration(ctx context.Context) (CANOutputConfiguration, error) {
+	if err := c.send(ctx, NewMessage(MessageIdentifierReqCANOutputConfig, nil)); err != nil {
+		return nil, fmt.Errorf("xsens client: get output configuration: %w", err)
+	}
+	if err := c.receiveUntil(ctx, MessageIdentifierReqCANOutputConfigAck); err != nil {
+		return nil, fmt.Errorf("xsens client: get output configuration: %w", err)
+	}
+	var result CANOutputConfiguration
+	if err := result.UnmarshalBinary(c.message.Data()); err != nil {
+		return nil, fmt.Errorf("xsens client: get CAN output configuration: %w", err)
+	}
+	return result, nil
+}
+
+// SetCANConfiguration sets the Xsens device CAN configuration.
+func (c *Client) SetCANConfiguration(ctx context.Context, configuration CANConfig) error {
+	data, err := configuration.MarshalBinary()
+	if err != nil {
+		return fmt.Errorf("xsens client: set CAN configuration: %w", err)
+	}
+	if err := c.send(ctx, NewMessage(MessageIdentifierSetCANConfig, data)); err != nil {
+		return fmt.Errorf("xsens client: set CAN output configuration: %w", err)
+	}
+	if err := c.receiveUntil(ctx, MessageIdentifierSetCANConfigAck); err != nil {
+		return fmt.Errorf("xsens client: set CAN configuration: %w", err)
+	}
+	return nil
+}
+
+// GetCANConfiguration returns the Xsens CAN output configuration.
+func (c *Client) GetCANConfiguration(ctx context.Context) (*CANConfig, error) {
+	if err := c.send(ctx, NewMessage(MessageIdentifierReqCANConfig, nil)); err != nil {
+		return nil, fmt.Errorf("xsens client: get configuration: %w", err)
+	}
+	if err := c.receiveUntil(ctx, MessageIdentifierReqCANConfigAck); err != nil {
+		return nil, fmt.Errorf("xsens client: get configuration: %w", err)
+	}
+	result := &CANConfig{}
+	if err := result.UnmarshalBinary(c.message.Data()); err != nil {
+		return nil, fmt.Errorf("xsens client: get CAN configuration: %w", err)
+	}
+	return result, nil
+}
+
 // GoToMeasurement puts the Xsens device in measurement mode.
 func (c *Client) GoToMeasurement(ctx context.Context) error {
 	if err := c.send(ctx, NewMessage(MessageIdentifierGotoMeasurement, nil)); err != nil {
