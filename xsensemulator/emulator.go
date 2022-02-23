@@ -13,7 +13,10 @@ import (
 	"go.einride.tech/xsens"
 )
 
-var ErrNotInMeasurementMode = errors.New("not in measurement mode")
+var (
+	ErrNotInMeasurementMode     = errors.New("not in measurement mode")
+	ErrNotInOutputConfiguration = errors.New("not in output configuration")
+)
 
 type UDPSerialPort struct {
 	OriginConn      *net.UDPConn
@@ -180,7 +183,7 @@ func (e *Emulator) MarshalMessage(measurement xsens.MeasurementData, dataType xs
 		id = d.DataIdentifier
 	}
 	if !isSet {
-		return nil, errors.New("not in output configuration")
+		return nil, ErrNotInOutputConfiguration
 	}
 	packetData, err := measurement.MarshalMTData2Packet(id)
 	if err != nil {
