@@ -6,7 +6,7 @@ import (
 
 type CANConfig struct {
 	Enable   bool
-	BaudRate CANBaudRate
+	BaudRate CANBaudRateID
 }
 
 const (
@@ -38,6 +38,6 @@ func (o *CANConfig) UnmarshalBinary(data []byte) error {
 		return fmt.Errorf("cannot unmarshal to a nil pointer")
 	}
 	o.Enable = (data[canCfgEnableOffset] & canCfgEnableMask) == 1
-	o.BaudRate = CANBaudRate(data[canCfgBaudrateOffset] & canCfgBaudrateMask)
+	o.BaudRate = CANBaudRateID(data[canCfgBaudrateOffset] & canCfgBaudrateMask)
 	return nil
 }
