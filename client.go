@@ -205,6 +205,21 @@ func (c *Client) GetCANConfiguration(ctx context.Context) (*CANConfig, error) {
 	return result, nil
 }
 
+// GetDeviceID returns the Xsens DeviceID.
+func (c *Client) GetDeviceID(ctx context.Context) (*DeviceID, error) {
+	if err := c.send(ctx, NewMessage(MessageIdentifierReqDID, nil)); err != nil {
+		return nil, fmt.Errorf("xsens client: get device id: %w", err)
+	}
+	if err := c.receiveUntil(ctx, MessageIdentifierDeviceID); err != nil {
+		return nil, fmt.Errorf("xsens client: get device id: %w", err)
+	}
+	result := DeviceID(0)
+	if err := (&result).UnmarshalBinary(c.message.Data()); err != nil {
+		return nil, fmt.Errorf("xsens client: get device id: %w", err)
+	}
+	return &result, nil
+}
+
 // GoToMeasurement puts the Xsens device in measurement mode.
 func (c *Client) GoToMeasurement(ctx context.Context) error {
 	if err := c.send(ctx, NewMessage(MessageIdentifierGotoMeasurement, nil)); err != nil {
