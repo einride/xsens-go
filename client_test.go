@@ -14,7 +14,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"go.einride.tech/xsens"
-	"go.einride.tech/xsens/internal/gen/mockxsens"
+	"go.einride.tech/xsens/mocks/mockserial"
 	"go.einride.tech/xsens/xsensemulator"
 	"golang.org/x/sync/errgroup"
 	"gotest.tools/v3/assert"
@@ -23,7 +23,7 @@ import (
 func TestClient_GoToConfig(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	port := mockxsens.NewMockSerialPort(ctrl)
+	port := mockserial.NewMockPort(ctrl)
 	client := xsens.NewClient(port)
 	expectedGoToConfig := []byte{0xfa, 0xff, 0x30, 0x0, 0xd1}
 	mtData2 := []byte{0xfa, 0xff, 0x36, 0x0, 0xcb}
@@ -32,16 +32,13 @@ func TestClient_GoToConfig(t *testing.T) {
 	ctx, cancel := context.WithDeadline(context.Background(), deadline)
 	defer cancel()
 	// the client should send a GoToConfig message
-	port.EXPECT().SetWriteDeadline(deadline)
 	port.EXPECT().Write(expectedGoToConfig)
 	// and then ignore messages other than GoToConfigAck
-	port.EXPECT().SetReadDeadline(deadline)
 	port.EXPECT().Read(gomock.Any()).DoAndReturn(func(b []byte) (int, error) {
 		copy(b, mtData2)
 		return len(mtData2), nil
 	})
 	// until it receives a GoToConfigAck
-	port.EXPECT().SetReadDeadline(deadline)
 	port.EXPECT().Read(gomock.Any()).DoAndReturn(func(b []byte) (int, error) {
 		copy(b, goToConfigAck)
 		return len(goToConfigAck), nil
@@ -53,7 +50,7 @@ func TestClient_GoToConfig(t *testing.T) {
 func TestClient_GoToMeasurement(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	port := mockxsens.NewMockSerialPort(ctrl)
+	port := mockserial.NewMockPort(ctrl)
 	client := xsens.NewClient(port)
 	expectedGoToMeasurement := []byte{0xfa, 0xff, 0x10, 0x0, 0xf1}
 	mtData2 := []byte{0xfa, 0xff, 0x36, 0x0, 0xcb}
@@ -62,16 +59,13 @@ func TestClient_GoToMeasurement(t *testing.T) {
 	ctx, cancel := context.WithDeadline(context.Background(), deadline)
 	defer cancel()
 	// the client should send a GoToMeasurement message
-	port.EXPECT().SetWriteDeadline(deadline)
 	port.EXPECT().Write(expectedGoToMeasurement)
 	// and then ignore messages other than MTData2
-	port.EXPECT().SetReadDeadline(deadline)
 	port.EXPECT().Read(gomock.Any()).DoAndReturn(func(b []byte) (int, error) {
 		copy(b, goToConfigAck)
 		return len(goToConfigAck), nil
 	})
 	// until it receives MTData2
-	port.EXPECT().SetReadDeadline(deadline)
 	port.EXPECT().Read(gomock.Any()).DoAndReturn(func(b []byte) (int, error) {
 		copy(b, mtData2)
 		return len(mtData2), nil
@@ -83,7 +77,7 @@ func TestClient_GoToMeasurement(t *testing.T) {
 func TestClient_GetOutputConfiguration(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	port := mockxsens.NewMockSerialPort(ctrl)
+	port := mockserial.NewMockPort(ctrl)
 	client := xsens.NewClient(port)
 	expectedReqOutputConfiguration := []byte{0xfa, 0xff, 0xc0, 0x0, 0x41}
 	expected := xsens.OutputConfiguration{
@@ -108,10 +102,8 @@ func TestClient_GetOutputConfiguration(t *testing.T) {
 	ctx, cancel := context.WithDeadline(context.Background(), deadline)
 	defer cancel()
 	// the client should send a ReqOutputconfiguration message
-	port.EXPECT().SetWriteDeadline(deadline)
 	port.EXPECT().Write(expectedReqOutputConfiguration)
 	// and when it receives a ReqOutputConfigurationAck with the output configuration
-	port.EXPECT().SetReadDeadline(deadline)
 	port.EXPECT().Read(gomock.Any()).DoAndReturn(func(b []byte) (int, error) {
 		copy(b, reqOutputConfigurationAck)
 		return len(reqOutputConfigurationAck), nil
@@ -125,7 +117,7 @@ func TestClient_GetOutputConfiguration(t *testing.T) {
 func TestClient_SetOutputConfiguration(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	port := mockxsens.NewMockSerialPort(ctrl)
+	port := mockserial.NewMockPort(ctrl)
 	client := xsens.NewClient(port)
 	outputConfiguration := xsens.OutputConfiguration{
 		{
@@ -150,10 +142,8 @@ func TestClient_SetOutputConfiguration(t *testing.T) {
 	ctx, cancel := context.WithDeadline(context.Background(), deadline)
 	defer cancel()
 	// the client should send a SetOutputconfiguration message with the requested output configuration
-	port.EXPECT().SetWriteDeadline(deadline)
 	port.EXPECT().Write(expectedSetOutputConfiguration)
 	// and then it should await a SetOutputConfigurationAck message
-	port.EXPECT().SetReadDeadline(deadline)
 	port.EXPECT().Read(gomock.Any()).DoAndReturn(func(b []byte) (int, error) {
 		copy(b, setOutputConfigurationAck)
 		return len(setOutputConfigurationAck), nil
@@ -165,7 +155,7 @@ func TestClient_SetOutputConfiguration(t *testing.T) {
 func TestClient_Close(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	port := mockxsens.NewMockSerialPort(ctrl)
+	port := mockserial.NewMockPort(ctrl)
 	client := xsens.NewClient(port)
 	err := errors.New("boom")
 	port.EXPECT().Close().Return(err)
@@ -192,11 +182,10 @@ func TestClient_ScanMeasurementData(t *testing.T) {
 			}()
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
-			port := mockxsens.NewMockSerialPort(ctrl)
+			port := mockserial.NewMockPort(ctrl)
 			deadline := time.Unix(1, 2)
 			ctx, cancel := context.WithDeadline(context.Background(), deadline)
 			defer cancel()
-			port.EXPECT().SetReadDeadline(deadline).AnyTimes()
 			port.EXPECT().Read(gomock.Any()).AnyTimes().DoAndReturn(f.Read)
 			client := xsens.NewClient(port)
 			var actual bytes.Buffer

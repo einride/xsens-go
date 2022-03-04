@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
+	"go.bug.st/serial"
 	"go.einride.tech/xsens"
-	"go.einride.tech/xsens/serial"
 	"gotest.tools/v3/assert"
 )
 

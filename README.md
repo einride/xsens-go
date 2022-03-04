@@ -40,8 +40,8 @@ import (
 	"log"
 	"os"
 
+	"go.bug.st/serial"
 	"go.einride.tech/xsens"
-	"go.einride.tech/xsens/serial"
 )
 
 func main() {
