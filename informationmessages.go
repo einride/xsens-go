@@ -2,7 +2,9 @@ package xsens
 
 import (
 	"encoding/binary"
+	"encoding/hex"
 	"fmt"
+	"strings"
 )
 
 type DeviceID uint32
@@ -25,8 +27,14 @@ func (d *DeviceID) UnmarshalBinary(data []byte) error {
 	return nil
 }
 
+func (d *DeviceID) HexString() string {
+	b := make([]byte, 4)
+	binary.BigEndian.PutUint32(b, uint32(*d))
+	return hex.EncodeToString(b)
+}
+
 func (d *ProductCode) UnmarshalBinary(data []byte) error {
-	*d = ProductCode(data)
+	*d = ProductCode(strings.TrimSpace(string(data)))
 	return nil
 }
 
