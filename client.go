@@ -220,6 +220,36 @@ func (c *Client) GetDeviceID(ctx context.Context) (*DeviceID, error) {
 	return &result, nil
 }
 
+// GetProductCode returns the Xsens ProductCode.
+func (c *Client) GetProductCode(ctx context.Context) (*ProductCode, error) {
+	if err := c.send(ctx, NewMessage(MessageIdentifierReqProductCode, nil)); err != nil {
+		return nil, fmt.Errorf("xsens client: get device id: %w", err)
+	}
+	if err := c.receiveUntil(ctx, MessageIdentifierProductCode); err != nil {
+		return nil, fmt.Errorf("xsens client: get device id: %w", err)
+	}
+	result := ProductCode("")
+	if err := (&result).UnmarshalBinary(c.message.Data()); err != nil {
+		return nil, fmt.Errorf("xsens client: get device id: %w", err)
+	}
+	return &result, nil
+}
+
+// GetHWVersion returns the Xsens HWVersion.
+func (c *Client) GetHWVersion(ctx context.Context) (*HWVersion, error) {
+	if err := c.send(ctx, NewMessage(MessageIdentifierReqHWVersion, nil)); err != nil {
+		return nil, fmt.Errorf("xsens client: get device id: %w", err)
+	}
+	if err := c.receiveUntil(ctx, MessageIdentifierHWVersion); err != nil {
+		return nil, fmt.Errorf("xsens client: get device id: %w", err)
+	}
+	result := HWVersion("")
+	if err := (&result).UnmarshalBinary(c.message.Data()); err != nil {
+		return nil, fmt.Errorf("xsens client: get device id: %w", err)
+	}
+	return &result, nil
+}
+
 // GoToMeasurement puts the Xsens device in measurement mode.
 func (c *Client) GoToMeasurement(ctx context.Context) error {
 	if err := c.send(ctx, NewMessage(MessageIdentifierGotoMeasurement, nil)); err != nil {

@@ -60,6 +60,8 @@ const (
 	MessageIdentifierSetSyncModeAck                MessageIdentifier = 0x1B
 	MessageIdentifierReqProductCode                MessageIdentifier = 0x1C
 	MessageIdentifierProductCode                   MessageIdentifier = 0x1D
+	MessageIdentifierReqHWVersion                  MessageIdentifier = 0x1E
+	MessageIdentifierHWVersion                     MessageIdentifier = 0x1F
 	MessageIdentifierReqProcessingFlags            MessageIdentifier = 0x20
 	MessageIdentifierReqProcessingFlagsAck         MessageIdentifier = 0x21
 	MessageIdentifierSetProcessingFlags            MessageIdentifier = 0x20
