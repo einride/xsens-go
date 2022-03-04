@@ -26,17 +26,17 @@ const (
 	canOutputCfgCANDataIDMask = ^byte(1 << 7) // Masks reserved bit in canOutputCfg Block 1 MSB
 
 	// CANIDLengthFlag.
-	canOutputCfgOffsetBlock2     = canOutputCfgLengthBlock1
+	canOutputCfgOffsetBlock2     = canOutputCfgOffsetBlock1 + canOutputCfgLengthBlock1
 	canOutputCfgLengthBlock2     = 1
 	canOutputCfgIDLengthFlagMask = byte(0b1) // Masks reserved bit in canOutputCfg Block 2 MSB
 
 	// IDMask.
-	canOutputCfgOffsetBlock3 = canOutputCfgLengthBlock2
+	canOutputCfgOffsetBlock3 = canOutputCfgOffsetBlock2 + canOutputCfgLengthBlock2
 	canOutputCfgLengthBlock3 = 4
 	canOutputCfgIDMaskMask   = ^byte(0b111 << 5) // Masks reserved bit in canOutputCfg Block 3 MSB
 
 	// OutputFrequency.
-	canOutputCfgOffsetBlock4   = canOutputCfgLengthBlock3
+	canOutputCfgOffsetBlock4   = canOutputCfgOffsetBlock3 + canOutputCfgLengthBlock3
 	canOutputCfgLengthBlock4   = 2
 	canOutputCfgOutputFreqMask = byte(0b111) // Masks reserved bit in canOutputCfg Block 4 MSB
 )
@@ -44,11 +44,15 @@ const (
 // CANOutputConfigurationSetting is the output configuration for a single CAN measurement data type.
 type CANOutputConfigurationSetting struct {
 	// DataIdentifier is the data identifier of the data.
-	CANDataIdentifier
+	CANDataIdentifier CANDataIdentifier
 
-	CANIDLengthFlag
+	// CANIDLengthFlag specifies whether the CAN address is 11 (CANIDLengthFlag11bits)
+	// or 29 bits (CANIDLengthFlag29bits).
+	CANIDLengthFlag CANIDLengthFlag
 
-	// TODO: Double check mask over interface
+	// IDMask is a uint32 version of CANDataIdentifier.
+	//
+	// Only used for reading. DefaultIDMask is used for writing.
 	IDMask IDMask
 
 	// OutputFrequency is the output frequency of the data.
@@ -56,12 +60,17 @@ type CANOutputConfigurationSetting struct {
 	// Selecting an Output OutputFrequency of either 0x0000 or 0xFFFF, makes the device select the
 	// maximum frequency for the given data identifier. The device reports the resulting effective
 	// frequencies in its response message.
-	OutputFrequency
+	OutputFrequency OutputFrequency
+}
+
+// DefaultIDMask returns the default CAN ID Mask.
+func (o *CANOutputConfigurationSetting) DefaultIDMask() IDMask {
+	return uint32(o.CANDataIdentifier)
 }
 
 // MarshalBinary returns the wire representation of the CAN output configuration.
 func (o *CANOutputConfiguration) MarshalBinary() ([]byte, error) {
-	buf := make([]byte, len(*o)*4)
+	buf := make([]byte, len(*o)*canOutputCfgSettingSize)
 	var b []byte
 	// Push each setting to the buffer
 	for i, setting := range *o {
@@ -80,7 +89,7 @@ func (o *CANOutputConfiguration) MarshalBinary() ([]byte, error) {
 
 		// push IDMask
 		b = extractBytes(w, canOutputCfgOffsetBlock3, canOutputCfgLengthBlock3)
-		binary.BigEndian.PutUint32(b, setting.IDMask)
+		binary.BigEndian.PutUint32(b, setting.DefaultIDMask())
 		b[0] &= canOutputCfgIDMaskMask // mask last byte
 
 		// push OutputFrequency
@@ -152,30 +161,9 @@ func (o *CANOutputConfiguration) UnmarshalBinary(data []byte) error {
 	return nil
 }
 
-// IDMask returns the ID mask expected.
-func (f CANIDLengthFlag) IDMask() IDMask {
-	b := make([]byte, 0, 4)
-	// bits 1-8
-	b[0] = ^byte(0)
-
-	// bits 9-11(or 16)
-	if f == CANIDLengthFlag11bits {
-		b[1] = 0b111
-		return binary.LittleEndian.Uint32(b)
-	}
-	b[1] = ^byte(0)
-
-	// bits 17-24
-	b[2] = ^byte(0)
-
-	// bits 25-29
-	b[3] = 0b11111
-	return binary.LittleEndian.Uint32(b)
-}
-
 // copyBytes returns a copy of the sub-slice of the byte array.
 func copyBytes(w []byte, offset, length int) []byte {
-	b := make([]byte, 0, length)
+	b := make([]byte, length)
 	copy(b, w[offset:offset+length])
 	return b
 }
