@@ -6,22 +6,25 @@ import (
 	"log"
 	"os"
 
+	"go.bug.st/serial"
 	"go.einride.tech/xsens"
-	"go.einride.tech/xsens/serial"
 )
+
+// TODO: fix this
+const BaudRate = 115200
 
 func main() {
 	ctx := context.Background()
 	log.SetFlags(0)
 	port := flag.String("port", "", "serial port to read from")
-	baudRateFlag := flag.Int("baudRate", int(serial.BaudRate115200), "baud rate for serial port")
+	baudRateFlag := flag.Int("baudRate", BaudRate, "baud rate for serial port")
 	flag.Parse()
 	if *port == "" {
 		flag.Usage()
 		os.Exit(1)
 	}
 	// Open serial port.
-	serialPort, err := serial.Open(*port, serial.BaudRate(*baudRateFlag))
+	serialPort, err := serial.Open(*port, &serial.Mode{BaudRate: *baudRateFlag})
 	if err != nil {
 		log.Fatal(err)
 	}

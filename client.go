@@ -5,22 +5,11 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"time"
 )
-
-// SerialPort is an interface for a serial used by the Client for communication with an Xsens device.
-type SerialPort interface {
-	io.ReadWriteCloser
-	SetReadDeadline(time.Time) error
-	SetWriteDeadline(time.Time) error
-}
-
-// nolint:lll
-//go:generate go run github.com/golang/mock/mockgen -destination internal/gen/mockxsens/mocks.go -package mockxsens . SerialPort
 
 // Client for communicating with an Xsens device.
 type Client struct {
-	p               SerialPort
+	p               io.ReadWriteCloser
 	sc              *bufio.Scanner
 	message         Message
 	mtData2         MTData2
@@ -55,7 +44,7 @@ type Client struct {
 }
 
 // NewClient returns a new client using the provided serial port for communication.
-func NewClient(p SerialPort) *Client {
+func NewClient(p io.ReadWriteCloser) *Client {
 	sc := bufio.NewScanner(p)
 	sc.Split(ScanMessages)
 	return &Client{p: p, sc: sc}
@@ -79,10 +68,6 @@ func (c *Client) Receive(ctx context.Context) error {
 	c.mtData2Packet = nil
 	c.nextPacketIndex = 0
 	// receive new message
-	deadline, _ := ctx.Deadline()
-	if err := c.p.SetReadDeadline(deadline); err != nil {
-		return fmt.Errorf("xsens client: receive: %w", err)
-	}
 	if !c.sc.Scan() {
 		if c.sc.Err() == nil {
 			return fmt.Errorf("xsens client: receive: %w", io.EOF)
@@ -448,10 +433,6 @@ func (c *Client) PositionECEF() *PositionECEF {
 }
 
 func (c *Client) send(ctx context.Context, message Message) error {
-	deadline, _ := ctx.Deadline()
-	if err := c.p.SetWriteDeadline(deadline); err != nil {
-		return fmt.Errorf("send %v: %w", message.Identifier(), err)
-	}
 	if _, err := c.p.Write(message); err != nil {
 		return fmt.Errorf("send %v: %w", message.Identifier(), err)
 	}

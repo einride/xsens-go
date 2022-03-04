@@ -19,6 +19,7 @@ var (
 )
 
 type UDPSerialPort struct {
+	io.ReadWriteCloser
 	OriginConn      *net.UDPConn
 	DestinationAddr *net.UDPAddr
 }
@@ -64,7 +65,7 @@ func (t *UDPSerialPort) SetWriteDeadline(t2 time.Time) error {
 }
 
 type Emulator struct {
-	port xsens.SerialPort
+	port io.ReadWriteCloser
 	w    *bufio.Writer
 	sc   *bufio.Scanner
 
@@ -73,7 +74,7 @@ type Emulator struct {
 	lastMessageIdentifier xsens.MessageIdentifier
 }
 
-func NewEmulator(p xsens.SerialPort) *Emulator {
+func NewEmulator(p io.ReadWriteCloser) *Emulator {
 	sc := bufio.NewScanner(p)
 	sc.Split(xsens.ScanMessages)
 	return &Emulator{
@@ -100,13 +101,6 @@ func (e *Emulator) SetSendMode() {
 
 func (e *Emulator) Receive(ctx context.Context) error {
 	for {
-		deadline, ok := ctx.Deadline()
-		if !ok {
-			return fmt.Errorf("no deadline")
-		}
-		if err := e.port.SetReadDeadline(deadline); err != nil {
-			return fmt.Errorf("xsens client: receive: %w", err)
-		}
 		if !e.sc.Scan() {
 			if e.sc.Err() != nil {
 				return fmt.Errorf("receive: %w", e.sc.Err())

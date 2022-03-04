@@ -11,16 +11,19 @@ import (
 	"strings"
 	"time"
 
+	"go.bug.st/serial"
 	"go.einride.tech/xsens"
-	"go.einride.tech/xsens/serial"
 	"golang.org/x/sync/errgroup"
 )
+
+// TODO: fix this.
+const BaudRate = 115200
 
 func main() {
 	ctx := withCancelOnSignal(context.Background(), os.Interrupt)
 	flags := flag.NewFlagSet("xsens", flag.ExitOnError)
 	jsonFlag := flags.Bool("json", false, "use JSON output")
-	baudRateFlag := flags.Int("baudRate", int(serial.BaudRate115200), "baud rate for serial communication")
+	baudRateFlag := flags.Int("baudRate", BaudRate, "baud rate for serial communication")
 	configTimeoutFlag := flags.Duration("configTimeout", time.Second, "timeout for config operations")
 	usage := func() {
 		fmt.Print(`
@@ -48,13 +51,10 @@ usage:
 	}
 	_ = flags.Parse(args)
 	portName := arg(0)
-	port, err := serial.Open(portName, serial.BaudRate(*baudRateFlag))
+	port, err := serial.Open(portName, &serial.Mode{BaudRate: *baudRateFlag})
 	if err != nil {
 		fmt.Println(err)
 		usage()
-	}
-	if err := port.Flush(); err != nil {
-		panic(err)
 	}
 	client := xsens.NewClient(port)
 	g, ctx := errgroup.WithContext(ctx)
