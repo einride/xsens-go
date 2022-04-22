@@ -43,14 +43,14 @@ type Client struct {
 	gnssSatInfo       GNSSSatInfo
 }
 
-// NewClient returns a new client using the provided serial port for communication.
+// NewClient returns a new client using the provided ReadWriterCloser for communication.
 func NewClient(p io.ReadWriteCloser) *Client {
 	sc := bufio.NewScanner(p)
 	sc.Split(ScanMessages)
 	return &Client{p: p, sc: sc}
 }
 
-// Close the client's serial port.
+// Close the client's ReadWriterCloser.
 func (c *Client) Close() error {
 	if err := c.p.Close(); err != nil {
 		return fmt.Errorf("xsens client: close: %w", err)
