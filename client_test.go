@@ -23,26 +23,41 @@ import (
 func TestClient_GoToConfig(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	port := mockserial.NewMockPort(ctrl)
-	client := xsens.NewClient(port)
+
 	expectedGoToConfig := []byte{0xfa, 0xff, 0x30, 0x0, 0xd1}
 	mtData2 := []byte{0xfa, 0xff, 0x36, 0x0, 0xcb}
 	goToConfigAck := []byte{0xfa, 0xff, 0x31, 0x0, 0xd0}
-	deadline := time.Unix(1, 2)
-	ctx, cancel := context.WithDeadline(context.Background(), deadline)
-	defer cancel()
+
+	port := mockserial.NewMockPort(ctrl)
+	client := xsens.NewClient(port)
+	defer client.Close()
+
 	// the client should send a GoToConfig message
 	port.EXPECT().Write(expectedGoToConfig)
+
 	// and then ignore messages other than GoToConfigAck
-	port.EXPECT().Read(gomock.Any()).DoAndReturn(func(b []byte) (int, error) {
-		copy(b, mtData2)
-		return len(mtData2), nil
-	})
+	port.EXPECT().
+		Read(gomock.Any()).
+		DoAndReturn(func(b []byte) (int, error) {
+			copy(b, mtData2)
+			return len(mtData2), nil
+		})
+
 	// until it receives a GoToConfigAck
-	port.EXPECT().Read(gomock.Any()).DoAndReturn(func(b []byte) (int, error) {
-		copy(b, goToConfigAck)
-		return len(goToConfigAck), nil
-	})
+	port.EXPECT().
+		Read(gomock.Any()).
+		DoAndReturn(func(b []byte) (int, error) {
+			copy(b, goToConfigAck)
+			return len(goToConfigAck), nil
+		})
+
+	// expect client to close
+	port.EXPECT().Close()
+
+	deadline := time.Now().Add(100 * time.Millisecond)
+	ctx, cancel := context.WithDeadline(context.Background(), deadline)
+	defer cancel()
+
 	// when requesting GoToConfig
 	assert.NilError(t, client.GoToConfig(ctx))
 }
@@ -50,26 +65,41 @@ func TestClient_GoToConfig(t *testing.T) {
 func TestClient_GoToMeasurement(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	port := mockserial.NewMockPort(ctrl)
-	client := xsens.NewClient(port)
+
 	expectedGoToMeasurement := []byte{0xfa, 0xff, 0x10, 0x0, 0xf1}
 	mtData2 := []byte{0xfa, 0xff, 0x36, 0x0, 0xcb}
-	goToConfigAck := []byte{0xfa, 0xff, 0x31, 0x0, 0xd0}
-	deadline := time.Unix(1, 2)
-	ctx, cancel := context.WithDeadline(context.Background(), deadline)
-	defer cancel()
+	goToMeasurementAck := []byte{0xfa, 0xff, 0x31, 0x0, 0xd0}
+
+	port := mockserial.NewMockPort(ctrl)
+	client := xsens.NewClient(port)
+	defer client.Close()
+
 	// the client should send a GoToMeasurement message
 	port.EXPECT().Write(expectedGoToMeasurement)
+
 	// and then ignore messages other than MTData2
-	port.EXPECT().Read(gomock.Any()).DoAndReturn(func(b []byte) (int, error) {
-		copy(b, goToConfigAck)
-		return len(goToConfigAck), nil
-	})
+	port.EXPECT().
+		Read(gomock.Any()).
+		DoAndReturn(func(b []byte) (int, error) {
+			copy(b, goToMeasurementAck)
+			return len(goToMeasurementAck), nil
+		})
+
 	// until it receives MTData2
-	port.EXPECT().Read(gomock.Any()).DoAndReturn(func(b []byte) (int, error) {
-		copy(b, mtData2)
-		return len(mtData2), nil
-	})
+	port.EXPECT().
+		Read(gomock.Any()).
+		DoAndReturn(func(b []byte) (int, error) {
+			copy(b, mtData2)
+			return len(mtData2), nil
+		})
+
+	// expect client to close
+	port.EXPECT().Close()
+
+	deadline := time.Now().Add(100 * time.Millisecond)
+	ctx, cancel := context.WithDeadline(context.Background(), deadline)
+	defer cancel()
+
 	// when requesting GoToMeasurement
 	assert.NilError(t, client.GoToMeasurement(ctx))
 }
@@ -77,8 +107,10 @@ func TestClient_GoToMeasurement(t *testing.T) {
 func TestClient_GetOutputConfiguration(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
+
 	port := mockserial.NewMockPort(ctrl)
 	client := xsens.NewClient(port)
+
 	expectedReqOutputConfiguration := []byte{0xfa, 0xff, 0xc0, 0x0, 0x41}
 	expected := xsens.OutputConfiguration{
 		{
@@ -97,17 +129,24 @@ func TestClient_GetOutputConfiguration(t *testing.T) {
 			OutputFrequency: 200,
 		},
 	}
+
 	reqOutputConfigurationAck := []byte{0xfa, 0xff, 0xc1, 0x8, 0x50, 0x40, 0x0, 0x64, 0x20, 0x13, 0x0, 0xc8, 0x49}
-	deadline := time.Unix(1, 2)
-	ctx, cancel := context.WithDeadline(context.Background(), deadline)
-	defer cancel()
+
 	// the client should send a ReqOutputconfiguration message
 	port.EXPECT().Write(expectedReqOutputConfiguration)
+
 	// and when it receives a ReqOutputConfigurationAck with the output configuration
-	port.EXPECT().Read(gomock.Any()).DoAndReturn(func(b []byte) (int, error) {
-		copy(b, reqOutputConfigurationAck)
-		return len(reqOutputConfigurationAck), nil
-	})
+	port.EXPECT().
+		Read(gomock.Any()).
+		DoAndReturn(func(b []byte) (int, error) {
+			copy(b, reqOutputConfigurationAck)
+			return len(reqOutputConfigurationAck), nil
+		})
+
+	deadline := time.Now().Add(100 * time.Millisecond)
+	ctx, cancel := context.WithDeadline(context.Background(), deadline)
+	defer cancel()
+
 	// it should return the parsed output configuration
 	actual, err := client.GetOutputConfiguration(ctx)
 	assert.NilError(t, err)
@@ -117,8 +156,10 @@ func TestClient_GetOutputConfiguration(t *testing.T) {
 func TestClient_SetOutputConfiguration(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
+
 	port := mockserial.NewMockPort(ctrl)
 	client := xsens.NewClient(port)
+
 	outputConfiguration := xsens.OutputConfiguration{
 		{
 			DataIdentifier: xsens.DataIdentifier{
@@ -138,16 +179,21 @@ func TestClient_SetOutputConfiguration(t *testing.T) {
 	}
 	setOutputConfigurationAck := []byte{0xfa, 0xff, 0xc1, 0x0, 0x40}
 	expectedSetOutputConfiguration := []byte{0xfa, 0xff, 0xc0, 0x8, 0x50, 0x40, 0x0, 0x64, 0x20, 0x13, 0x0, 0xc8, 0x4a}
-	deadline := time.Unix(1, 2)
-	ctx, cancel := context.WithDeadline(context.Background(), deadline)
-	defer cancel()
+
 	// the client should send a SetOutputconfiguration message with the requested output configuration
 	port.EXPECT().Write(expectedSetOutputConfiguration)
 	// and then it should await a SetOutputConfigurationAck message
-	port.EXPECT().Read(gomock.Any()).DoAndReturn(func(b []byte) (int, error) {
-		copy(b, setOutputConfigurationAck)
-		return len(setOutputConfigurationAck), nil
-	})
+	port.EXPECT().
+		Read(gomock.Any()).
+		DoAndReturn(func(b []byte) (int, error) {
+			copy(b, setOutputConfigurationAck)
+			return len(setOutputConfigurationAck), nil
+		})
+
+	deadline := time.Now().Add(100 * time.Millisecond)
+	ctx, cancel := context.WithDeadline(context.Background(), deadline)
+	defer cancel()
+
 	// when requesting to set the output configuration
 	assert.NilError(t, client.SetOutputConfiguration(ctx, outputConfiguration))
 }
@@ -155,10 +201,13 @@ func TestClient_SetOutputConfiguration(t *testing.T) {
 func TestClient_Close(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
+
 	port := mockserial.NewMockPort(ctrl)
 	client := xsens.NewClient(port)
+
 	err := errors.New("boom")
 	port.EXPECT().Close().Return(err)
+
 	assert.Assert(t, errors.Is(client.Close(), err))
 }
 
@@ -183,7 +232,7 @@ func TestClient_ScanMeasurementData(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 			port := mockserial.NewMockPort(ctrl)
-			deadline := time.Unix(1, 2)
+			deadline := time.Now().Add(100 * time.Millisecond)
 			ctx, cancel := context.WithDeadline(context.Background(), deadline)
 			defer cancel()
 			port.EXPECT().Read(gomock.Any()).AnyTimes().DoAndReturn(f.Read)
@@ -217,43 +266,56 @@ func TestClient_ScanMeasurementData(t *testing.T) {
 func TestUDPEmulator(t *testing.T) {
 	addrEmulator := "127.0.0.1:24001"
 	addrClient := "127.0.0.1:24002"
+
 	connEmulator, err := xsensemulator.NewUDPSerialPort(addrEmulator, addrClient)
 	assert.NilError(t, err)
-	connClient, err := xsensemulator.NewUDPSerialPort(addrClient, addrEmulator)
-	assert.NilError(t, err)
-	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(100*time.Millisecond))
-	defer cancel()
 	defer func() {
 		assert.NilError(t, connEmulator.Close())
 	}()
 
+	connClient, err := xsensemulator.NewUDPSerialPort(addrClient, addrEmulator)
+	assert.NilError(t, err)
+
 	emu := xsensemulator.NewEmulator(connEmulator)
+
+	outputConf := xsens.OutputConfiguration{
+		xsens.OutputConfigurationSetting{DataIdentifier: xsens.DataIdentifier{DataType: xsens.DataTypeUTCTime}},
+		xsens.OutputConfigurationSetting{DataIdentifier: xsens.DataIdentifier{DataType: xsens.DataTypeEulerAngles}},
+		xsens.OutputConfigurationSetting{DataIdentifier: xsens.DataIdentifier{DataType: xsens.DataTypeVelocityXYZ}},
+		xsens.OutputConfigurationSetting{DataIdentifier: xsens.DataIdentifier{DataType: xsens.DataTypeAcceleration}},
+		xsens.OutputConfigurationSetting{DataIdentifier: xsens.DataIdentifier{DataType: xsens.DataTypeFreeAcceleration}},
+		xsens.OutputConfigurationSetting{DataIdentifier: xsens.DataIdentifier{DataType: xsens.DataTypeRateOfTurn}},
+	}
+
+	deadline := time.Now().Add(100 * time.Millisecond)
+	ctx, cancel := context.WithDeadline(context.Background(), deadline)
+	defer cancel()
+
 	var g errgroup.Group
+
 	g.Go(func() error {
+		assert.NilError(t, connEmulator.SetReadDeadline(deadline))
+		assert.NilError(t, connEmulator.SetWriteDeadline(deadline))
+
 		err := emu.Receive(ctx)
 		if !strings.Contains(err.Error(), "timeout") {
 			return err
 		}
 		return nil
 	})
+
 	g.Go(func() error {
-		defer func() {
-			assert.NilError(t, connClient.Close())
-		}()
-		assert.NilError(t, err)
+		assert.NilError(t, connClient.SetReadDeadline(deadline))
+		assert.NilError(t, connClient.SetWriteDeadline(deadline))
+
 		client := xsens.NewClient(connClient)
-		ctx := context.Background()
-		outputConf := xsens.OutputConfiguration{
-			xsens.OutputConfigurationSetting{DataIdentifier: xsens.DataIdentifier{DataType: xsens.DataTypeUTCTime}},
-			xsens.OutputConfigurationSetting{DataIdentifier: xsens.DataIdentifier{DataType: xsens.DataTypeEulerAngles}},
-			xsens.OutputConfigurationSetting{DataIdentifier: xsens.DataIdentifier{DataType: xsens.DataTypeVelocityXYZ}},
-			xsens.OutputConfigurationSetting{DataIdentifier: xsens.DataIdentifier{DataType: xsens.DataTypeAcceleration}},
-			xsens.OutputConfigurationSetting{DataIdentifier: xsens.DataIdentifier{DataType: xsens.DataTypeFreeAcceleration}},
-			xsens.OutputConfigurationSetting{DataIdentifier: xsens.DataIdentifier{DataType: xsens.DataTypeRateOfTurn}},
-		}
+
 		assert.NilError(t, client.SetOutputConfiguration(ctx, outputConf))
 		assert.NilError(t, client.GoToConfig(ctx))
+
+		assert.NilError(t, connClient.Close())
 		return nil
 	})
+
 	assert.NilError(t, g.Wait())
 }

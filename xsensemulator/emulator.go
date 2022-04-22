@@ -43,24 +43,24 @@ func NewUDPSerialPort(origin, destination string) (*UDPSerialPort, error) {
 	}, nil
 }
 
-func (t *UDPSerialPort) Read(p []byte) (int, error) {
+func (t UDPSerialPort) Read(p []byte) (int, error) {
 	n, _, err := t.OriginConn.ReadFromUDP(p)
 	return n, err
 }
 
-func (t *UDPSerialPort) Write(p []byte) (n int, err error) {
+func (t UDPSerialPort) Write(p []byte) (n int, err error) {
 	return t.OriginConn.WriteToUDP(p, t.DestinationAddr)
 }
 
-func (t *UDPSerialPort) Close() error {
+func (t UDPSerialPort) Close() error {
 	return t.OriginConn.Close()
 }
 
-func (t *UDPSerialPort) SetReadDeadline(t2 time.Time) error {
+func (t UDPSerialPort) SetReadDeadline(t2 time.Time) error {
 	return t.OriginConn.SetReadDeadline(t2)
 }
 
-func (t *UDPSerialPort) SetWriteDeadline(t2 time.Time) error {
+func (t UDPSerialPort) SetWriteDeadline(t2 time.Time) error {
 	return t.OriginConn.SetWriteDeadline(t2)
 }
 
@@ -101,16 +101,25 @@ func (e *Emulator) SetSendMode() {
 
 func (e *Emulator) Receive(ctx context.Context) error {
 	for {
+		// Give a chance to quit upon context cancellation
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+
 		if !e.sc.Scan() {
 			if e.sc.Err() != nil {
 				return fmt.Errorf("receive: %w", e.sc.Err())
 			}
 			return fmt.Errorf("receive: %w", io.EOF)
 		}
+
 		var m xsens.Message = e.sc.Bytes()
 		if err := m.Validate(); err != nil {
 			return fmt.Errorf("receive: %w", err)
 		}
+
 		switch m.Identifier() {
 		case xsens.MessageIdentifierGotoConfig:
 			e.mutex.Lock()
@@ -120,7 +129,6 @@ func (e *Emulator) Receive(ctx context.Context) error {
 			if err != nil {
 				return fmt.Errorf("receive: %w", err)
 			}
-			continue
 		case xsens.MessageIdentifierSetOutputConfiguration:
 			if err := e.outputConf.Unmarshal(m.Data()); err != nil {
 				return fmt.Errorf("receive: %w", err)
@@ -132,7 +140,6 @@ func (e *Emulator) Receive(ctx context.Context) error {
 			if err != nil {
 				return fmt.Errorf("receive: %w", err)
 			}
-			continue
 		case xsens.MessageIdentifierGotoMeasurement:
 			e.mutex.Lock()
 			e.lastMessageIdentifier = xsens.MessageIdentifierMTData2
@@ -141,14 +148,6 @@ func (e *Emulator) Receive(ctx context.Context) error {
 			if err != nil {
 				return fmt.Errorf("receive: %w", err)
 			}
-			continue
-		}
-
-		// Give a chance to quit upon context cancellation
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		default:
 		}
 	}
 }

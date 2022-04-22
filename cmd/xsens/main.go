@@ -16,14 +16,13 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-// TODO: fix this.
-const BaudRate = 115200
+const DefaultBaudRate = 115200
 
 func main() {
 	ctx := withCancelOnSignal(context.Background(), os.Interrupt)
 	flags := flag.NewFlagSet("xsens", flag.ExitOnError)
 	jsonFlag := flags.Bool("json", false, "use JSON output")
-	baudRateFlag := flags.Int("baudRate", BaudRate, "baud rate for serial communication")
+	baudRateFlag := flags.Int("baudRate", DefaultBaudRate, "baud rate for serial communication")
 	configTimeoutFlag := flags.Duration("configTimeout", time.Second, "timeout for config operations")
 	usage := func() {
 		fmt.Print(`

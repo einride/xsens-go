@@ -21,18 +21,25 @@ import (
 func TestEmulator_Convert(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	deadline := time.Unix(1, 2)
+
 	reader, writer := io.Pipe()
+
 	port1 := mockserial.NewMockPort(ctrl)
-	port1.EXPECT().Read(gomock.Any()).Times(1).DoAndReturn(func(b []byte) (int, error) {
-		n, err := reader.Read(b)
-		if errors.Is(err, io.ErrClosedPipe) {
-			return 0, io.EOF
-		}
-		assert.NilError(t, reader.Close())
-		return n, err
-	})
+	port1.EXPECT().
+		Read(gomock.Any()).
+		Times(1).
+		DoAndReturn(func(b []byte) (int, error) {
+			n, err := reader.Read(b)
+			if errors.Is(err, io.ErrClosedPipe) {
+				return 0, io.EOF
+			}
+			assert.NilError(t, reader.Close())
+			return n, err
+		})
+
 	c := xsens.NewClient(port1)
+
+	deadline := time.Now().Add(100 * time.Millisecond)
 	ctx, cancel := context.WithDeadline(context.Background(), deadline)
 	defer cancel()
 
@@ -40,8 +47,10 @@ func TestEmulator_Convert(t *testing.T) {
 		Lat: 1,
 		Lon: 2,
 	}
+
 	var didReachEnd bool
 	var g errgroup.Group
+
 	g.Go(func() error {
 		for {
 			err := c.Receive(ctx)
@@ -64,7 +73,11 @@ func TestEmulator_Convert(t *testing.T) {
 
 	// then emulator receives
 	port2 := mockserial.NewMockPort(ctrl)
-	port2.EXPECT().Write(gomock.Any()).AnyTimes().DoAndReturn(writer.Write)
+	port2.EXPECT().
+		Write(gomock.Any()).
+		AnyTimes().
+		DoAndReturn(writer.Write)
+
 	emulator := xsensemulator.NewEmulator(port2)
 	emulator.SetOutputConguration(xsens.OutputConfiguration{
 		{
@@ -75,9 +88,11 @@ func TestEmulator_Convert(t *testing.T) {
 			OutputFrequency: 100,
 		},
 	})
+
 	emulator.SetSendMode()
 	m, err := emulator.MarshalMessage(expectedData, xsens.DataTypeLatLon)
 	mes := xsens.NewMessage(xsens.MessageIdentifierMTData2, m)
+
 	assert.NilError(t, err)
 	assert.NilError(t, emulator.Transmit(mes))
 	assert.NilError(t, g.Wait())
@@ -105,10 +120,13 @@ func TestEmulator_Output(t *testing.T) {
 			defer func() {
 				assert.NilError(t, f.Close())
 			}()
+
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
-			deadline := time.Unix(1, 2)
+
+			deadline := time.Now().Add(100 * time.Millisecond)
 			port1 := mockserial.NewMockPort(ctrl)
+
 			ctx, cancel := context.WithDeadline(context.Background(), deadline)
 			defer cancel()
 
@@ -116,10 +134,13 @@ func TestEmulator_Output(t *testing.T) {
 			port1.EXPECT().Read(gomock.Any()).AnyTimes().DoAndReturn(f.Read)
 
 			port2 := mockserial.NewMockPort(ctrl)
+
 			emulator := xsensemulator.NewEmulator(port2)
 			emulator.SetOutputConguration(o)
 			emulator.SetSendMode()
+
 			var g errgroup.Group
+
 			g.Go(func() error {
 				client := xsens.NewClient(port1)
 				assert.NilError(t, client.GoToMeasurement(ctx))
@@ -147,56 +168,62 @@ func TestEmulator_Output(t *testing.T) {
 	}
 }
 
-// func TestEmulator_Transmit(t *testing.T) {
-// 	expectedData := &xsens.LatLon{
-// 		Lat: 1,
-// 		Lon: 2,
-// 	}
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
-// 	for _, tc := range []struct {
-// 		name          string
-// 		expectFunc    func(emulator *xsensemulator.Emulator, port *mockxsens.MockSerialPort)
-// 		expectedError error
-// 	}{
-// 		{
-// 			name: "not measurement mode (by default)",
-// 			expectFunc: func(emulator *xsensemulator.Emulator, port *mockxsens.MockSerialPort) {
-// 			},
-// 			expectedError: xsensemulator.ErrNotInMeasurementMode,
-// 		},
+func TestEmulator_Transmit(t *testing.T) {
+	expectedData := &xsens.LatLon{
+		Lat: 1,
+		Lon: 2,
+	}
 
-// 		{
-// 			name: "in measurement mode",
-// 			expectFunc: func(emulator *xsensemulator.Emulator, port *mockxsens.MockSerialPort) {
-// 				emulator.SetSendMode()
-// 				port.EXPECT().Write(gomock.Any())
-// 			},
-// 			expectedError: nil,
-// 		},
-// 	} {
-// 		tc := tc
-// 		t.Run(tc.name, func(t *testing.T) {
-// 			// given
-// 			port2 := mockserial.NewMockPort(ctrl)
-// 			emulator := xsensemulator.NewEmulator(port2)
-// 			emulator.SetOutputConguration(xsens.OutputConfiguration{
-// 				{
-// 					DataIdentifier: xsens.DataIdentifier{
-// 						DataType:  xsens.DataTypeLatLon,
-// 						Precision: xsens.PrecisionFP1632,
-// 					},
-// 					OutputFrequency: 100,
-// 				},
-// 			})
-// 			// then expect
-// 			tc.expectFunc(emulator, port2)
-// 			// when
-// 			m, err := emulator.MarshalMessage(expectedData, xsens.DataTypeLatLon)
-// 			assert.NilError(t, err)
-// 			msg := xsens.NewMessage(xsens.MessageIdentifierMTData2, m)
-// 			err = emulator.Transmit(msg)
-// 			assert.Assert(t, errors.Is(err, tc.expectedError))
-// 		})
-// 	}
-// }
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	for _, tc := range []struct {
+		name          string
+		expectFunc    func(emulator *xsensemulator.Emulator, port *mockserial.MockPort)
+		expectedError error
+	}{
+		{
+			name: "not measurement mode (by default)",
+			expectFunc: func(emulator *xsensemulator.Emulator, port *mockserial.MockPort) {
+			},
+			expectedError: xsensemulator.ErrNotInMeasurementMode,
+		},
+
+		{
+			name: "in measurement mode",
+			expectFunc: func(emulator *xsensemulator.Emulator, port *mockserial.MockPort) {
+				emulator.SetSendMode()
+				port.EXPECT().Write(gomock.Any())
+			},
+			expectedError: nil,
+		},
+	} {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			// given
+			port2 := mockserial.NewMockPort(ctrl)
+			emulator := xsensemulator.NewEmulator(port2)
+			emulator.SetOutputConguration(xsens.OutputConfiguration{
+				{
+					DataIdentifier: xsens.DataIdentifier{
+						DataType:  xsens.DataTypeLatLon,
+						Precision: xsens.PrecisionFP1632,
+					},
+					OutputFrequency: 100,
+				},
+			})
+
+			// then expect
+			tc.expectFunc(emulator, port2)
+
+			// when
+			m, err := emulator.MarshalMessage(expectedData, xsens.DataTypeLatLon)
+			assert.NilError(t, err)
+
+			msg := xsens.NewMessage(xsens.MessageIdentifierMTData2, m)
+
+			err = emulator.Transmit(msg)
+			assert.Assert(t, errors.Is(err, tc.expectedError))
+		})
+	}
+}
