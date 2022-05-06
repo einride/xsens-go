@@ -267,13 +267,15 @@ func TestUDPEmulator(t *testing.T) {
 	addrEmulator := "127.0.0.1:24001"
 	addrClient := "127.0.0.1:24002"
 
-	connEmulator, err := xsensemulator.NewUDPSerialPort(addrEmulator, addrClient)
+	timeout := 100 * time.Millisecond
+
+	connEmulator, err := xsensemulator.NewUDPSerialPort(addrEmulator, addrClient, timeout)
 	assert.NilError(t, err)
 	defer func() {
 		assert.NilError(t, connEmulator.Close())
 	}()
 
-	connClient, err := xsensemulator.NewUDPSerialPort(addrClient, addrEmulator)
+	connClient, err := xsensemulator.NewUDPSerialPort(addrClient, addrEmulator, timeout)
 	assert.NilError(t, err)
 
 	emu := xsensemulator.NewEmulator(connEmulator)
@@ -294,9 +296,6 @@ func TestUDPEmulator(t *testing.T) {
 	var g errgroup.Group
 
 	g.Go(func() error {
-		assert.NilError(t, connEmulator.SetReadDeadline(deadline))
-		assert.NilError(t, connEmulator.SetWriteDeadline(deadline))
-
 		err := emu.Receive(ctx)
 		if !strings.Contains(err.Error(), "timeout") {
 			return err
@@ -305,9 +304,6 @@ func TestUDPEmulator(t *testing.T) {
 	})
 
 	g.Go(func() error {
-		assert.NilError(t, connClient.SetReadDeadline(deadline))
-		assert.NilError(t, connClient.SetWriteDeadline(deadline))
-
 		client := xsens.NewClient(connClient)
 
 		assert.NilError(t, client.SetOutputConfiguration(ctx, outputConf))

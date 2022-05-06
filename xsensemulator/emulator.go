@@ -20,11 +20,13 @@ var (
 
 type UDPSerialPort struct {
 	io.ReadWriteCloser
+	// Timeout for setting read/write deadlines
+	timeout         time.Duration
 	OriginConn      *net.UDPConn
 	DestinationAddr *net.UDPAddr
 }
 
-func NewUDPSerialPort(origin, destination string) (*UDPSerialPort, error) {
+func NewUDPSerialPort(origin, destination string, timeout time.Duration) (*UDPSerialPort, error) {
 	udpOriginAddr, err := net.ResolveUDPAddr("udp", origin)
 	if err != nil {
 		return nil, fmt.Errorf("new udp serial port: %w", err)
@@ -40,28 +42,29 @@ func NewUDPSerialPort(origin, destination string) (*UDPSerialPort, error) {
 	return &UDPSerialPort{
 		OriginConn:      originConn,
 		DestinationAddr: udpDestinationAddr,
+		timeout:         timeout,
 	}, nil
 }
 
-func (t UDPSerialPort) Read(p []byte) (int, error) {
-	n, _, err := t.OriginConn.ReadFromUDP(p)
+func (t UDPSerialPort) Read(p []byte) (n int, err error) {
+	err = t.OriginConn.SetReadDeadline(time.Now().Add(t.timeout))
+	if err != nil {
+		return 0, fmt.Errorf("udp serial port read: %w", err)
+	}
+	n, _, err = t.OriginConn.ReadFromUDP(p)
 	return n, err
 }
 
 func (t UDPSerialPort) Write(p []byte) (n int, err error) {
+	err = t.OriginConn.SetWriteDeadline(time.Now().Add(t.timeout))
+	if err != nil {
+		return 0, fmt.Errorf("udp serial port write: %w", err)
+	}
 	return t.OriginConn.WriteToUDP(p, t.DestinationAddr)
 }
 
 func (t UDPSerialPort) Close() error {
 	return t.OriginConn.Close()
-}
-
-func (t UDPSerialPort) SetReadDeadline(t2 time.Time) error {
-	return t.OriginConn.SetReadDeadline(t2)
-}
-
-func (t UDPSerialPort) SetWriteDeadline(t2 time.Time) error {
-	return t.OriginConn.SetWriteDeadline(t2)
 }
 
 type Emulator struct {
