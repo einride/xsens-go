@@ -10,11 +10,6 @@ import (
 	"gotest.tools/v3/assert"
 )
 
-func TestMain(m *testing.M) {
-	_ = flag.Bool(updateGoldenFilesFlag())
-	os.Exit(m.Run())
-}
-
 func updateGoldenFilesFlag() (string, bool, string) {
 	return "update", false, "Update golden files."
 }
