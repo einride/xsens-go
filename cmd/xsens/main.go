@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/signal"
 	"strings"
@@ -137,7 +136,7 @@ func setOutputConfigMain(ctx context.Context, client *xsens.Client, jsonFile str
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	// parse output configuration
-	js, err := ioutil.ReadFile(jsonFile)
+	js, err := os.ReadFile(jsonFile)
 	if err != nil {
 		return err
 	}

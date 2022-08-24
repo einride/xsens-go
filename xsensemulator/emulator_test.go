@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"io"
-	"io/ioutil"
 	"os"
 	"testing"
 	"time"
@@ -111,7 +110,7 @@ func TestEmulator_Output(t *testing.T) {
 	} {
 		tt := tt
 		t.Run(tt.inputFile, func(t *testing.T) {
-			outputConf, err := ioutil.ReadFile(tt.outputConfigurationFile)
+			outputConf, err := os.ReadFile(tt.outputConfigurationFile)
 			assert.NilError(t, err)
 			o := xsens.OutputConfiguration{}
 			assert.NilError(t, o.Unmarshal(outputConf))

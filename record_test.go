@@ -5,7 +5,6 @@ package xsens_test
 
 import (
 	"context"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -506,7 +505,7 @@ func TestRecord_TestData(t *testing.T) {
 			// write output config
 			outputConfigData, err := tt.outputConfig.Marshal()
 			assert.NilError(t, err)
-			assert.NilError(t, ioutil.WriteFile(tt.outputConfigFile, outputConfigData, 0o644))
+			assert.NilError(t, os.WriteFile(tt.outputConfigFile, outputConfigData, 0o644))
 			// open Xsens port
 			port, err := serial.Open("/dev/ttyUSB0", serial.BaudRate115200)
 			assert.NilError(t, err)
