@@ -1,7 +1,7 @@
 package xsens_test
 
 import (
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"go.einride.tech/xsens"
@@ -20,7 +20,7 @@ func TestOutputConfiguration_UnmarshalMarshal_TestData(t *testing.T) {
 	} {
 		tt := tt
 		t.Run(tt.inputFile, func(t *testing.T) {
-			golden, err := ioutil.ReadFile(tt.inputFile)
+			golden, err := os.ReadFile(tt.inputFile)
 			assert.NilError(t, err)
 			var outputConfiguration xsens.OutputConfiguration
 			assert.NilError(t, outputConfiguration.Unmarshal(golden))
@@ -44,14 +44,14 @@ func TestOutputConfiguration_MarshalText_TestData(t *testing.T) {
 	} {
 		tt := tt
 		t.Run(tt.inputFile, func(t *testing.T) {
-			input, err := ioutil.ReadFile(tt.inputFile)
+			input, err := os.ReadFile(tt.inputFile)
 			assert.NilError(t, err)
 			var outputConfiguration xsens.OutputConfiguration
 			assert.NilError(t, outputConfiguration.Unmarshal(input))
 			txt, err := outputConfiguration.MarshalText()
 			assert.NilError(t, err)
 			if shouldUpdateGoldenFiles() {
-				assert.NilError(t, ioutil.WriteFile(tt.goldenFile, []byte(txt), 0o600))
+				assert.NilError(t, os.WriteFile(tt.goldenFile, []byte(txt), 0o600))
 			}
 			requireGoldenFileContent(t, tt.goldenFile, txt)
 		})

@@ -2,7 +2,7 @@ package xsens_test
 
 import (
 	"flag"
-	"io/ioutil"
+	"io"
 	"os"
 	"testing"
 
@@ -16,7 +16,7 @@ func updateGoldenFilesFlag() (string, bool, string) {
 
 func shouldUpdateGoldenFiles() bool {
 	var flags flag.FlagSet
-	flags.SetOutput(ioutil.Discard)
+	flags.SetOutput(io.Discard)
 	update := flags.Bool(updateGoldenFilesFlag())
 	_ = flags.Parse(os.Args[1:]) // error will always be an unparsed flags error
 	return *update
@@ -24,7 +24,7 @@ func shouldUpdateGoldenFiles() bool {
 
 func requireGoldenFileContent(t *testing.T, goldenFile, actual string) {
 	t.Helper()
-	goldenFileContent, err := ioutil.ReadFile(goldenFile)
+	goldenFileContent, err := os.ReadFile(goldenFile)
 	assert.NilError(t, err)
 	expected := string(goldenFileContent)
 	if expected != actual {

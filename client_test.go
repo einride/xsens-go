@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -256,7 +255,7 @@ func TestClient_ScanMeasurementData(t *testing.T) {
 				printf("\n")
 			}
 			if shouldUpdateGoldenFiles() {
-				assert.NilError(t, ioutil.WriteFile(tt.goldenFile, actual.Bytes(), 0o600))
+				assert.NilError(t, os.WriteFile(tt.goldenFile, actual.Bytes(), 0o600))
 			}
 			requireGoldenFileContent(t, tt.goldenFile, actual.String())
 		})
