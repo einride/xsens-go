@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/golang/mock v1.6.0
 	github.com/pmezard/go-difflib v1.0.0
-	go.bug.st/serial v1.3.5
+	go.bug.st/serial v1.4.0
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	gotest.tools/v3 v3.3.0
 )
