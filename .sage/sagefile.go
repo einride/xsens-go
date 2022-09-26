@@ -24,15 +24,15 @@ func main() {
 }
 
 func All(ctx context.Context) error {
-	sg.Deps(ctx, ConvcoCheck, FormatMarkdown, FormatYAML, GoGenerate)
+	sg.Deps(ctx, ConvcoCheck, FormatMarkdown, FormatYaml, GoGenerate)
 	sg.Deps(ctx, GoLint, GoReview, GoTest)
 	sg.SerialDeps(ctx, GoModTidy, GitVerifyNoDiff)
 	return nil
 }
 
-func FormatYAML(ctx context.Context) error {
-	sg.Logger(ctx).Println("formatting YAML files...")
-	return sgyamlfmt.Command(ctx, "-d", sg.FromGitRoot(), "-r").Run()
+func FormatYaml(ctx context.Context) error {
+	sg.Logger(ctx).Println("formatting Yaml files...")
+	return sgyamlfmt.Run(ctx)
 }
 
 func GoModTidy(ctx context.Context) error {
