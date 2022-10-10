@@ -7,7 +7,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0
 	go.bug.st/serial v1.4.0
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	gotest.tools/v3 v3.3.0
+	gotest.tools/v3 v3.4.0
 )
 
 require (
