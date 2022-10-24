@@ -512,9 +512,9 @@ func (t *StatusByte) MarshalMTData2Packet(id DataIdentifier) (MTData2Packet, err
 // This flag indicates the status of the no rotation update procedure in the filter after the SetNoRotation message
 // has been sent.
 //
-//  11: Running with no rotation assumption
-//  10: Rotation detected, no gyro bias estimation (sticky)
-//  00: Estimation complete, no errors
+// 11: Running with no rotation assumption
+// 10: Rotation detected, no gyro bias estimation (sticky)
+// 00: Estimation complete, no errors
 //
 // 5 Representative Motion
 //
@@ -526,35 +526,35 @@ func (t *StatusByte) MarshalMTData2Packet(id DataIdentifier) (MTData2Packet, err
 //
 // Indicates out of range values on sensors.
 //
-//  8:     Clipflag Acc X
-//  9:     Clipflag Acc Y
-//  10:    Clipflag Acc Z
-//  11:    Clipflag Gyr X
-//  12:    Clipflag Gyr Y
-//  13:    Clipflag Gyr Z
-//  14:    Clipflag Mag X
-//  15:    Clipflag Mag Y
-//  16:    Clipflag Mag Z
-//  17-18: Reserved Reserved for future use
-//  19:    Clipping Indication (indicates that one or more sensors are out of range)
+// 8:     Clipflag Acc X
+// 9:     Clipflag Acc Y
+// 10:    Clipflag Acc Z
+// 11:    Clipflag Gyr X
+// 12:    Clipflag Gyr Y
+// 13:    Clipflag Gyr Z
+// 14:    Clipflag Mag X
+// 15:    Clipflag Mag Y
+// 16:    Clipflag Mag Z
+// 17-18: Reserved Reserved for future use
+// 19:    Clipping Indication (indicates that one or more sensors are out of range)
 //
 // 20: Reserved Reserved for future use
 //
 // 21: SyncIn Marker
 //
-// When a SyncIn is detected, this bit will rise to 1
+// When a SyncIn is detected, this bit will rise to 1.
 //
 // 22: SyncOut Marker
 //
-// When SyncOut is active this bit will rise to 1
+// When SyncOut is active this bit will rise to 1.
 //
 // 23-25: Filter Mode
 //
 // Indicates Filter Mode, currently only available for the MTi-G-710 and MTi-7:
 //
-//  000: Without GNSS (filter profile is in VRU mode)
-//  001: Coasting mode (GNSS has been lost <60 sec ago)
-//  011: With GNSS (default mode of MTi-G-710)
+// 000: Without GNSS (filter profile is in VRU mode)
+// 001: Coasting mode (GNSS has been lost <60 sec ago)
+// 011: With GNSS (default mode of MTi-G-710)
 //
 // 26-31: Reserved
 //

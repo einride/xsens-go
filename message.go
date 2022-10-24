@@ -52,28 +52,29 @@ const (
 // A message has two basic structures; one with a standard length and one with extended
 // length.
 //
-// Standard length
+// Standard length.
 //
 // The standard length message has a maximum of 254 data bytes and is used most frequently.
 //
 // An MT message (standard length) contains the following fields:
 //
-//  +----------+-----+-----+-----+------+----------+
-//  | PREAMBLE | BID | MID | LEN | DATA | CHECKSUM |
-//  +----------+-----+-----+-----+------+----------+
-//  0          1     2     3     4
+// +----------+-----+-----+-----+------+----------+
+// | PREAMBLE | BID | MID | LEN | DATA | CHECKSUM |
+// +----------+-----+-----+-----+------+----------+
+// 0          1     2     3     4
 //
-// Extended length
+// Extended length.
 //
 // In some cases the extended length message needs to be used if the number of data bytes exceeds
 // 254 bytes.
 //
 // An MT message (extended length) contains these fields:
 //
-//  +----------+-----+-----+-----+---------+------+----------+
-//  | PREAMBLE | BID | MID | LEN | EXT-LEN | DATA | CHECKSUM |
-//  +----------+-----+-----+-----+---------+------+----------+
-//  0          1     2     3     4         6
+// +----------+-----+-----+-----+---------+------+----------+
+// | PREAMBLE | BID | MID | LEN | EXT-LEN | DATA | CHECKSUM |
+// +----------+-----+-----+-----+---------+------+----------+
+// 0          1     2     3     4         6
+
 type Message []byte
 
 // NewMessage creates a new Xsens message with the provided identifier and data.
