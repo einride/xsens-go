@@ -17,7 +17,7 @@ const (
 //
 // The 12.20 fixed point output is calculated with:
 //
-//  int32_t fixedPointValue12p20 = round(floatingPointValue * 2^20)
+// int32_t fixedPointValue12p20 = round(floatingPointValue * 2^20)
 //
 // The resulting 32bit integer value is transmitted in big-endian order (MSB first).
 //
@@ -57,14 +57,14 @@ func (fp *FP1220) toBinary(data []byte) {
 //
 // The 16.32 fixed point output is calculated with:
 //
-//  int64_t fixedPointValue16p32 = round(floatPointValue * 2^32)
+// int64_t fixedPointValue16p32 = round(floatPointValue * 2^32)
 //
 // Of the resulting 64 bit integer only the 6 least significant bytes are transmitted.
 //
 // If these are the bytes b0 to b5 (with b0 the LSB) they are transmitted in this order:
 //
-//  [b3, b2, b1, b0, b5, b4]
-//  [0,  1,  2,  3,  4,  5 ]
+// [b3, b2, b1, b0, b5, b4]
+// [0,  1,  2,  3,  4,  5 ]
 //
 // This can be interpreted as first transmitting the 32bit fractional part and then the
 // 16 bit integer part, both parts are in big-endian order (MSB first).

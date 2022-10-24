@@ -8,11 +8,11 @@ import (
 //
 // Each data identifier is constructed in this way:
 //
-//  +-------------------------------------------------------------------------------+
-//  | 15 | 14 | 13 | 12 | 11 | 10 |  9 |  8 |  7 |  6 |  5 |  4 |  3 |  2 |  1 |  0 |
-//  +------------------------+--------------+-------------------+-------------------+
-//  | Group                  | Reserved     | Type              | Format            |
-//  +------------------------+--------------+-------------------+-------------------+
+// +-------------------------------------------------------------------------------+
+// | 15 | 14 | 13 | 12 | 11 | 10 |  9 |  8 |  7 |  6 |  5 |  4 |  3 |  2 |  1 |  0 |
+// +------------------------+--------------+-------------------+-------------------+
+// | Group                  | Reserved     | Type              | Format            |
+// +------------------------+--------------+-------------------+-------------------+
 //
 // Group defines the category of the data, such as timestamps, orientations, angular velocities, etc.
 //
@@ -62,9 +62,7 @@ func (d DataIdentifier) DataSize() uint8 {
 		DataTypeVelocityXYZ,
 		DataTypeMagneticField:
 		return 3 * d.Precision.Size()
-	// quaternions
-	case DataTypeDeltaQ,
-		DataTypeQuaternion:
+	case DataTypeDeltaQ, DataTypeQuaternion:
 		return 4 * d.Precision.Size()
 	case DataTypeUTCTime:
 		return 12
