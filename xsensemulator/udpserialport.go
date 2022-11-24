@@ -1,6 +1,7 @@
 package xsensemulator
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"net"
@@ -64,6 +65,10 @@ func (t UDPSerialPort) Write(p []byte) (n int, err error) {
 		}
 	}
 	return t.OriginConn.WriteToUDP(p, t.DestinationAddr)
+}
+
+func (t UDPSerialPort) Flush() error {
+	return bufio.NewWriter(t.OriginConn).Flush()
 }
 
 func (t UDPSerialPort) Close() error {
