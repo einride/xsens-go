@@ -129,7 +129,21 @@ func TestClient_GetOutputConfiguration(t *testing.T) {
 		},
 	}
 
-	reqOutputConfigurationAck := []byte{0xfa, 0xff, 0xc1, 0x8, 0x50, 0x40, 0x0, 0x64, 0x20, 0x13, 0x0, 0xc8, 0x49}
+	reqOutputConfigurationAck := []byte{
+		0xfa,
+		0xff,
+		0xc1,
+		0x8,
+		0x50,
+		0x40,
+		0x0,
+		0x64,
+		0x20,
+		0x13,
+		0x0,
+		0xc8,
+		0x49,
+	}
 
 	// the client should send a ReqOutputconfiguration message
 	port.EXPECT().Write(expectedReqOutputConfiguration)
@@ -177,7 +191,21 @@ func TestClient_SetOutputConfiguration(t *testing.T) {
 		},
 	}
 	setOutputConfigurationAck := []byte{0xfa, 0xff, 0xc1, 0x0, 0x40}
-	expectedSetOutputConfiguration := []byte{0xfa, 0xff, 0xc0, 0x8, 0x50, 0x40, 0x0, 0x64, 0x20, 0x13, 0x0, 0xc8, 0x4a}
+	expectedSetOutputConfiguration := []byte{
+		0xfa,
+		0xff,
+		0xc0,
+		0x8,
+		0x50,
+		0x40,
+		0x0,
+		0x64,
+		0x20,
+		0x13,
+		0x0,
+		0xc8,
+		0x4a,
+	}
 
 	// the client should send a SetOutputconfiguration message with the requested output configuration
 	port.EXPECT().Write(expectedSetOutputConfiguration)
@@ -268,24 +296,44 @@ func TestUDPEmulator(t *testing.T) {
 
 	timeout := 100 * time.Millisecond
 
-	connEmulator, err := xsensemulator.NewUDPSerialPort(addrEmulator, addrClient, timeout)
+	connEmulator, err := xsensemulator.NewUDPSerialPort(
+		addrEmulator,
+		addrClient,
+		xsensemulator.WithTimeout(timeout),
+	)
 	assert.NilError(t, err)
 	defer func() {
 		assert.NilError(t, connEmulator.Close())
 	}()
 
-	connClient, err := xsensemulator.NewUDPSerialPort(addrClient, addrEmulator, timeout)
+	connClient, err := xsensemulator.NewUDPSerialPort(
+		addrClient,
+		addrEmulator,
+		xsensemulator.WithTimeout(timeout),
+	)
 	assert.NilError(t, err)
 
 	emu := xsensemulator.NewEmulator(connEmulator)
 
 	outputConf := xsens.OutputConfiguration{
-		xsens.OutputConfigurationSetting{DataIdentifier: xsens.DataIdentifier{DataType: xsens.DataTypeUTCTime}},
-		xsens.OutputConfigurationSetting{DataIdentifier: xsens.DataIdentifier{DataType: xsens.DataTypeEulerAngles}},
-		xsens.OutputConfigurationSetting{DataIdentifier: xsens.DataIdentifier{DataType: xsens.DataTypeVelocityXYZ}},
-		xsens.OutputConfigurationSetting{DataIdentifier: xsens.DataIdentifier{DataType: xsens.DataTypeAcceleration}},
-		xsens.OutputConfigurationSetting{DataIdentifier: xsens.DataIdentifier{DataType: xsens.DataTypeFreeAcceleration}},
-		xsens.OutputConfigurationSetting{DataIdentifier: xsens.DataIdentifier{DataType: xsens.DataTypeRateOfTurn}},
+		xsens.OutputConfigurationSetting{
+			DataIdentifier: xsens.DataIdentifier{DataType: xsens.DataTypeUTCTime},
+		},
+		xsens.OutputConfigurationSetting{
+			DataIdentifier: xsens.DataIdentifier{DataType: xsens.DataTypeEulerAngles},
+		},
+		xsens.OutputConfigurationSetting{
+			DataIdentifier: xsens.DataIdentifier{DataType: xsens.DataTypeVelocityXYZ},
+		},
+		xsens.OutputConfigurationSetting{
+			DataIdentifier: xsens.DataIdentifier{DataType: xsens.DataTypeAcceleration},
+		},
+		xsens.OutputConfigurationSetting{
+			DataIdentifier: xsens.DataIdentifier{DataType: xsens.DataTypeFreeAcceleration},
+		},
+		xsens.OutputConfigurationSetting{
+			DataIdentifier: xsens.DataIdentifier{DataType: xsens.DataTypeRateOfTurn},
+		},
 	}
 
 	deadline := time.Now().Add(100 * time.Millisecond)
