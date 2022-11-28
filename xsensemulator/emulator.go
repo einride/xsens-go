@@ -6,9 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net"
 	"sync"
-	"time"
 
 	"go.einride.tech/xsens"
 )
@@ -17,55 +15,6 @@ var (
 	ErrNotInMeasurementMode     = errors.New("not in measurement mode")
 	ErrNotInOutputConfiguration = errors.New("not in output configuration")
 )
-
-type UDPSerialPort struct {
-	io.ReadWriteCloser
-	// Timeout for setting read/write deadlines
-	timeout         time.Duration
-	OriginConn      *net.UDPConn
-	DestinationAddr *net.UDPAddr
-}
-
-func NewUDPSerialPort(origin, destination string, timeout time.Duration) (*UDPSerialPort, error) {
-	udpOriginAddr, err := net.ResolveUDPAddr("udp", origin)
-	if err != nil {
-		return nil, fmt.Errorf("new udp serial port: %w", err)
-	}
-	udpDestinationAddr, err := net.ResolveUDPAddr("udp", destination)
-	if err != nil {
-		return nil, fmt.Errorf("new udp serial port: %w", err)
-	}
-	originConn, err := net.ListenUDP("udp", udpOriginAddr)
-	if err != nil {
-		return nil, fmt.Errorf("new udp serial port: %w", err)
-	}
-	return &UDPSerialPort{
-		OriginConn:      originConn,
-		DestinationAddr: udpDestinationAddr,
-		timeout:         timeout,
-	}, nil
-}
-
-func (t UDPSerialPort) Read(p []byte) (n int, err error) {
-	err = t.OriginConn.SetReadDeadline(time.Now().Add(t.timeout))
-	if err != nil {
-		return 0, fmt.Errorf("udp serial port read: %w", err)
-	}
-	n, _, err = t.OriginConn.ReadFromUDP(p)
-	return n, err
-}
-
-func (t UDPSerialPort) Write(p []byte) (n int, err error) {
-	err = t.OriginConn.SetWriteDeadline(time.Now().Add(t.timeout))
-	if err != nil {
-		return 0, fmt.Errorf("udp serial port write: %w", err)
-	}
-	return t.OriginConn.WriteToUDP(p, t.DestinationAddr)
-}
-
-func (t UDPSerialPort) Close() error {
-	return t.OriginConn.Close()
-}
 
 type Emulator struct {
 	port io.ReadWriteCloser
@@ -139,7 +88,9 @@ func (e *Emulator) Receive(ctx context.Context) error {
 			e.mutex.Lock()
 			e.lastMessageIdentifier = xsens.MessageIdentifierSetOutputConfiguration
 			e.mutex.Unlock()
-			_, err := e.port.Write(xsens.NewMessage(xsens.MessageIdentifierSetOutputConfigurationAck, nil))
+			_, err := e.port.Write(
+				xsens.NewMessage(xsens.MessageIdentifierSetOutputConfigurationAck, nil),
+			)
 			if err != nil {
 				return fmt.Errorf("receive: %w", err)
 			}
@@ -168,7 +119,10 @@ func (e *Emulator) Transmit(m xsens.Message) error {
 	return nil
 }
 
-func (e *Emulator) MarshalMessage(measurement xsens.MeasurementData, dataType xsens.DataType) ([]byte, error) {
+func (e *Emulator) MarshalMessage(
+	measurement xsens.MeasurementData,
+	dataType xsens.DataType,
+) ([]byte, error) {
 	var id xsens.DataIdentifier
 	var isSet bool
 	for _, d := range e.outputConf {

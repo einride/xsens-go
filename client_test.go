@@ -268,13 +268,21 @@ func TestUDPEmulator(t *testing.T) {
 
 	timeout := 100 * time.Millisecond
 
-	connEmulator, err := xsensemulator.NewUDPSerialPort(addrEmulator, addrClient, timeout)
+	connEmulator, err := xsensemulator.NewUDPSerialPort(
+		addrEmulator,
+		addrClient,
+		xsensemulator.WithTimeout(timeout),
+	)
 	assert.NilError(t, err)
 	defer func() {
 		assert.NilError(t, connEmulator.Close())
 	}()
 
-	connClient, err := xsensemulator.NewUDPSerialPort(addrClient, addrEmulator, timeout)
+	connClient, err := xsensemulator.NewUDPSerialPort(
+		addrClient,
+		addrEmulator,
+		xsensemulator.WithTimeout(timeout),
+	)
 	assert.NilError(t, err)
 
 	emu := xsensemulator.NewEmulator(connEmulator)
