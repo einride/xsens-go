@@ -153,7 +153,10 @@ func TestEmulator_Output(t *testing.T) {
 					}
 					packets := []byte{}
 					for client.ScanMeasurementData() {
-						m, err := emulator.MarshalMessage(client.MeasurementData(), client.DataType())
+						m, err := emulator.MarshalMessage(
+							client.MeasurementData(),
+							client.DataType(),
+						)
 						assert.NilError(t, err)
 						packets = append(packets, m...)
 					}
