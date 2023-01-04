@@ -35,6 +35,20 @@ func (m *MockPort) EXPECT() *MockPortMockRecorder {
 	return m.recorder
 }
 
+// Break mocks base method.
+func (m *MockPort) Break(arg0 time.Duration) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Break", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Break indicates an expected call of Break.
+func (mr *MockPortMockRecorder) Break(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Break", reflect.TypeOf((*MockPort)(nil).Break), arg0)
+}
+
 // Close mocks base method.
 func (m *MockPort) Close() error {
 	m.ctrl.T.Helper()
