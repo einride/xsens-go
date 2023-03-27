@@ -153,10 +153,7 @@ func setOutputConfigMain(ctx context.Context, client *xsens.Client, jsonFile str
 	if err := client.GoToConfig(ctx); err != nil {
 		return err
 	}
-	if err := client.SetOutputConfiguration(ctx, outputConfiguration); err != nil {
-		return err
-	}
-	return nil
+	return client.SetOutputConfiguration(ctx, outputConfiguration)
 }
 
 func withCancelOnSignal(ctx context.Context, sig ...os.Signal) context.Context {
