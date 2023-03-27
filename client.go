@@ -61,7 +61,7 @@ func (c *Client) Close() error {
 // Receive an Xsens message.
 //
 // Clears state related to a previously received message, such as scanned measurement data.
-func (c *Client) Receive(ctx context.Context) error {
+func (c *Client) Receive(_ context.Context) error {
 	// clear previous received message state
 	c.message = nil
 	c.mtData2 = nil
@@ -432,7 +432,7 @@ func (c *Client) PositionECEF() *PositionECEF {
 	return &c.positionECEF
 }
 
-func (c *Client) send(ctx context.Context, message Message) error {
+func (c *Client) send(_ context.Context, message Message) error {
 	if _, err := c.p.Write(message); err != nil {
 		return fmt.Errorf("send %v: %w", message.Identifier(), err)
 	}
