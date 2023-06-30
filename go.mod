@@ -7,14 +7,13 @@ require (
 	github.com/pmezard/go-difflib v1.0.0
 	go.bug.st/serial v1.5.0
 	golang.org/x/sync v0.3.0
-	gotest.tools/v3 v3.4.0
+	gotest.tools/v3 v3.5.0
 )
 
 require (
 	github.com/creack/goselect v0.1.2 // indirect
-	github.com/google/go-cmp v0.5.5 // indirect
-	golang.org/x/mod v0.4.2 // indirect
+	github.com/google/go-cmp v0.5.9 // indirect
+	golang.org/x/mod v0.6.0 // indirect
 	golang.org/x/sys v0.1.0 // indirect
-	golang.org/x/tools v0.1.7 // indirect
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
+	golang.org/x/tools v0.2.0 // indirect
 )
