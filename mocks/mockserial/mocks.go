@@ -63,6 +63,20 @@ func (mr *MockPortMockRecorder) Close() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockPort)(nil).Close))
 }
 
+// Drain mocks base method.
+func (m *MockPort) Drain() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Drain")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Drain indicates an expected call of Drain.
+func (mr *MockPortMockRecorder) Drain() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Drain", reflect.TypeOf((*MockPort)(nil).Drain))
+}
+
 // GetModemStatusBits mocks base method.
 func (m *MockPort) GetModemStatusBits() (*serial.ModemStatusBits, error) {
 	m.ctrl.T.Helper()
