@@ -4,14 +4,24 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: daily
+      interval: weekly
 
   - package-ecosystem: gomod
     directory: /
     schedule:
-      interval: daily
+      interval: weekly
+      day: monday
+    groups:
+      go-dependencies:
+        patterns:
+          - "*"  # Include all go dependencies in one PR
 
   - package-ecosystem: gomod
     directory: .sage
     schedule:
-      interval: weekly
+      interval: daily
+    open-pull-requests-limit: 1
+    groups:
+      sage-go-dependencies:
+        patterns:
+          - "*"  # Include all sage dependencies in one PR
