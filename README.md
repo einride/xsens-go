@@ -1,33 +1,34 @@
-Xsens Go
-========
+# Xsens Go
 
-[![PkgGoDev](https://pkg.go.dev/badge/go.einride.tech/xsens)](https://pkg.go.dev/go.einride.tech/xsens) [![GoReportCard](https://goreportcard.com/badge/go.einride.tech/xsens)](https://goreportcard.com/report/go.einride.tech/xsens) [![Codecov](https://codecov.io/gh/einride/xsens-go/branch/master/graph/badge.svg)](https://codecov.io/gh/einride/xsens-go)
+[![PkgGoDev](https://pkg.go.dev/badge/go.einride.tech/xsens)](https://pkg.go.dev/go.einride.tech/xsens)
+[![GoReportCard](https://goreportcard.com/badge/go.einride.tech/xsens)](https://goreportcard.com/report/go.einride.tech/xsens)
+[![Codecov](https://codecov.io/gh/einride/xsens-go/branch/master/graph/badge.svg)](https://codecov.io/gh/einride/xsens-go)
 
 A Go client for [Xsens](https://xsens.com) IMU(s).
 
 **Disclaimer**: This is a 3rd party SDK with no official support.
 
-For 1st party support on Xsens devices, turn to the Xsens online support platform [BASE](https://base.xsens.com/hc/en-us).
+For 1st party support on Xsens devices, turn to the Xsens online support
+platform [BASE](https://base.xsens.com/hc/en-us).
 
-Documentation
--------------
+## Documentation
 
-The SDK implements the [Xsens MT Low Level Communication Protocol](https://www.xsens.com/hubfs/Downloads/Manuals/MT_Low-Level_Documentation.pdf).
+The SDK implements the
+[Xsens MT Low Level Communication Protocol](https://www.xsens.com/hubfs/Downloads/Manuals/MT_Low-Level_Documentation.pdf).
 
-Supported devices
------------------
+## Supported devices
 
-This SDK has primarily been tested on the Xsens MTi-G-710, but should be compatible with all products in the [MTi product line](https://www.xsens.com/mti-products).
+This SDK has primarily been tested on the Xsens MTi-G-710, but should be
+compatible with all products in the
+[MTi product line](https://www.xsens.com/mti-products).
 
-Usage
------
+## Usage
 
 ```bash
 $ go get -u go.einride.tech/xsens
 ```
 
-Examples
---------
+## Examples
 
 ### Read measurement data
 
