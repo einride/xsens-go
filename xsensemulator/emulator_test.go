@@ -186,7 +186,7 @@ func TestEmulator_Transmit(t *testing.T) {
 	}{
 		{
 			name: "not measurement mode (by default)",
-			expectFunc: func(emulator *xsensemulator.Emulator, port *mockserial.MockPort) {
+			expectFunc: func(_ *xsensemulator.Emulator, _ *mockserial.MockPort) {
 			},
 			expectedError: xsensemulator.ErrNotInMeasurementMode,
 		},
