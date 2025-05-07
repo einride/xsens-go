@@ -27,7 +27,6 @@ func TestConvert_Scalar(t *testing.T) {
 			Precision: PrecisionFloat64,
 		},
 	} {
-		tt := tt
 		t.Run(fmt.Sprintf("precision %v", tt), func(t *testing.T) {
 			var scalar Scalar = 1
 			data, err := scalar.MarshalMTData2Packet(tt)
@@ -59,7 +58,6 @@ func TestConvert_VectorXYZ(t *testing.T) {
 			Precision: PrecisionFloat64,
 		},
 	} {
-		tt := tt
 		t.Run(fmt.Sprintf("vector %v", tt), func(t *testing.T) {
 			vec := VectorXYZ{X: 1, Y: 2, Z: 3}
 			data, err := vec.MarshalMTData2Packet(tt)
@@ -91,7 +89,6 @@ func TestConvert_Quaternion(t *testing.T) {
 			Precision: PrecisionFloat64,
 		},
 	} {
-		tt := tt
 		t.Run(fmt.Sprintf("quat %v", tt), func(t *testing.T) {
 			vec := Quaternion{Q0: 1, Q1: 2, Q2: 3, Q3: 4}
 			data, err := vec.MarshalMTData2Packet(tt)
@@ -123,7 +120,6 @@ func TestConvert_RotationMatrix(t *testing.T) {
 			Precision: PrecisionFloat64,
 		},
 	} {
-		tt := tt
 		t.Run(fmt.Sprintf("rotation matrix %v", tt), func(t *testing.T) {
 			org := RotationMatrix{
 				A: 1,
@@ -165,7 +161,6 @@ func TestConvert_LatLon(t *testing.T) {
 			Precision: PrecisionFloat64,
 		},
 	} {
-		tt := tt
 		t.Run(fmt.Sprintf("rotation matrix %v", tt), func(t *testing.T) {
 			org := LatLon{
 				Lat: 1,
@@ -201,7 +196,6 @@ func TestConvert_StatusByte(t *testing.T) {
 			Precision: PrecisionFloat64,
 		},
 	} {
-		tt := tt
 		t.Run(fmt.Sprintf("rotation matrix %v", tt), func(t *testing.T) {
 			org := StatusByte(1)
 			data, err := org.MarshalMTData2Packet(tt)
@@ -234,7 +228,6 @@ func TestConvert_GNSSPVTData(t *testing.T) {
 			Precision: PrecisionFloat64,
 		},
 	} {
-		tt := tt
 		t.Run(fmt.Sprintf("GNSSPVTData %v", tt), func(t *testing.T) {
 			org := GNSSPVTData{
 				ITOW:      1,
@@ -303,7 +296,6 @@ func TestConvert_SampleTimeFine(t *testing.T) {
 			Precision: PrecisionFloat64,
 		},
 	} {
-		tt := tt
 		t.Run(fmt.Sprintf("SampleTimeFine %v", tt), func(t *testing.T) {
 			org := SampleTimeFine(1)
 			data, err := org.MarshalMTData2Packet(tt)
@@ -336,7 +328,6 @@ func TestConvert_SampleTimeCoarse(t *testing.T) {
 			Precision: PrecisionFloat64,
 		},
 	} {
-		tt := tt
 		t.Run(fmt.Sprintf("SampleTimeCoarse %v", tt), func(t *testing.T) {
 			org := SampleTimeCoarse(1)
 			data, err := org.MarshalMTData2Packet(tt)
@@ -376,7 +367,6 @@ func TestConvert_UTCTime(t *testing.T) {
 			Precision: PrecisionFloat64,
 		},
 	} {
-		tt := tt
 		t.Run(fmt.Sprintf("UTCTime %v", tt), func(t *testing.T) {
 			org := UTCTime{
 				Ns:     1,
@@ -418,7 +408,6 @@ func TestConvert_PacketCounter(t *testing.T) {
 			Precision: PrecisionFloat64,
 		},
 	} {
-		tt := tt
 		t.Run(fmt.Sprintf("PacketCounter %v", tt), func(t *testing.T) {
 			org := PacketCounter(43875)
 			data, err := org.MarshalMTData2Packet(tt)
@@ -451,7 +440,6 @@ func TestConvert_GNSSSatInfo(t *testing.T) {
 			Precision: PrecisionFloat64,
 		},
 	} {
-		tt := tt
 		t.Run(fmt.Sprintf("GNSSSatInfo %v", tt), func(t *testing.T) {
 			org := GNSSSatInfo{
 				ITOW:   1,
@@ -490,7 +478,6 @@ func TestConvert_StatusWord(t *testing.T) {
 			Precision: PrecisionFloat64,
 		},
 	} {
-		tt := tt
 		t.Run(fmt.Sprintf("StatusWord %v", tt), func(t *testing.T) {
 			org := StatusWord(1)
 			data, err := org.MarshalMTData2Packet(tt)
@@ -523,7 +510,6 @@ func TestConvert_BaroPressure(t *testing.T) {
 			Precision: PrecisionFloat64,
 		},
 	} {
-		tt := tt
 		t.Run(fmt.Sprintf("BaroPressure %v", tt), func(t *testing.T) {
 			org := BaroPressure(1)
 			data, err := org.MarshalMTData2Packet(tt)

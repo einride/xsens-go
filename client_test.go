@@ -221,7 +221,6 @@ func TestClient_ScanMeasurementData(t *testing.T) {
 		{inputFile: "testdata/4/output.bin", goldenFile: "testdata/4/output.client.golden"},
 		{inputFile: "testdata/5/output.bin", goldenFile: "testdata/5/output.client.golden"},
 	} {
-		tt := tt
 		t.Run(tt.inputFile, func(t *testing.T) {
 			f, err := os.Open(tt.inputFile)
 			assert.NilError(t, err)

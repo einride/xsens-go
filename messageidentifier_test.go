@@ -14,7 +14,6 @@ func TestMessageIdentifier_Ack(t *testing.T) {
 		{id: MessageIdentifierGotoConfig, ack: MessageIdentifierGotoConfigAck},
 		{id: MessageIdentifier(0xfe), ack: MessageIdentifier(0xff)},
 	} {
-		tt := tt
 		t.Run(tt.id.String(), func(t *testing.T) {
 			assert.Equal(t, tt.ack, tt.id.Ack())
 		})

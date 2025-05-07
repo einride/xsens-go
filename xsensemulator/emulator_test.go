@@ -108,7 +108,6 @@ func TestEmulator_Output(t *testing.T) {
 		{inputFile: "../testdata/3/output.bin", outputConfigurationFile: "../testdata/3/outputconfig.bin"},
 		{inputFile: "../testdata/4/output.bin", outputConfigurationFile: "../testdata/4/outputconfig.bin"},
 	} {
-		tt := tt
 		t.Run(tt.inputFile, func(t *testing.T) {
 			outputConf, err := os.ReadFile(tt.outputConfigurationFile)
 			assert.NilError(t, err)
@@ -200,7 +199,6 @@ func TestEmulator_Transmit(t *testing.T) {
 			expectedError: nil,
 		},
 	} {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			// given
 			port2 := mockserial.NewMockPort(ctrl)

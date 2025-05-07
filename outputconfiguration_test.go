@@ -18,7 +18,6 @@ func TestOutputConfiguration_UnmarshalMarshal_TestData(t *testing.T) {
 		{inputFile: "testdata/4/outputconfig.bin"},
 		{inputFile: "testdata/5/outputconfig.bin"},
 	} {
-		tt := tt
 		t.Run(tt.inputFile, func(t *testing.T) {
 			golden, err := os.ReadFile(tt.inputFile)
 			assert.NilError(t, err)
@@ -42,7 +41,6 @@ func TestOutputConfiguration_MarshalText_TestData(t *testing.T) {
 		{inputFile: "testdata/4/outputconfig.bin", goldenFile: "testdata/4/outputconfig.golden"},
 		{inputFile: "testdata/5/outputconfig.bin", goldenFile: "testdata/5/outputconfig.golden"},
 	} {
-		tt := tt
 		t.Run(tt.inputFile, func(t *testing.T) {
 			input, err := os.ReadFile(tt.inputFile)
 			assert.NilError(t, err)

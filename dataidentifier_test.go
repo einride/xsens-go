@@ -21,7 +21,6 @@ func TestDataIdentifier_GetSetUint16(t *testing.T) {
 			value: 0x201b,
 		},
 	} {
-		tt := tt
 		t.Run(fmt.Sprintf("%#x", tt.value), func(t *testing.T) {
 			t.Run("Uint16", func(t *testing.T) {
 				assert.Equal(t, tt.value, tt.dataIdentifier.Uint16())
@@ -62,7 +61,6 @@ func TestDataIdentifier_DataSize(t *testing.T) {
 			dataSize: 16,
 		},
 	} {
-		tt := tt
 		t.Run(tt.dataIdentifier.String(), func(t *testing.T) {
 			assert.Equal(t, tt.dataSize, tt.dataIdentifier.DataSize())
 		})

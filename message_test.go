@@ -21,7 +21,6 @@ func TestNewMessage_TestData(t *testing.T) {
 		{inputFile: "testdata/4/output.bin"},
 		{inputFile: "testdata/5/output.bin"},
 	} {
-		tt := tt
 		t.Run(tt.inputFile, func(t *testing.T) {
 			f, err := os.Open(tt.inputFile)
 			assert.NilError(t, err)
@@ -55,7 +54,6 @@ func TestNewMessage(t *testing.T) {
 			expected: xsens.Message{0xfa, 0xff, 0x42, 0x01, 0x04, 0xba},
 		},
 	} {
-		tt := tt
 		t.Run(fmt.Sprintf("%v", tt.actual), func(t *testing.T) {
 			assert.DeepEqual(t, tt.expected, tt.actual)
 			t.Run("Validate", func(t *testing.T) {
@@ -71,7 +69,6 @@ func TestMessage_Validate_Error(t *testing.T) {
 		{0x00},
 		{0x00, 0x01},
 	} {
-		tt := tt
 		t.Run(tt.String(), func(t *testing.T) {
 			assert.Assert(t, is.ErrorContains(tt.Validate(), ""))
 		})

@@ -24,7 +24,6 @@ func TestFP1220_Float64(t *testing.T) {
 			expected: 11.882691383361816,
 		},
 	} {
-		tt := tt
 		t.Run(tt.input.String(), func(t *testing.T) {
 			assert.Equal(t, tt.expected, tt.input.Float64())
 		})
@@ -49,7 +48,6 @@ func TestFP1220_FromFloat64(t *testing.T) {
 			expected: 11.882691383361816,
 		},
 	} {
-		tt := tt
 		t.Run(tt.input.String(), func(t *testing.T) {
 			tempF := tt.input.Float64()
 			var newFP FP1220
@@ -77,7 +75,6 @@ func TestFP1220_MarshalConvert(t *testing.T) {
 			expected: 11.882691383361816,
 		},
 	} {
-		tt := tt
 		t.Run(tt.input.String(), func(t *testing.T) {
 			var FP FP1220
 			FP.FromFloat64(tt.expected)
@@ -113,7 +110,6 @@ func TestFP1632_Float64(t *testing.T) {
 			expected: -0.038089100271463394,
 		},
 	} {
-		tt := tt
 		t.Run(tt.input.String(), func(t *testing.T) {
 			assert.Equal(t, tt.expected, tt.input.Float64())
 		})
@@ -142,7 +138,6 @@ func TestFP1632_FromFloat64(t *testing.T) {
 			expected: -0.038089100271463394,
 		},
 	} {
-		tt := tt
 		t.Run(tt.input.String(), func(t *testing.T) {
 			var newFP FP1632
 			newFP.FromFloat64(tt.input.Float64())
@@ -173,7 +168,6 @@ func TestFP1632_MarshalConvert(t *testing.T) {
 			expected: -0.038089100271463394,
 		},
 	} {
-		tt := tt
 		t.Run(tt.input.String(), func(t *testing.T) {
 			var FP FP1632
 			FP.FromFloat64(tt.expected)

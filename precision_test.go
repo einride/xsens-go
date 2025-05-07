@@ -16,7 +16,6 @@ func TestPrecision_Size(t *testing.T) {
 		{precision: PrecisionFP1632, size: 6},
 		{precision: PrecisionFloat64, size: 8},
 	} {
-		tt := tt
 		t.Run(tt.precision.String(), func(t *testing.T) {
 			assert.Equal(t, tt.size, tt.precision.Size())
 		})
