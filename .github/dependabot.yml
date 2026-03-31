@@ -6,6 +6,11 @@ updates:
     schedule:
       interval: weekly
 
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
   - package-ecosystem: gomod
     directory: /
     schedule:
@@ -16,6 +21,11 @@ updates:
         patterns:
           - "*"  # Include all go dependencies in one PR
 
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
   - package-ecosystem: gomod
     directory: .sage
     schedule:
@@ -25,3 +35,8 @@ updates:
       sage-go-dependencies:
         patterns:
           - "*"  # Include all sage dependencies in one PR
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
